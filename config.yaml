@@ -1,0 +1,80 @@
+# ==========================================================================
+# Layered Scenario Model - Configuration
+# Units: durations in seconds, distances in miles, speed in mph.
+# ==========================================================================
+
+# --- Reproducibility ------------------------------------------------------
+simulation_seed: 12345    # RNG seed for everything stochastic in the simulation:
+                          # element counts, rarity shuffling, Dirichlet transition
+                          # vectors, initial states, transitions, durations.
+global_seed: 42           # Seed for the deterministic SHA-256 unknown-combination
+                          # classifier. Changing it selects a different fixed set
+                          # of unknown combinations.
+
+# --- Simulation run -------------------------------------------------------
+target_total_miles: 2000000     # Stop once simulated mileage reaches this.
+average_speed_mph: 50.0         # Constant speed converting seconds -> miles:
+                                # delta_miles = average_speed_mph * dt / 3600
+min_duration_seconds: 1.0       # Lower clamp applied to every sampled duration.
+count_initial_scenario: true    # Also check/count the initial scenario at t=0
+                                # if it is unknown (entering the first tuple).
+
+# --- Elements per layer ---------------------------------------------------
+element_count_min: 50           # Number of elements per layer is sampled
+element_count_max: 100          # uniformly from [min, max] (inclusive).
+
+# --- Rarity category proportions (must sum to 1.0) ------------------------
+rarity_proportions:
+  common:     0.50
+  medium:     0.25
+  rare:       0.10
+  very_rare:  0.05
+  unknown:    0.10
+
+# --- Base transition weights per rarity (unknown is handled separately) ----
+base_weights:
+  common:     1.0
+  medium:     0.4
+  rare:       0.1
+  very_rare:  0.03
+
+# --- Unknown element weighting --------------------------------------------
+# "calculated": per layer, solve for the weight that makes the total unknown
+#               probability mass ~= target_unknown_element_probability.
+# "fixed":      use fixed_unknown_weight directly.
+# In both modes the unknown weight must be smaller than the very_rare weight.
+unknown_weight_mode: calculated
+target_unknown_element_probability: 0.004   # used when mode = calculated
+fixed_unknown_weight: 0.001                 # used when mode = fixed
+
+# --- Unknown combinations (deterministic hash-based) -----------------------
+unknown_combination_probability: 0.005   # ~0.5% of all-known tuples classify
+                                         # as unknown combinations.
+
+# --- Transition probability vectors ----------------------------------------
+concentration_scale: 100.0      # Dirichlet concentration. Higher = sampled
+                                # vector stays closer to the designed weights;
+                                # lower = more random transition behavior.
+allow_self_transition: true     # If false, resample until next != current.
+
+# --- Per-layer duration parameters (Gamma distribution) --------------------
+# shape = mean^2 / variance ; scale = variance / mean
+layers:
+  street:                       # road segment / street type
+    mean_duration: 300.0
+    variance_duration: 20000.0
+  temporal_modifications:       # e.g. roadworks, temporary signage
+    mean_duration: 600.0
+    variance_duration: 90000.0
+  ego_maneuver:                 # ego vehicle maneuver
+    mean_duration: 30.0
+    variance_duration: 400.0
+  ru_maneuver:                  # road-user (RU) maneuver
+    mean_duration: 45.0
+    variance_duration: 900.0
+  environmental_conditions:     # weather / lighting
+    mean_duration: 1800.0
+    variance_duration: 500000.0
+  triggering_conditions:        # unexpected AV triggering condition
+    mean_duration: 120.0
+    variance_duration: 8000.0
