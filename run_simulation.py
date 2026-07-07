@@ -2,11 +2,14 @@
 """Run the layered scenario simulation and write results.
 
 Outputs (in --outdir):
-  encounters.csv   one row per unknown-scenario encounter
+  encounters.csv   one row per unknown-scenario encounter (mileage, time,
+                   inter-arrival distance and time, reason, scenario)
+  windows.csv      unknown-encounter count per fixed mileage window
   summary.md       human-readable results summary + verification
   stats.json       machine-readable statistics
   plots/*.png      cumulative encounters, inter-arrival histogram,
-                   per-layer unknown rates, rarity selection shares
+                   per-layer unknown rates, rarity selection shares,
+                   per-window counts
 """
 
 import argparse
@@ -23,18 +26,35 @@ from simulator import (LAYER_DEFINITIONS, RARITIES, ScenarioSimulator,
                        SimConfig)
 
 
-def write_encounters_csv(path, result, inter):
+def write_encounters_csv(path, result, inter_mi, inter_s):
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["encounter_index", "mileage_miles", "time_seconds",
-                    "time_hours", "reason", "inter_arrival_miles", "scenario"])
-        for e, d in zip(result.encounters, inter):
+                    "time_hours", "reason", "inter_arrival_miles",
+                    "inter_arrival_seconds", "scenario"])
+        for e, dmi, ds in zip(result.encounters, inter_mi, inter_s):
             w.writerow([e.index, f"{e.mileage:.3f}", f"{e.time_seconds:.1f}",
                         f"{e.time_seconds / 3600:.3f}", e.reason,
-                        f"{d:.3f}", e.scenario])
+                        f"{dmi:.3f}", f"{ds:.1f}", e.scenario])
 
 
-def build_summary(result, inter, wall_seconds):
+def write_windows_csv(path, ws):
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["window_index", "start_mile", "end_mile", "encounter_count"])
+        for i, c in enumerate(ws["counts"]):
+            w.writerow([i, f"{i * ws['window_miles']:.0f}",
+                        f"{(i + 1) * ws['window_miles']:.0f}", c])
+
+
+def _dist_stats(arr):
+    arr = np.asarray(arr)
+    return {"mean": float(arr.mean()), "median": float(np.median(arr)),
+            "p90": float(np.percentile(arr, 90)),
+            "min": float(arr.min()), "max": float(arr.max())}
+
+
+def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     cfg = result.config
     enc = result.encounters
     n = len(enc)
@@ -47,7 +67,8 @@ def build_summary(result, inter, wall_seconds):
     lines.append("## Run parameters\n")
     lines.append(f"- target mileage: {cfg.target_total_miles:,.0f} miles at "
                  f"{cfg.average_speed_mph} mph constant average speed")
-    lines.append(f"- simulation_seed: {cfg.simulation_seed}, global_seed: {cfg.global_seed}")
+    lines.append(f"- seeds: {json.dumps(cfg.seeds)}")
+    lines.append(f"- global_seed (hash-based unknown combinations): {cfg.global_seed}")
     lines.append(f"- unknown_weight_mode: {cfg.unknown_weight_mode} "
                  f"(target_unknown_element_probability = {cfg.target_unknown_element_probability})")
     lines.append(f"- unknown_combination_probability: {cfg.unknown_combination_probability}")
@@ -55,30 +76,48 @@ def build_summary(result, inter, wall_seconds):
                  f"allow_self_transition: {cfg.allow_self_transition}\n")
 
     lines.append("## Totals\n")
-    lines.append(f"- simulated distance: {result.total_miles:,.1f} miles")
-    lines.append(f"- simulated time: {result.total_time_seconds:,.0f} s "
+    lines.append(f"- total simulated mileage: {result.total_miles:,.1f} miles")
+    lines.append(f"- total simulated time: {result.total_time_seconds:,.1f} s "
                  f"({result.total_time_seconds / 3600:,.1f} h)")
     lines.append(f"- event-driven steps: {result.total_events:,}")
     lines.append(f"- scenario tuple changes: {result.total_tuple_changes:,}")
     lines.append(f"- wall-clock runtime: {wall_seconds:,.1f} s\n")
 
     lines.append("## Unknown scenario encounters\n")
-    lines.append(f"- total encounters: {n:,}")
+    lines.append(f"- total unknown scenario encounters: {n:,}")
     lines.append(f"  - via unknown element: {by_reason['unknown_element']:,}")
     lines.append(f"  - via unknown combination (hash): {by_reason['unknown_combination']:,}")
-    if result.total_miles > 0:
-        lines.append(f"- encounters per 1,000,000 miles: "
-                     f"{n / (result.total_miles / 1e6):,.1f}")
+    lines.append(f"- estimated unknown encounter rate per million miles: "
+                 f"{result.encounters_per_million_miles():,.1f}")
     if n:
-        arr = np.asarray(inter)
+        s_mi = _dist_stats(inter_mi)
+        s_s = _dist_stats(inter_s)
         lines.append(f"- first encounter at mile {enc[0].mileage:,.2f}, "
                      f"last at mile {enc[-1].mileage:,.2f}")
         lines.append("- inter-arrival distance (miles): "
-                     f"mean {arr.mean():,.3f}, median {np.median(arr):,.3f}, "
-                     f"p90 {np.percentile(arr, 90):,.3f}, "
-                     f"min {arr.min():,.3f}, max {arr.max():,.3f}")
-        lines.append("  (first inter-arrival = distance from start to first "
-                     "encounter; full list in encounters.csv)\n")
+                     f"mean {s_mi['mean']:,.3f}, median {s_mi['median']:,.3f}, "
+                     f"p90 {s_mi['p90']:,.3f}, min {s_mi['min']:,.3f}, "
+                     f"max {s_mi['max']:,.3f}")
+        lines.append("- inter-arrival time (seconds): "
+                     f"mean {s_s['mean']:,.1f}, median {s_s['median']:,.1f}, "
+                     f"p90 {s_s['p90']:,.1f}, min {s_s['min']:,.1f}, "
+                     f"max {s_s['max']:,.1f}")
+        lines.append("  (first inter-arrival = distance/time from the start of "
+                     "the simulation to the first encounter; the mileage and "
+                     "time position of every encounter is in encounters.csv)\n")
+
+    lines.append("## Unknown encounters per mileage window\n")
+    lines.append(f"- window size: {ws['window_miles']:,.0f} miles "
+                 f"({ws['n_windows']} complete windows; per-window counts in "
+                 "windows.csv)")
+    lines.append(f"- empirical mean count per window: {ws['mean_count']:,.3f}")
+    lines.append(f"- empirical variance of count per window: "
+                 f"{ws['variance_count']:,.3f}")
+    lines.append(f"- dispersion index (variance / mean): "
+                 f"{ws['dispersion_index']:,.3f} "
+                 "(1 = Poisson-like; > 1 = clustered/overdispersed, expected "
+                 "here because encounters burst while a slow layer holds an "
+                 "unknown element)\n")
 
     lines.append("## Per-layer statistics\n")
     header = ("| layer | elements | common/medium/rare/very_rare/unknown | "
@@ -123,33 +162,38 @@ def build_summary(result, inter, wall_seconds):
     return "\n".join(lines) + "\n"
 
 
-def build_stats_json(result, inter, wall_seconds):
+def build_stats_json(result, inter_mi, inter_s, ws, wall_seconds):
     enc = result.encounters
     by_reason = {"unknown_element": 0, "unknown_combination": 0}
     for e in enc:
         by_reason[e.reason] += 1
-    arr = np.asarray(inter) if enc else np.asarray([0.0])
     return {
-        "total_miles": result.total_miles,
-        "total_time_seconds": result.total_time_seconds,
+        "total_simulated_mileage": result.total_miles,
+        "total_simulated_time_seconds": result.total_time_seconds,
         "total_events": result.total_events,
         "total_tuple_changes": result.total_tuple_changes,
         "known_tuple_changes": result.known_tuple_changes,
         "wall_seconds": wall_seconds,
-        "encounters_total": len(enc),
+        "total_unknown_encounters": len(enc),
         "encounters_by_reason": by_reason,
-        "encounters_per_million_miles":
-            len(enc) / (result.total_miles / 1e6) if result.total_miles else 0.0,
-        "inter_arrival_miles": {
-            "mean": float(arr.mean()), "median": float(np.median(arr)),
-            "p90": float(np.percentile(arr, 90)),
-            "min": float(arr.min()), "max": float(arr.max()),
-        } if enc else None,
+        "unknown_encounter_rate_per_million_miles":
+            result.encounters_per_million_miles(),
+        "inter_arrival_miles": _dist_stats(inter_mi) if enc else None,
+        "inter_arrival_seconds": _dist_stats(inter_s) if enc else None,
+        "mileage_windows": {
+            "window_miles": ws["window_miles"],
+            "n_windows": ws["n_windows"],
+            "empirical_mean_count_per_window": ws["mean_count"],
+            "empirical_variance_count_per_window": ws["variance_count"],
+            "dispersion_index": ws["dispersion_index"],
+        },
+        "seeds": result.config.seeds,
+        "global_seed": result.config.global_seed,
         "layer_stats": result.layer_stats,
     }
 
 
-def make_plots(result, inter, sim, plots_dir):
+def make_plots(result, inter_mi, ws, sim, plots_dir):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -173,8 +217,8 @@ def make_plots(result, inter, sim, plots_dir):
 
     # 2. inter-arrival distance histogram (log y)
     fig, ax = plt.subplots(figsize=(9, 5))
-    if inter:
-        arr = np.asarray(inter)
+    if inter_mi:
+        arr = np.asarray(inter_mi)
         ax.hist(arr, bins=100, color="tab:blue", alpha=0.8)
         ax.axvline(arr.mean(), color="tab:red", ls="--",
                    label=f"mean = {arr.mean():.2f} mi")
@@ -239,6 +283,24 @@ def make_plots(result, inter, sim, plots_dir):
     fig.savefig(os.path.join(plots_dir, "rarity_selection_share.png"), dpi=150)
     plt.close(fig)
 
+    # 5. encounters per mileage window (+ mean and dispersion annotation)
+    fig, ax = plt.subplots(figsize=(10, 5))
+    starts = [i * ws["window_miles"] for i in range(ws["n_windows"])]
+    ax.bar(starts, ws["counts"], width=ws["window_miles"] * 0.95,
+           align="edge", color="tab:blue", alpha=0.8)
+    ax.axhline(ws["mean_count"], color="tab:red", ls="--",
+               label=f"mean = {ws['mean_count']:.1f}   "
+                     f"var = {ws['variance_count']:.1f}   "
+                     f"dispersion = {ws['dispersion_index']:.2f}")
+    ax.set_xlabel("mileage (miles)")
+    ax.set_ylabel(f"unknown encounters per {ws['window_miles']:,.0f}-mile window")
+    ax.set_title("Unknown encounters per fixed mileage window")
+    ax.legend()
+    ax.grid(alpha=0.3, axis="y")
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "window_counts.png"), dpi=150)
+    plt.close(fig)
+
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
@@ -265,6 +327,7 @@ def main():
     else:
         cfg = SimConfig.from_yaml(args.config)
         print(f"config: {args.config}")
+        print(f"seeds: {cfg.seeds} | global_seed: {cfg.global_seed}")
         sim = ScenarioSimulator(cfg)
         state = None
         for layer in sim.layers:
@@ -292,14 +355,18 @@ def main():
           f"{result.total_events:,} events, {len(result.encounters):,} "
           f"unknown encounters, {wall:,.1f} s wall time")
 
-    inter = result.inter_arrival_miles()
-    write_encounters_csv(os.path.join(args.outdir, "encounters.csv"), result, inter)
+    inter_mi = result.inter_arrival_miles()
+    inter_s = result.inter_arrival_seconds()
+    ws = result.window_stats()
+    write_encounters_csv(os.path.join(args.outdir, "encounters.csv"),
+                         result, inter_mi, inter_s)
+    write_windows_csv(os.path.join(args.outdir, "windows.csv"), ws)
     with open(os.path.join(args.outdir, "summary.md"), "w", encoding="utf-8") as f:
-        f.write(build_summary(result, inter, wall))
+        f.write(build_summary(result, inter_mi, inter_s, ws, wall))
     with open(os.path.join(args.outdir, "stats.json"), "w", encoding="utf-8") as f:
-        json.dump(build_stats_json(result, inter, wall), f, indent=2)
+        json.dump(build_stats_json(result, inter_mi, inter_s, ws, wall), f, indent=2)
     if not args.no_plots:
-        make_plots(result, inter, sim, os.path.join(args.outdir, "plots"))
+        make_plots(result, inter_mi, ws, sim, os.path.join(args.outdir, "plots"))
     print(f"results written to {args.outdir}/")
 
 

@@ -7,9 +7,10 @@ import random
 import numpy as np
 import pytest
 
-from simulator import (KNOWN_RARITIES, LAYER_DEFINITIONS, RARITIES, ConfigError,
-                       ScenarioSimulator, SimConfig, UnknownCombinationClassifier,
-                       assign_rarity_counts, compute_unknown_weight)
+from simulator import (KNOWN_RARITIES, LAYER_DEFINITIONS, RARITIES, SEED_KEYS,
+                       ConfigError, ScenarioSimulator, SimConfig,
+                       UnknownCombinationClassifier, assign_rarity_counts,
+                       compute_unknown_weight, compute_window_stats)
 
 _LAYER_DURATIONS = {
     "street": (300.0, 20000.0),
@@ -20,15 +21,20 @@ _LAYER_DURATIONS = {
     "triggering_conditions": (120.0, 8000.0),
 }
 
+_SEEDS = {"element_count": 12345, "rarity_assignment": 23456,
+          "transition_matrix": 34567, "duration": 45678,
+          "initial_state": 56789, "transition_sampling": 67890}
+
 
 def base_config(**over):
     raw = {
-        "simulation_seed": 7,
+        "seeds": dict(_SEEDS),
         "global_seed": 42,
         "target_total_miles": 50.0,
         "average_speed_mph": 50.0,
         "min_duration_seconds": 1.0,
         "count_initial_scenario": True,
+        "mileage_window_miles": 10.0,
         "element_count_min": 50,
         "element_count_max": 100,
         "rarity_proportions": {"common": 0.50, "medium": 0.25, "rare": 0.10,
@@ -46,6 +52,12 @@ def base_config(**over):
     }
     raw.update(over)
     return SimConfig.from_dict(raw)
+
+
+def seeds_with(**over):
+    s = dict(_SEEDS)
+    s.update(over)
+    return s
 
 
 _COUNTS = {"common": 37, "medium": 19, "rare": 8, "very_rare": 4, "unknown": 7}
@@ -162,6 +174,16 @@ def test_unknown_base_weight_rejected():
         base_config(base_weights=bw)
 
 
+def test_seeds_validated():
+    with pytest.raises(ConfigError):
+        base_config(seeds={"element_count": 1})           # missing entries
+    with pytest.raises(ConfigError):
+        base_config(seeds=seeds_with(bogus=7))            # unknown entry
+    with pytest.raises(ConfigError):
+        base_config(seeds=seeds_with(duration="abc"))     # non-int
+    assert set(base_config().seeds) == set(SEED_KEYS)
+
+
 # ------------------------------------------------------------ layers / vectors
 
 def test_layers_built_to_spec():
@@ -199,6 +221,40 @@ def test_no_self_transition_when_disabled():
     current = 5
     for _ in range(20000):
         assert layer.sample_next_index(rng, current, False) != current
+
+
+# ------------------------------------------------------------ seed separation
+
+def test_seed_streams_isolated():
+    """Each seed controls exactly its own random source."""
+    ref = ScenarioSimulator(base_config())
+
+    # different duration seed: layer structure and vectors identical
+    s_dur = ScenarioSimulator(base_config(seeds=seeds_with(duration=999)))
+    for a, b in zip(ref.layers, s_dur.layers):
+        assert a.names == b.names
+        assert a.rarities == b.rarities
+        assert np.array_equal(a.transition_probs, b.transition_probs)
+
+    # different transition_matrix seed: same elements/rarities, new vectors
+    s_mat = ScenarioSimulator(base_config(seeds=seeds_with(transition_matrix=999)))
+    assert all(a.rarities == b.rarities for a, b in zip(ref.layers, s_mat.layers))
+    assert any(not np.array_equal(a.transition_probs, b.transition_probs)
+               for a, b in zip(ref.layers, s_mat.layers))
+
+    # different rarity_assignment seed: same counts, different shuffle
+    s_rar = ScenarioSimulator(base_config(seeds=seeds_with(rarity_assignment=999)))
+    assert all(a.counts == b.counts for a, b in zip(ref.layers, s_rar.layers))
+    assert any(a.rarities != b.rarities for a, b in zip(ref.layers, s_rar.layers))
+
+    # different element_count seed: different element counts (overwhelmingly)
+    s_cnt = ScenarioSimulator(base_config(seeds=seeds_with(element_count=999)))
+    assert [l.n_elements for l in ref.layers] != \
+           [l.n_elements for l in s_cnt.layers]
+
+    # different initial_state seed: same layers, (typically) different start
+    s_ini = ScenarioSimulator(base_config(seeds=seeds_with(initial_state=999)))
+    assert all(a.names == b.names for a, b in zip(ref.layers, s_ini.layers))
 
 
 # -------------------------------------------------------------------- durations
@@ -271,6 +327,42 @@ def test_no_double_count_same_tuple():
     assert counted is True and reason == "unknown_element"
 
 
+# ------------------------------------------------------------ output statistics
+
+def test_window_stats_counts_mean_variance_dispersion():
+    mileages = [5.0, 15.0, 25.0, 25.5, 999.0]  # 999 beyond complete windows
+    ws = compute_window_stats(mileages, total_miles=40.0, window_miles=10.0)
+    assert ws["n_windows"] == 4
+    assert ws["counts"] == [1, 1, 2, 0]
+    assert math.isclose(ws["mean_count"], 1.0)
+    assert math.isclose(ws["variance_count"], 2.0 / 3.0)
+    assert math.isclose(ws["dispersion_index"], 2.0 / 3.0)
+
+
+def test_window_stats_requires_complete_window():
+    with pytest.raises(ValueError):
+        compute_window_stats([1.0], total_miles=5.0, window_miles=10.0)
+
+
+def test_inter_arrival_times_and_distances_consistent():
+    cfg = base_config(target_total_miles=2000.0)
+    res = ScenarioSimulator(cfg).run()
+    assert len(res.encounters) > 0
+    inter_mi = res.inter_arrival_miles()
+    inter_s = res.inter_arrival_seconds()
+    assert len(inter_mi) == len(inter_s) == len(res.encounters)
+    for dmi, ds in zip(inter_mi, inter_s):
+        assert dmi >= 0 and ds >= 0
+        # constant speed: distance and time gaps must be proportional
+        assert math.isclose(dmi, cfg.average_speed_mph * ds / 3600.0,
+                            rel_tol=1e-9, abs_tol=1e-9)
+    # positions reconstruct from inter-arrivals
+    assert math.isclose(sum(inter_mi), res.encounters[-1].mileage, rel_tol=1e-9)
+    ws = res.window_stats()
+    assert sum(ws["counts"]) <= len(res.encounters)
+    assert ws["n_windows"] == int(res.total_miles // cfg.mileage_window_miles)
+
+
 # ------------------------------------------------------------------ simulation
 
 def test_simulation_reaches_target_and_time_consistent():
@@ -283,13 +375,17 @@ def test_simulation_reaches_target_and_time_consistent():
     assert res.total_events > 0
 
 
-def test_simulation_reproducible_with_same_seed():
+def test_simulation_reproducible_with_same_seeds():
+    """Running twice with the same config and seeds -> identical results."""
     r1 = ScenarioSimulator(base_config(target_total_miles=100.0)).run()
     r2 = ScenarioSimulator(base_config(target_total_miles=100.0)).run()
     assert r1.total_events == r2.total_events
     assert r1.total_time_seconds == r2.total_time_seconds
-    assert [(e.mileage, e.scenario, e.reason) for e in r1.encounters] == \
-           [(e.mileage, e.scenario, e.reason) for e in r2.encounters]
+    assert r1.total_miles == r2.total_miles
+    assert [(e.mileage, e.time_seconds, e.scenario, e.reason)
+            for e in r1.encounters] == \
+           [(e.mileage, e.time_seconds, e.scenario, e.reason)
+            for e in r2.encounters]
 
 
 def test_encounters_recorded_with_mileage_and_time():

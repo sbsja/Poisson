@@ -17,11 +17,17 @@ A scenario tuple is the ordered combination of the six current elements.
 A scenario is unknown if:
   1. at least one element has rarity category "unknown", OR
   2. all elements are known but the combination is classified unknown by a
-     deterministic SHA-256 hash test (seeded, thresholded, not enumerated).
+     deterministic SHA-256 hash test (seeded with global_seed, thresholded,
+     never stored or enumerated).
 
 The simulation is event-driven: it jumps to the next time at which at least
 one layer changes, and runs until a target mileage is reached, converting
 elapsed seconds to miles with a constant configurable average speed.
+
+Reproducibility: every random source has its own configurable seed
+(config section `seeds`): element_count, rarity_assignment,
+transition_matrix, duration, initial_state, transition_sampling.
+Running twice with the same config produces identical results.
 """
 
 from __future__ import annotations
@@ -38,6 +44,10 @@ import yaml
 
 RARITIES = ("common", "medium", "rare", "very_rare", "unknown")
 KNOWN_RARITIES = ("common", "medium", "rare", "very_rare")
+
+#: One independent RNG stream per random source.
+SEED_KEYS = ("element_count", "rarity_assignment", "transition_matrix",
+             "duration", "initial_state", "transition_sampling")
 
 #: (config key, element-name prefix) for the six layers, in fixed tuple order.
 LAYER_DEFINITIONS = (
@@ -72,14 +82,21 @@ def _default_base_weights():
     return {"common": 1.0, "medium": 0.4, "rare": 0.1, "very_rare": 0.03}
 
 
+def _default_seeds():
+    return {"element_count": 12345, "rarity_assignment": 23456,
+            "transition_matrix": 34567, "duration": 45678,
+            "initial_state": 56789, "transition_sampling": 67890}
+
+
 @dataclass
 class SimConfig:
-    simulation_seed: int = 12345
+    seeds: dict = field(default_factory=_default_seeds)
     global_seed: int = 42
     target_total_miles: float = 2_000_000.0
     average_speed_mph: float = 50.0
     min_duration_seconds: float = 1.0
     count_initial_scenario: bool = True
+    mileage_window_miles: float = 10_000.0
     element_count_min: int = 50
     element_count_max: int = 100
     rarity_proportions: dict = field(default_factory=_default_proportions)
@@ -119,6 +136,20 @@ class SimConfig:
 
     # -- validation -----------------------------------------------------------
     def validate(self) -> None:
+        if not isinstance(self.seeds, dict):
+            raise ConfigError("'seeds' must be a mapping of seed names to ints.")
+        missing = [k for k in SEED_KEYS if k not in self.seeds]
+        if missing:
+            raise ConfigError(f"seeds missing entries: {missing}")
+        unknown_keys = [k for k in self.seeds if k not in SEED_KEYS]
+        if unknown_keys:
+            raise ConfigError(f"seeds has unknown entries: {unknown_keys} "
+                              f"(expected {list(SEED_KEYS)})")
+        for k in SEED_KEYS:
+            v = self.seeds[k]
+            if isinstance(v, bool) or not isinstance(v, int):
+                raise ConfigError(f"seeds[{k}] must be an integer, got {v!r}")
+
         if self.unknown_weight_mode not in ("calculated", "fixed"):
             raise ConfigError("unknown_weight_mode must be 'calculated' or 'fixed', "
                               f"got {self.unknown_weight_mode!r}")
@@ -158,6 +189,8 @@ class SimConfig:
                               "(durations must always be positive).")
         if self.concentration_scale <= 0:
             raise ConfigError("concentration_scale must be positive.")
+        if self.mileage_window_miles <= 0:
+            raise ConfigError("mileage_window_miles must be positive.")
 
         for key, _prefix in LAYER_DEFINITIONS:
             if key not in self.layers:
@@ -254,6 +287,42 @@ def sample_gamma_duration(rng, shape, scale, min_duration):
     return d if d > min_duration else min_duration
 
 
+# ------------------------------------------------------------ output statistics
+
+def compute_window_stats(encounter_mileages, total_miles, window_miles):
+    """Unknown-encounter counts per fixed mileage window.
+
+    Windows are [0, w), [w, 2w), ...; only COMPLETE windows inside
+    total_miles are used, so a partial final window cannot bias the
+    statistics. Returns counts, empirical mean and variance (sample
+    variance, ddof=1) of the per-window count, and the dispersion index
+    (variance / mean; > 1 indicates clustering vs. a Poisson process).
+    """
+    n_windows = int(total_miles // window_miles)
+    if n_windows < 1:
+        raise ValueError("mileage_window_miles is larger than the total "
+                         "simulated mileage; no complete window exists.")
+    counts = [0] * n_windows
+    for m in encounter_mileages:
+        i = int(m // window_miles)
+        if i < n_windows:
+            counts[i] += 1
+    mean = sum(counts) / n_windows
+    if n_windows > 1:
+        var = sum((c - mean) ** 2 for c in counts) / (n_windows - 1)
+    else:
+        var = 0.0
+    dispersion = (var / mean) if mean > 0 else float("nan")
+    return {
+        "window_miles": float(window_miles),
+        "n_windows": n_windows,
+        "counts": counts,
+        "mean_count": mean,
+        "variance_count": var,
+        "dispersion_index": dispersion,
+    }
+
+
 # ----------------------------------------------------------------------- layer
 
 @dataclass
@@ -305,16 +374,20 @@ class Layer:
 
 
 def build_layer(key: str, prefix: str, cfg: SimConfig,
-                py_rng: random.Random, np_rng: np.random.Generator) -> Layer:
+                rng_element_count: random.Random,
+                rng_rarity: random.Random,
+                np_rng_transition: np.random.Generator) -> Layer:
     """Build one layer: element count, rarity assignment, weights, fixed
-    Dirichlet transition vector, and Gamma duration parameters."""
-    n = py_rng.randint(cfg.element_count_min, cfg.element_count_max)  # inclusive
+    Dirichlet transition vector, and Gamma duration parameters. Each random
+    source uses its own dedicated RNG stream."""
+    n = rng_element_count.randint(cfg.element_count_min,
+                                  cfg.element_count_max)  # inclusive
     counts = assign_rarity_counts(n, cfg.rarity_proportions)
 
     rarity_list = []
     for r in RARITIES:
         rarity_list.extend([r] * counts[r])
-    py_rng.shuffle(rarity_list)  # random shuffle of category assignments
+    rng_rarity.shuffle(rarity_list)  # random shuffle of category assignments
 
     names = [f"{prefix}_{i:03d}" for i in range(n)]
     unknown_w = compute_unknown_weight(counts, cfg)
@@ -326,7 +399,7 @@ def build_layer(key: str, prefix: str, cfg: SimConfig,
 
     # Fixed transition probabilities: Dirichlet sampled ONCE, stored permanently.
     alpha = cfg.concentration_scale * initial_probs
-    transition_probs = np_rng.dirichlet(alpha)
+    transition_probs = np_rng_transition.dirichlet(alpha)
     transition_probs = transition_probs / transition_probs.sum()  # numerical safety
 
     lp = cfg.layers[key]
@@ -407,16 +480,49 @@ class SimulationResult:
             prev = e.mileage
         return out
 
+    def inter_arrival_seconds(self) -> list:
+        """Time between consecutive encounters; the first entry is the time
+        from the start of the simulation to the first encounter."""
+        out, prev = [], 0.0
+        for e in self.encounters:
+            out.append(e.time_seconds - prev)
+            prev = e.time_seconds
+        return out
+
+    def window_stats(self) -> dict:
+        """Per-mileage-window encounter counts and dispersion statistics
+        (window size from config.mileage_window_miles)."""
+        return compute_window_stats([e.mileage for e in self.encounters],
+                                    self.total_miles,
+                                    self.config.mileage_window_miles)
+
+    def encounters_per_million_miles(self) -> float:
+        return (len(self.encounters) / (self.total_miles / 1e6)
+                if self.total_miles else 0.0)
+
 
 class ScenarioSimulator:
-    """Event-driven simulator over the 6-layer scenario model."""
+    """Event-driven simulator over the 6-layer scenario model.
+
+    One independent RNG stream per random source (see SEED_KEYS), so every
+    aspect of the randomness is reproducible and independently controllable
+    from the config.
+    """
 
     def __init__(self, cfg: SimConfig):
         cfg.validate()
         self.cfg = cfg
-        self.py_rng = random.Random(cfg.simulation_seed)      # hot-loop RNG
-        self.np_rng = np.random.default_rng(cfg.simulation_seed)  # Dirichlet RNG
-        self.layers = [build_layer(key, prefix, cfg, self.py_rng, self.np_rng)
+        seeds = cfg.seeds
+        self.rng_element_count = random.Random(seeds["element_count"])
+        self.rng_rarity = random.Random(seeds["rarity_assignment"])
+        self.np_rng_transition = np.random.default_rng(seeds["transition_matrix"])
+        self.rng_duration = random.Random(seeds["duration"])
+        self.rng_initial = random.Random(seeds["initial_state"])
+        self.rng_transition = random.Random(seeds["transition_sampling"])
+        self.layers = [build_layer(key, prefix, cfg,
+                                   self.rng_element_count,
+                                   self.rng_rarity,
+                                   self.np_rng_transition)
                        for key, prefix in LAYER_DEFINITIONS]
         self.classifier = UnknownCombinationClassifier(
             cfg.global_seed, cfg.unknown_combination_probability)
@@ -453,9 +559,9 @@ class ScenarioSimulator:
     # -- state management -------------------------------------------------------
     def _new_state(self) -> dict:
         """Initialize the simulation state: one initial element per layer
-        (sampled from the rarity-weighted element probabilities) plus one
-        initial Gamma duration per selected element."""
-        rng = self.py_rng
+        (sampled from the rarity-weighted element probabilities using the
+        initial_state RNG) plus one initial Gamma duration per selected
+        element (using the duration RNG)."""
         layers = self.layers
         selected_by_rarity = [dict.fromkeys(RARITIES, 0) for _ in range(N_LAYERS)]
         duration_sum = [0.0] * N_LAYERS
@@ -463,12 +569,13 @@ class ScenarioSimulator:
 
         current = []
         for k in range(N_LAYERS):
-            i = layers[k].sample_initial_index(rng)
+            i = layers[k].sample_initial_index(self.rng_initial)
             current.append(i)
             selected_by_rarity[k][layers[k].rarities[i]] += 1
         remaining = []
         for k in range(N_LAYERS):
-            d = layers[k].sample_duration(rng, self.cfg.min_duration_seconds)
+            d = layers[k].sample_duration(self.rng_duration,
+                                          self.cfg.min_duration_seconds)
             duration_sum[k] += d
             duration_n[k] += 1
             remaining.append(d)
@@ -516,7 +623,7 @@ class ScenarioSimulator:
         Returns (SimulationResult, state) when the target mileage is reached,
         or (None, state) if wall_limit_seconds elapsed first; in that case the
         returned state (together with this simulator object, which carries the
-        RNG state) can be checkpointed and passed back in to resume with
+        RNG states) can be checkpointed and passed back in to resume with
         bit-identical results.
         """
         wall_start = time.monotonic()
@@ -526,7 +633,6 @@ class ScenarioSimulator:
             state = self._new_state()
 
         cfg = self.cfg
-        rng = self.py_rng
         layers = self.layers
         min_dur = cfg.min_duration_seconds
         mph = cfg.average_speed_mph
@@ -541,7 +647,8 @@ class ScenarioSimulator:
         n_l = [l.n_elements for l in layers]
         shape_l = [l.gamma_shape for l in layers]
         scale_l = [l.gamma_scale for l in layers]
-        gamma = rng.gammavariate
+        trans_rng = self.rng_transition          # next-element selection stream
+        gamma = self.rng_duration.gammavariate   # duration sampling stream
         sha256 = hashlib.sha256
         hash_prefix = self.classifier.prefix
         threshold = self.classifier.threshold
@@ -601,7 +708,7 @@ class ScenarioSimulator:
             # 8. update ALL expired layers first (transition + new duration)
             for k in expired:
                 cur = current[k]
-                nxt = sample_next_index(cum_l[k], n_l[k], rng, cur, allow_self)
+                nxt = sample_next_index(cum_l[k], n_l[k], trans_rng, cur, allow_self)
                 if unk_l[k][nxt] != unk_l[k][cur]:
                     unknown_active += 1 if unk_l[k][nxt] else -1
                 current[k] = nxt

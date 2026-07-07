@@ -8,9 +8,9 @@ scenario model and counts encounters with *unknown scenarios*.
 | File | Purpose |
 |---|---|
 | `config.yaml` | All parameters (documented inline) |
-| `simulator.py` | Core model: layers, weights, Dirichlet vectors, durations, hash classifier, event-driven engine |
-| `run_simulation.py` | CLI runner: writes `encounters.csv`, `summary.md`, `stats.json`, plots |
-| `test_simulator.py` | 24 pytest unit tests |
+| `simulator.py` | Core model: layers, weights, Dirichlet vectors, durations, hash classifier, event-driven engine, window statistics |
+| `run_simulation.py` | CLI runner: writes `encounters.csv`, `windows.csv`, `summary.md`, `stats.json`, plots |
+| `test_simulator.py` | 29 pytest unit tests |
 | `results/` | Output of the default 2M-mile run |
 
 ## How to run
@@ -27,6 +27,34 @@ Long runs can be paused/resumed with bit-identical results:
 python run_simulation.py --checkpoint cp.pkl --max-wall-seconds 60
 python run_simulation.py --checkpoint cp.pkl --max-wall-seconds 60   # resumes
 ```
+
+## Outputs
+
+The simulator reports: total simulated mileage; total simulated time in
+seconds; total number of unknown scenario encounters; the mileage and time
+position of each encounter plus inter-arrival distances and times
+(`encounters.csv`, stats in `summary.md`/`stats.json`); unknown-encounter
+count per fixed mileage window (`windows.csv`, window size
+`mileage_window_miles`, default 10,000 mi) with empirical mean count,
+empirical variance, and dispersion index = variance/mean; and the estimated
+unknown encounter rate per million miles. Window statistics use only
+complete windows so a partial final window cannot bias them. A dispersion
+index > 1 (observed ≈ 12) means encounters are clustered, which is expected:
+while a slow layer holds an unknown element, every fast-layer change creates
+a new unknown tuple.
+
+## Reproducibility
+
+Every random source has its own configurable seed (config section `seeds`):
+`element_count` (elements per layer), `rarity_assignment` (category
+shuffle), `transition_matrix` (Dirichlet sampling), `duration` (Gamma
+sampling, initial + simulation), `initial_state` (initial elements), and
+`transition_sampling` (next-element selection during simulation). The
+hash-based unknown-combination method uses `global_seed`. Running twice
+with the same config and seeds produces identical results (unit-tested,
+including across checkpoint/resume). Seed-stream isolation is also tested:
+e.g. changing only the `duration` seed leaves element sets, rarities, and
+transition vectors untouched.
 
 ## Model
 
@@ -84,30 +112,4 @@ counting. The stop condition is 2,000,000 *miles* (not iterations/seconds).
 
 ## Design decisions & assumptions
 
-- **One shared transition vector per layer** (chosen over a full per-element
-  matrix): next-element probabilities depend on target rarity, not on the
-  current element.
-- **Initial scenario at t=0 is checked and counted if unknown**
-  (`count_initial_scenario`, default true), since entering the first tuple
-  is entering a new scenario. Set to `false` to only count changes.
-- **Two RNG streams, one seed:** `random.Random(simulation_seed)` drives the
-  hot loop; `numpy default_rng(simulation_seed)` drives the Dirichlet draws.
-  Same `simulation_seed` ⇒ bit-identical runs (unit-tested).
-- **Per-layer duration defaults** are plausibility choices (ego maneuver
-  ~30 s … environment ~30 min) and freely configurable.
-- **Encounter bursts are expected:** while a slow layer sits on an unknown
-  element, every change in a fast layer creates a *new* unknown tuple and
-  counts again (per spec). Hence the low median (~0.3 mi) vs mean (~13 mi)
-  inter-arrival distance.
-
-## Accuracy notes (worth knowing)
-
-- With `concentration_scale = 100`, each layer's *realized* unknown mass is
-  a Beta(≈0.4, ≈99.6) draw around the 0.4% design target — individual
-  layers can land at 0.01% or 0.6% (see
-  `results/plots/unknown_rates_per_layer.png`). The design mass is exact;
-  the scatter comes from the spec's Dirichlet step. Raise
-  `concentration_scale` (e.g. 10,000) if realized rates must sit near 0.4%.
-- The empirical unknown-combination rate in the 2M-mile run was 0.5022%
-  vs the 0.5% target; empirical durations matched configured means, and
-  mileage/time are exactly consistent (40,000 h at 50 mph).
+- **One shared transition vector per layer** (chosen ov

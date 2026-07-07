@@ -4,12 +4,21 @@
 # ==========================================================================
 
 # --- Reproducibility ------------------------------------------------------
-simulation_seed: 12345    # RNG seed for everything stochastic in the simulation:
-                          # element counts, rarity shuffling, Dirichlet transition
-                          # vectors, initial states, transitions, durations.
-global_seed: 42           # Seed for the deterministic SHA-256 unknown-combination
-                          # classifier. Changing it selects a different fixed set
-                          # of unknown combinations.
+# One independent, configurable seed per random source. Running the
+# simulator twice with the same config (all seeds included) produces
+# identical results.
+seeds:
+  element_count: 12345        # number of elements per layer
+  rarity_assignment: 23456    # shuffling rarity categories across elements
+  transition_matrix: 34567    # Dirichlet sampling of transition vectors
+  duration: 45678             # Gamma duration sampling (initial + simulation)
+  initial_state: 56789        # initial element selection per layer
+  transition_sampling: 67890  # next-element selection during simulation
+
+global_seed: 42               # Seed for the deterministic SHA-256
+                              # unknown-combination classifier. Changing it
+                              # selects a different fixed set of unknown
+                              # combinations.
 
 # --- Simulation run -------------------------------------------------------
 target_total_miles: 2000000     # Stop once simulated mileage reaches this.
@@ -18,6 +27,10 @@ average_speed_mph: 50.0         # Constant speed converting seconds -> miles:
 min_duration_seconds: 1.0       # Lower clamp applied to every sampled duration.
 count_initial_scenario: true    # Also check/count the initial scenario at t=0
                                 # if it is unknown (entering the first tuple).
+
+# --- Output statistics ------------------------------------------------------
+mileage_window_miles: 10000     # Fixed window size for per-window encounter
+                                # counts, mean, variance, dispersion index.
 
 # --- Elements per layer ---------------------------------------------------
 element_count_min: 50           # Number of elements per layer is sampled
