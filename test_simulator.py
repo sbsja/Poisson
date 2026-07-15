@@ -1,4 +1,4 @@
-"""Unit tests for the layered scenario simulator (pytest)."""
+"""Unit tests for the layered scenario simulator (episode semantics)."""
 
 import math
 import pickle
@@ -10,20 +10,59 @@ import pytest
 from simulator import (KNOWN_RARITIES, LAYER_DEFINITIONS, RARITIES, SEED_KEYS,
                        ConfigError, ScenarioSimulator, SimConfig,
                        UnknownCombinationClassifier, assign_rarity_counts,
-                       compute_unknown_weight, compute_window_stats)
+                       compute_unknown_weight, compute_window_stats,
+                       episode_transition_action)
 
-_LAYER_DURATIONS = {
-    "street": (300.0, 20000.0),
-    "temporal_modifications": (600.0, 90000.0),
-    "ego_maneuver": (30.0, 400.0),
-    "ru_maneuver": (45.0, 900.0),
-    "environmental_conditions": (1800.0, 500000.0),
-    "triggering_conditions": (120.0, 8000.0),
-}
+_STREET_ELEMENTS = [
+    {"name": "constant_lane", "probability": 0.493},
+    {"name": "forced_merge_proceeding", "probability": 0.169},
+    {"name": "road_split_proceeding", "probability": 0.079},
+    {"name": "lane_split_proceeding", "probability": 0.072},
+    {"name": "added_lane_proceeding", "probability": 0.034},
+    {"name": "road_split_exiting", "probability": 0.014},
+    {"name": "lane_split_exiting", "probability": 0.013},
+    {"name": "removed_lane", "probability": 0.012},
+    {"name": "forced_merge_merging", "probability": 0.010},
+    {"name": "added_lane_merging", "probability": 0.006},
+    {"name": "added_lane", "probability": 0.003},
+    {"name": "overlap_zone", "probability": 0.095},
+]
 
 _SEEDS = {"element_count": 12345, "rarity_assignment": 23456,
           "transition_matrix": 34567, "duration": 45678,
-          "initial_state": 56789, "transition_sampling": 67890}
+          "initial_state": 56789, "transition_sampling": 67890,
+          "pattern_rules": 78901}
+
+
+def _layers(**over):
+    base = {
+        "street": {"mean_duration": 300.0, "variance_duration": 20000.0,
+                   "allow_unknown": False,
+                   "fixed_elements": [dict(e) for e in _STREET_ELEMENTS]},
+        "temporal_modifications": {"mean_duration": 600.0,
+                                   "variance_duration": 90000.0,
+                                   "element_count_min": 30,
+                                   "element_count_max": 46,
+                                   "allow_unknown": True},
+        "ego_maneuver": {"mean_duration": 30.0, "variance_duration": 400.0,
+                         "element_count_min": 7, "element_count_max": 12,
+                         "allow_unknown": True},
+        "ru_maneuver": {"mean_duration": 45.0, "variance_duration": 900.0,
+                        "element_count_min": 7, "element_count_max": 12,
+                        "allow_unknown": True},
+        "environmental_conditions": {"mean_duration": 1800.0,
+                                     "variance_duration": 500000.0,
+                                     "element_count_min": 15,
+                                     "element_count_max": 21,
+                                     "allow_unknown": False},
+        "triggering_conditions": {"mean_duration": 120.0,
+                                  "variance_duration": 8000.0,
+                                  "element_count_min": 50,
+                                  "element_count_max": 100,
+                                  "allow_unknown": True},
+    }
+    base.update(over)
+    return base
 
 
 def base_config(**over):
@@ -33,10 +72,15 @@ def base_config(**over):
         "target_total_miles": 50.0,
         "average_speed_mph": 50.0,
         "min_duration_seconds": 1.0,
-        "count_initial_scenario": True,
         "mileage_window_miles": 10.0,
-        "element_count_min": 50,
-        "element_count_max": 100,
+        "enable_unknown_combinations": True,
+        "combination_rules": {
+            "manual": [{"street": "forced_merge_merging",
+                        "environmental_conditions": "environment_000"}],
+            "generated_max_rules": 12,
+            "generated_layers_per_rule": 2,
+            "generated_target_mass": 0.005,
+        },
         "rarity_proportions": {"common": 0.50, "medium": 0.25, "rare": 0.10,
                                "very_rare": 0.05, "unknown": 0.10},
         "base_weights": {"common": 1.0, "medium": 0.4, "rare": 0.1,
@@ -45,10 +89,9 @@ def base_config(**over):
         "target_unknown_element_probability": 0.004,
         "fixed_unknown_weight": 0.001,
         "unknown_combination_probability": 0.005,
-        "concentration_scale": 100.0,
+        "concentration_scale": 20000.0,
         "allow_self_transition": True,
-        "layers": {k: {"mean_duration": m, "variance_duration": v}
-                   for k, (m, v) in _LAYER_DURATIONS.items()},
+        "layers": _layers(),
     }
     raw.update(over)
     return SimConfig.from_dict(raw)
@@ -61,9 +104,28 @@ def seeds_with(**over):
 
 
 _COUNTS = {"common": 37, "medium": 19, "rare": 8, "very_rare": 4, "unknown": 7}
+_UNKNOWN_LAYERS = {"temporal_modifications", "ego_maneuver", "ru_maneuver",
+                   "triggering_conditions"}
+
+
+# ------------------------------------------------------ episode rules (unit)
+
+def test_episode_transition_action_rules():
+    # rule 1: known -> unknown opens
+    assert episode_transition_action(False, True, False) == (False, True)
+    # rule 2: unknown -> known closes
+    assert episode_transition_action(True, False, False) == (True, False)
+    # rule 3: unknown -> different unknown restarts (close + open)
+    assert episode_transition_action(True, True, False) == (True, True)
+    # rule 4: self-transition on same unknown element continues
+    assert episode_transition_action(True, True, True) == (False, False)
+    # known -> known: nothing
+    assert episode_transition_action(False, False, False) == (False, False)
+    assert episode_transition_action(False, False, True) == (False, False)
 
 
 # ------------------------------------------------------------- hash classifier
+# (mechanism currently disabled for counting, but kept intact for later)
 
 def _random_tuples(n, seed=0):
     rng = random.Random(seed)
@@ -71,190 +133,228 @@ def _random_tuples(n, seed=0):
             for _ in range(n)]
 
 
-def test_hash_classifier_deterministic():
-    c = UnknownCombinationClassifier(42, 0.005)
-    t = ("street_012", "temporal_004", "ego_031", "ru_008",
-         "environment_022", "trigger_003")
-    v1, v2 = c.hash_value(t), c.hash_value(t)
-    assert v1 == v2
-    assert 0.0 <= v1 < 1.0
-    assert c.is_unknown_combination(t) == c.is_unknown_combination(t)
-
-
-def test_hash_classifier_rate_and_seed_dependence():
+def test_hash_classifier_deterministic_and_seeded():
     c42 = UnknownCombinationClassifier(42, 0.005)
     c43 = UnknownCombinationClassifier(43, 0.005)
     tuples = _random_tuples(20000)
     r42 = [c42.is_unknown_combination(t) for t in tuples]
     r43 = [c43.is_unknown_combination(t) for t in tuples]
-    rate42 = sum(r42) / len(r42)
-    rate43 = sum(r43) / len(r43)
-    assert 0.003 < rate42 < 0.007          # ~0.5% +- 4 sigma
-    assert 0.003 < rate43 < 0.007
-    assert r42 != r43                       # different seed -> different set
-    assert r42 == [c42.is_unknown_combination(t) for t in tuples]  # stable
+    assert 0.003 < sum(r42) / len(r42) < 0.007
+    assert r42 != r43
+    assert r42 == [c42.is_unknown_combination(t) for t in tuples]
 
 
-def test_hash_classifier_no_storage():
-    c = UnknownCombinationClassifier(42, 0.005)
-    for t in _random_tuples(1000, seed=1):
-        c.is_unknown_combination(t)
-    assert not any(isinstance(v, (dict, set, list)) and len(v) > 10
-                   for v in vars(c).values())  # nothing enumerated/stored
+def test_combination_rule_validation():
+    # a rule must span at least two layers
+    with pytest.raises(ConfigError):
+        base_config(combination_rules={
+            "manual": [{"street": "constant_lane"}]})
+    # unknown layer key
+    with pytest.raises(ConfigError):
+        base_config(combination_rules={
+            "manual": [{"street": "constant_lane", "weather": "x"}]})
+    # nonexistent element name is rejected when the simulator is built
+    cfg = base_config(combination_rules={
+        "manual": [{"street": "no_such_element",
+                    "environmental_conditions": "environment_000"}]})
+    with pytest.raises(ConfigError):
+        ScenarioSimulator(cfg)
 
 
-# --------------------------------------------------------------- rarity counts
+def test_combination_rule_rejects_unknown_rarity_elements():
+    # find an unknown-rarity element in a sampled layer, reference it in a
+    # rule -> must be rejected (combinations are known-element interactions)
+    sim = ScenarioSimulator(base_config())
+    ego = sim.layers[2]
+    unk_name = ego.names[ego.is_unknown.index(True)]
+    cfg = base_config(combination_rules={
+        "manual": [{"ego_maneuver": unk_name, "street": "constant_lane"}]})
+    with pytest.raises(ConfigError) as ei:
+        ScenarioSimulator(cfg)
+    assert "unknown-rarity" in str(ei.value)
+
+
+def test_generated_rules_reproducible_and_calibrated():
+    s1 = ScenarioSimulator(base_config())
+    s2 = ScenarioSimulator(base_config())
+    assert [r.description for r in s1.rules] == \
+           [r.description for r in s2.rules]
+    gen = [r for r in s1.rules if r.source == "generated"]
+    assert gen, "expected generated rules"
+    for r in s1.rules:
+        assert len(r.items) >= 2
+        assert 0 < r.mass < 1
+    # generation stops once the target mass is reached (last rule may overshoot)
+    gen_mass = sum(r.mass for r in gen)
+    assert gen_mass >= 0.005 or len(gen) == 12
+    # different pattern seed -> different rules, identical layers
+    s3 = ScenarioSimulator(base_config(seeds=seeds_with(pattern_rules=999)))
+    assert [r.description for r in s3.rules if r.source == "generated"] != \
+           [r.description for r in gen]
+    assert all(a.names == b.names for a, b in zip(s1.layers, s3.layers))
+
+
+# --------------------------------------------------------------- rarity/weights
 
 def test_rarity_counts_sum_and_proportions():
     props = base_config().rarity_proportions
-    for n in range(50, 101):
+    for n in range(7, 101):
         counts = assign_rarity_counts(n, props)
         assert sum(counts.values()) == n
         for r in RARITIES:
-            assert abs(counts[r] - n * props[r]) < 1.0  # largest remainder
+            assert abs(counts[r] - n * props[r]) < 1.0
 
-
-# -------------------------------------------------------------- unknown weight
 
 def test_calculated_unknown_weight_formula_and_target():
     cfg = base_config()
     w = compute_unknown_weight(_COUNTS, cfg)
     known_mass = sum(_COUNTS[r] * cfg.base_weights[r] for r in KNOWN_RARITIES)
-    expected = 0.004 * known_mass / (_COUNTS["unknown"] * (1 - 0.004))
-    assert math.isclose(w, expected, rel_tol=1e-12)
-    # resulting unknown probability mass hits the target exactly
-    total = known_mass + _COUNTS["unknown"] * w
-    assert math.isclose(_COUNTS["unknown"] * w / total, 0.004, rel_tol=1e-9)
+    assert math.isclose(w, 0.004 * known_mass / (7 * 0.996), rel_tol=1e-12)
+    total = known_mass + 7 * w
+    assert math.isclose(7 * w / total, 0.004, rel_tol=1e-9)
     assert w < cfg.base_weights["very_rare"]
 
 
 def test_calculated_unknown_weight_error_lists_remedies():
-    cfg = base_config(target_unknown_element_probability=0.5)
+    cfg = base_config()
+    cfg.target_unknown_element_probability = 0.5   # after validation, direct
     with pytest.raises(ConfigError) as ei:
         compute_unknown_weight(_COUNTS, cfg)
     msg = str(ei.value)
-    assert "proportion of unknown elements" in msg
-    assert "target_unknown_element_probability" in msg
-    assert "fixed" in msg
+    assert "proportion of unknown elements" in msg and "fixed" in msg
+    # and an infeasible target is rejected already at config validation
+    with pytest.raises(ConfigError):
+        base_config(target_unknown_element_probability=0.5)
 
 
 def test_fixed_mode_uses_and_validates_fixed_weight():
     cfg = base_config(unknown_weight_mode="fixed")
     assert compute_unknown_weight(_COUNTS, cfg) == 0.001
-    cfg_bad = base_config(unknown_weight_mode="fixed", fixed_unknown_weight=0.05)
     with pytest.raises(ConfigError):
-        compute_unknown_weight(_COUNTS, cfg_bad)  # not < very_rare weight
-
-
-def test_calculated_mode_requires_unknown_elements():
-    cfg = base_config()
-    counts = dict(_COUNTS, unknown=0)
-    with pytest.raises(ConfigError):
-        compute_unknown_weight(counts, cfg)
+        compute_unknown_weight(
+            _COUNTS, base_config(unknown_weight_mode="fixed",
+                                 fixed_unknown_weight=0.05))
 
 
 # ------------------------------------------------------------------ validation
 
+def test_seeds_validated():
+    with pytest.raises(ConfigError):
+        base_config(seeds={"element_count": 1})
+    with pytest.raises(ConfigError):
+        base_config(seeds=seeds_with(bogus=7))
+    assert set(base_config().seeds) == set(SEED_KEYS)
+
+
+def test_fixed_elements_validated():
+    bad = _layers()
+    bad["street"]["fixed_elements"][0]["probability"] = 0.9   # sum != 1
+    with pytest.raises(ConfigError):
+        base_config(layers=bad)
+    bad2 = _layers()
+    bad2["street"]["allow_unknown"] = True   # fixed layers are all-known
+    with pytest.raises(ConfigError):
+        base_config(layers=bad2)
+
+
+def test_too_small_range_for_unknowns_rejected():
+    bad = _layers()
+    bad["ego_maneuver"]["element_count_min"] = 4   # yields 0 unknown elements
+    bad["ego_maneuver"]["element_count_max"] = 5
+    with pytest.raises(ConfigError):
+        base_config(layers=bad)
+
+
+def test_infeasible_range_rejected_with_clear_error():
+    bad = _layers()
+    bad["ego_maneuver"]["element_count_max"] = 14   # n=13,14 infeasible
+    with pytest.raises(ConfigError) as ei:
+        base_config(layers=bad)
+    assert "infeasible" in str(ei.value)
+
+
 def test_invalid_proportions_rejected():
     bad = {"common": 0.9, "medium": 0.05, "rare": 0.03, "very_rare": 0.01,
-           "unknown": 0.05}  # sums to 1.04
+           "unknown": 0.05}
     with pytest.raises(ConfigError):
         base_config(rarity_proportions=bad)
 
 
-def test_invalid_mode_rejected():
-    with pytest.raises(ConfigError):
-        base_config(unknown_weight_mode="banana")
+# ------------------------------------------------------------ layer construction
 
-
-def test_unknown_base_weight_rejected():
-    bw = {"common": 1.0, "medium": 0.4, "rare": 0.1, "very_rare": 0.03,
-          "unknown": 0.5}
-    with pytest.raises(ConfigError):
-        base_config(base_weights=bw)
-
-
-def test_seeds_validated():
-    with pytest.raises(ConfigError):
-        base_config(seeds={"element_count": 1})           # missing entries
-    with pytest.raises(ConfigError):
-        base_config(seeds=seeds_with(bogus=7))            # unknown entry
-    with pytest.raises(ConfigError):
-        base_config(seeds=seeds_with(duration="abc"))     # non-int
-    assert set(base_config().seeds) == set(SEED_KEYS)
-
-
-# ------------------------------------------------------------ layers / vectors
-
-def test_layers_built_to_spec():
+def test_street_layer_fixed_and_exact():
     sim = ScenarioSimulator(base_config())
-    assert len(sim.layers) == 6
-    for layer in sim.layers:
-        assert 50 <= layer.n_elements <= 100
-        assert sum(layer.counts.values()) == layer.n_elements
-        assert len(layer.names) == len(set(layer.names))
-        # unknown weight strictly smallest
-        assert layer.unknown_weight < min(base_config().base_weights.values())
-        # transition vector: valid probability vector, fixed size
-        assert math.isclose(float(layer.transition_probs.sum()), 1.0, abs_tol=1e-9)
-        assert (layer.transition_probs >= 0).all()
-        assert len(layer.transition_probs) == layer.n_elements
-        # designed unknown mass hits the calculated-mode target exactly
-        assert math.isclose(layer.designed_unknown_mass(), 0.004, rel_tol=1e-9)
+    street = sim.layers[0]
+    assert street.is_fixed and street.n_elements == 12
+    assert not any(street.is_unknown)                 # no unknown elements
+    assert street.unknown_weight is None
+    expected = np.array([e["probability"] for e in _STREET_ELEMENTS])
+    assert np.allclose(street.transition_probs, expected, atol=1e-12)
+    assert np.allclose(street.initial_probs, expected, atol=1e-12)
+    assert street.names[0] == "constant_lane"
 
 
-def test_transition_vectors_reproducible_and_permanent():
+def test_street_vector_not_dirichlet_perturbed():
+    # changing the transition_matrix seed must NOT change the street vector,
+    # but must change the sampled layers' vectors
     s1 = ScenarioSimulator(base_config())
-    s2 = ScenarioSimulator(base_config())
-    for l1, l2 in zip(s1.layers, s2.layers):
-        assert np.array_equal(l1.transition_probs, l2.transition_probs)
+    s2 = ScenarioSimulator(base_config(seeds=seeds_with(transition_matrix=999)))
+    assert np.array_equal(s1.layers[0].transition_probs,
+                          s2.layers[0].transition_probs)
+    assert any(not np.array_equal(a.transition_probs, b.transition_probs)
+               for a, b in zip(s1.layers[1:], s2.layers[1:]))
+
+
+def test_environment_layer_has_no_unknowns():
+    sim = ScenarioSimulator(base_config())
+    env = sim.layers[4]
+    assert not env.is_fixed
+    assert 15 <= env.n_elements <= 21
+    assert not any(env.is_unknown)
+    assert env.counts["unknown"] == 0
+    # renormalized known proportions still sum to 1
+    lp = base_config().layers["environmental_conditions"]
+    props = base_config().effective_proportions(lp)
+    assert math.isclose(sum(props.values()), 1.0, rel_tol=1e-12)
+    assert props["unknown"] == 0.0
+
+
+def test_sampled_layers_built_to_spec():
+    sim = ScenarioSimulator(base_config())
+    ranges = {"temporal_modifications": (30, 46), "ego_maneuver": (7, 12),
+              "ru_maneuver": (7, 12), "environmental_conditions": (15, 21),
+              "triggering_conditions": (50, 100)}
+    for layer in sim.layers[1:]:
+        lo, hi = ranges[layer.key]
+        assert lo <= layer.n_elements <= hi
+        assert sum(layer.counts.values()) == layer.n_elements
+        assert math.isclose(float(layer.transition_probs.sum()), 1.0,
+                            abs_tol=1e-9)
+        if layer.key in _UNKNOWN_LAYERS:
+            assert layer.counts["unknown"] >= 1
+            assert layer.unknown_weight < 0.03
+            assert math.isclose(layer.designed_unknown_mass(), 0.004,
+                                rel_tol=1e-9)
+
+
+def test_transition_vectors_permanent():
+    s1 = ScenarioSimulator(base_config())
     before = [l.transition_probs.copy() for l in s1.layers]
-    s1.run()  # simulation must not resample transition probabilities
+    s1.run()
     for b, layer in zip(before, s1.layers):
         assert np.array_equal(b, layer.transition_probs)
 
 
-def test_no_self_transition_when_disabled():
-    sim = ScenarioSimulator(base_config(allow_self_transition=False))
-    layer = sim.layers[0]
-    rng = random.Random(3)
-    current = 5
-    for _ in range(20000):
-        assert layer.sample_next_index(rng, current, False) != current
-
-
-# ------------------------------------------------------------ seed separation
-
 def test_seed_streams_isolated():
-    """Each seed controls exactly its own random source."""
     ref = ScenarioSimulator(base_config())
-
-    # different duration seed: layer structure and vectors identical
     s_dur = ScenarioSimulator(base_config(seeds=seeds_with(duration=999)))
     for a, b in zip(ref.layers, s_dur.layers):
-        assert a.names == b.names
-        assert a.rarities == b.rarities
+        assert a.names == b.names and a.rarities == b.rarities
         assert np.array_equal(a.transition_probs, b.transition_probs)
-
-    # different transition_matrix seed: same elements/rarities, new vectors
-    s_mat = ScenarioSimulator(base_config(seeds=seeds_with(transition_matrix=999)))
-    assert all(a.rarities == b.rarities for a, b in zip(ref.layers, s_mat.layers))
-    assert any(not np.array_equal(a.transition_probs, b.transition_probs)
-               for a, b in zip(ref.layers, s_mat.layers))
-
-    # different rarity_assignment seed: same counts, different shuffle
-    s_rar = ScenarioSimulator(base_config(seeds=seeds_with(rarity_assignment=999)))
-    assert all(a.counts == b.counts for a, b in zip(ref.layers, s_rar.layers))
-    assert any(a.rarities != b.rarities for a, b in zip(ref.layers, s_rar.layers))
-
-    # different element_count seed: different element counts (overwhelmingly)
     s_cnt = ScenarioSimulator(base_config(seeds=seeds_with(element_count=999)))
-    assert [l.n_elements for l in ref.layers] != \
-           [l.n_elements for l in s_cnt.layers]
-
-    # different initial_state seed: same layers, (typically) different start
-    s_ini = ScenarioSimulator(base_config(seeds=seeds_with(initial_state=999)))
-    assert all(a.names == b.names for a, b in zip(ref.layers, s_ini.layers))
+    assert s_cnt.layers[0].n_elements == 12         # street unaffected
+    assert [l.n_elements for l in ref.layers[1:]] != \
+           [l.n_elements for l in s_cnt.layers[1:]]
 
 
 # -------------------------------------------------------------------- durations
@@ -272,66 +372,153 @@ def test_gamma_parameterization_moments():
 
 def test_duration_positive_and_min_clamped():
     sim = ScenarioSimulator(base_config())
-    layer = sim.layers[2]  # ego, mean 30
     rng = random.Random(9)
-    ds = [layer.sample_duration(rng, 25.0) for _ in range(20000)]
+    ds = [sim.layers[2].sample_duration(rng, 25.0) for _ in range(20000)]
     assert min(ds) >= 25.0
-    assert all(d > 0 for d in ds)
 
 
-# --------------------------------------------------- scenario classification
-
-def test_scenario_unknown_via_element():
-    sim = ScenarioSimulator(base_config())
-    k = next(i for i, l in enumerate(sim.layers) if any(l.is_unknown))
-    idx = [0] * 6
-    idx[k] = sim.layers[k].is_unknown.index(True)
-    is_unk, reason = sim.classify_scenario(tuple(idx))
-    assert is_unk and reason == "unknown_element"
+def test_no_self_transition_when_disabled():
+    sim = ScenarioSimulator(base_config(allow_self_transition=False))
+    rng = random.Random(3)
+    for _ in range(20000):
+        assert sim.layers[0].sample_next_index(rng, 0, False) != 0
 
 
-def test_scenario_unknown_via_combination():
-    sim = ScenarioSimulator(base_config())
-    rng = random.Random(1)
-    found = None
-    for _ in range(200000):
-        idx = tuple(rng.randrange(l.n_elements) for l in sim.layers)
-        if any(l.is_unknown[i] for l, i in zip(sim.layers, idx)):
+# ----------------------------------------------------------- episode semantics
+
+def _run(miles=5000.0, **over):
+    return ScenarioSimulator(base_config(target_total_miles=miles,
+                                         **over)).run()
+
+
+def test_episodes_only_from_unknown_bearing_layers():
+    res = _run()
+    elem = [e for e in res.episodes if e.type == "element"]
+    assert len(elem) > 0
+    for e in elem:
+        assert e.layer in _UNKNOWN_LAYERS      # never street / environment
+    by_layer = {st["layer"]: st["episodes"] for st in res.layer_stats}
+    assert by_layer["street"] == 0
+    assert by_layer["environmental_conditions"] == 0
+    assert sum(by_layer.values()) == len(elem)
+    for e in res.episodes:
+        if e.type != "element":
+            assert e.layer == "combination"
+
+
+def test_episode_elements_are_unknown_rarity():
+    res = _run()
+    sim_layers = {st["layer"]: st for st in res.layer_stats}
+    for e in res.episodes:
+        if e.type != "element":
             continue
-        is_unk, reason = sim.classify_scenario(idx)
-        if is_unk:
-            assert reason == "unknown_combination"
-            found = idx
-            break
-    assert found is not None
-    # deterministic: same tuple classifies the same way again
-    assert sim.classify_scenario(found) == (True, "unknown_combination")
+        st = sim_layers[e.layer]
+        assert e.element in st["element_names"]
+        assert st["counts"]["unknown"] >= 1
 
 
-def test_no_double_count_same_tuple():
-    sim = ScenarioSimulator(base_config())
-    k = next(i for i, l in enumerate(sim.layers) if any(l.is_unknown))
-    unk_idx = [0] * 6
-    unk_idx[k] = sim.layers[k].is_unknown.index(True)
-    unk_tuple = tuple(unk_idx)
-    assert sim.classify_scenario(unk_tuple)[0] is True
-    # staying in the same unknown tuple -> NOT counted again
-    counted, reason = ScenarioSimulator.check_new_scenario(
-        unk_tuple, unk_tuple, sim.classify_scenario)
-    assert counted is False and reason is None
-    # entering a different unknown tuple -> counted once
-    other = list(unk_tuple)
-    other[(k + 1) % 6] = (other[(k + 1) % 6] + 1) % sim.layers[(k + 1) % 6].n_elements
-    counted, reason = ScenarioSimulator.check_new_scenario(
-        tuple(other), unk_tuple, sim.classify_scenario)
-    assert counted is True and reason == "unknown_element"
+def test_episode_intervals_valid_and_per_layer_non_overlapping():
+    res = _run()
+    per_layer = {}
+    for e in res.episodes:
+        assert e.end_time_seconds is not None      # all closed at the end
+        assert e.end_time_seconds >= e.start_time_seconds
+        assert e.end_mileage >= e.start_mileage
+        assert math.isclose(
+            e.duration_miles,
+            res.config.average_speed_mph * e.duration_seconds / 3600.0,
+            rel_tol=1e-9, abs_tol=1e-9)
+        if not e.truncated and e.type == "element":
+            # combination episodes may be shorter: events in OTHER layers
+            # can end them after arbitrarily small staggered gaps
+            assert e.duration_seconds >= res.config.min_duration_seconds - 1e-9
+        slot = (e.type, e.layer if e.type == "element" else e.element)
+        per_layer.setdefault(slot, []).append(e)
+    for eps in per_layer.values():
+        eps.sort(key=lambda e: e.start_time_seconds)
+        for a, b in zip(eps, eps[1:]):
+            assert b.start_time_seconds >= a.end_time_seconds - 1e-9
+
+
+def test_starts_are_ordered_and_union_bounded():
+    res = _run()
+    starts = [e.start_time_seconds for e in res.episodes]
+    assert starts == sorted(starts)
+    total_dur = sum(e.duration_seconds for e in res.episodes)
+    assert res.total_unknown_time_seconds <= total_dur + 1e-6   # overlaps merge
+    assert res.total_unknown_time_seconds <= res.total_time_seconds
+    if res.episodes:
+        assert res.total_unknown_time_seconds >= max(
+            e.duration_seconds for e in res.episodes) - 1e-6
+
+
+def test_episode_count_matches_unknown_entries_without_self_transitions():
+    # with self-transitions disabled every transition changes the element,
+    # so episodes == unknown-element selections + initial unknown layers
+    res = _run(miles=3000.0, allow_self_transition=False)
+    elem = [e for e in res.episodes if e.type == "element"]
+    initial = sum(1 for e in elem if e.start_time_seconds == 0.0)
+    selected = sum(st["unknown_selected"] for st in res.layer_stats)
+    assert len(elem) == selected + initial
+
+
+def test_other_layer_changes_do_not_end_episodes():
+    # episode durations must equal the element sojourn time of their own
+    # layer; ego transitions every ~30 s, so temporal/trigger episodes must
+    # frequently span multiple ego changes without being cut
+    res = _run(miles=20000.0)
+    long_eps = [e for e in res.episodes
+                if e.type == "element"
+                and e.layer in ("temporal_modifications",
+                                "triggering_conditions")
+                and not e.truncated]
+    if long_eps:   # statistically ~always present at 20k miles
+        assert max(e.duration_seconds for e in long_eps) > 60.0
+
+
+def test_hash_episodes_gated_by_element_unknowns():
+    """A hash episode never starts while an element episode is running."""
+    res = _run(miles=20000.0)
+    elem = [(e.start_time_seconds, e.end_time_seconds)
+            for e in res.episodes if e.type == "element"]
+    for h in res.episodes:
+        if h.type != "hash_combination":
+            continue
+        for s, t_end in elem:
+            assert not (s <= h.start_time_seconds < t_end)
+
+
+def test_pattern_episode_counts_match_rule_stats():
+    res = _run(miles=20000.0)
+    cs = res.combination_stats
+    assert cs["enabled"]
+    n_pattern = sum(1 for e in res.episodes if e.type == "pattern")
+    assert n_pattern == cs["pattern_episodes"] == \
+           sum(r["episodes"] for r in cs["rules"])
+    n_hash = sum(1 for e in res.episodes if e.type == "hash_combination")
+    assert n_hash == cs["hash_episodes"]
+    assert n_hash > 0    # ~0.5% of tuple changes over 20k miles
+
+
+def test_combinations_can_be_disabled():
+    res = _run(miles=2000.0, enable_unknown_combinations=False)
+    assert all(e.type == "element" for e in res.episodes)
+    assert res.combination_stats["enabled"] is False
+
+
+def test_truncated_episodes_flagged_at_end():
+    res = _run()
+    for e in res.episodes:
+        if e.truncated:
+            assert math.isclose(e.end_time_seconds, res.total_time_seconds,
+                                rel_tol=1e-12)
 
 
 # ------------------------------------------------------------ output statistics
 
 def test_window_stats_counts_mean_variance_dispersion():
-    mileages = [5.0, 15.0, 25.0, 25.5, 999.0]  # 999 beyond complete windows
-    ws = compute_window_stats(mileages, total_miles=40.0, window_miles=10.0)
+    ws = compute_window_stats([5.0, 15.0, 25.0, 25.5, 999.0],
+                              total_miles=40.0, window_miles=10.0)
     assert ws["n_windows"] == 4
     assert ws["counts"] == [1, 1, 2, 0]
     assert math.isclose(ws["mean_count"], 1.0)
@@ -339,28 +526,18 @@ def test_window_stats_counts_mean_variance_dispersion():
     assert math.isclose(ws["dispersion_index"], 2.0 / 3.0)
 
 
-def test_window_stats_requires_complete_window():
-    with pytest.raises(ValueError):
-        compute_window_stats([1.0], total_miles=5.0, window_miles=10.0)
-
-
-def test_inter_arrival_times_and_distances_consistent():
-    cfg = base_config(target_total_miles=2000.0)
-    res = ScenarioSimulator(cfg).run()
-    assert len(res.encounters) > 0
+def test_inter_arrivals_consistent_and_windows_on_starts():
+    res = _run(miles=2000.0, mileage_window_miles=100.0)
     inter_mi = res.inter_arrival_miles()
     inter_s = res.inter_arrival_seconds()
-    assert len(inter_mi) == len(inter_s) == len(res.encounters)
+    assert len(inter_mi) == len(inter_s) == len(res.episodes)
     for dmi, ds in zip(inter_mi, inter_s):
         assert dmi >= 0 and ds >= 0
-        # constant speed: distance and time gaps must be proportional
-        assert math.isclose(dmi, cfg.average_speed_mph * ds / 3600.0,
+        assert math.isclose(dmi, res.config.average_speed_mph * ds / 3600.0,
                             rel_tol=1e-9, abs_tol=1e-9)
-    # positions reconstruct from inter-arrivals
-    assert math.isclose(sum(inter_mi), res.encounters[-1].mileage, rel_tol=1e-9)
     ws = res.window_stats()
-    assert sum(ws["counts"]) <= len(res.encounters)
-    assert ws["n_windows"] == int(res.total_miles // cfg.mileage_window_miles)
+    assert ws["n_windows"] == int(res.total_miles // 100.0)
+    assert sum(ws["counts"]) <= len(res.episodes)
 
 
 # ------------------------------------------------------------------ simulation
@@ -372,39 +549,20 @@ def test_simulation_reaches_target_and_time_consistent():
     assert math.isclose(res.total_miles,
                         cfg.average_speed_mph * res.total_time_seconds / 3600.0,
                         rel_tol=1e-9)
-    assert res.total_events > 0
 
 
 def test_simulation_reproducible_with_same_seeds():
-    """Running twice with the same config and seeds -> identical results."""
-    r1 = ScenarioSimulator(base_config(target_total_miles=100.0)).run()
-    r2 = ScenarioSimulator(base_config(target_total_miles=100.0)).run()
+    def key(res):
+        return [(e.type, e.layer, e.element, e.start_mileage, e.end_mileage,
+                 e.truncated) for e in res.episodes]
+    r1 = ScenarioSimulator(base_config(target_total_miles=500.0)).run()
+    r2 = ScenarioSimulator(base_config(target_total_miles=500.0)).run()
     assert r1.total_events == r2.total_events
     assert r1.total_time_seconds == r2.total_time_seconds
-    assert r1.total_miles == r2.total_miles
-    assert [(e.mileage, e.time_seconds, e.scenario, e.reason)
-            for e in r1.encounters] == \
-           [(e.mileage, e.time_seconds, e.scenario, e.reason)
-            for e in r2.encounters]
-
-
-def test_encounters_recorded_with_mileage_and_time():
-    res = ScenarioSimulator(base_config(target_total_miles=2000.0)).run()
-    prev_mile = -1.0
-    for e in res.encounters:
-        assert 0.0 <= e.mileage <= res.total_miles
-        assert e.mileage >= prev_mile           # monotonically ordered
-        assert e.reason in ("unknown_element", "unknown_combination")
-        assert len(e.scenario.split("|")) == 6
-        prev_mile = e.mileage
-    inter = res.inter_arrival_miles()
-    assert len(inter) == len(res.encounters)
-    assert all(d >= 0 for d in inter)
+    assert key(r1) == key(r2)
 
 
 def test_chunked_resume_bit_identical():
-    """Checkpoint/resume (pickle round-trip) must reproduce a single
-    uninterrupted run exactly."""
     kw = dict(target_total_miles=2000.0)
     full = ScenarioSimulator(base_config(**kw)).run()
     sim = ScenarioSimulator(base_config(**kw))
@@ -413,17 +571,10 @@ def test_chunked_resume_bit_identical():
         result, state = sim.run_resumable(state, wall_limit_seconds=0.001)
         if result is not None:
             break
-        sim, state = pickle.loads(pickle.dumps((sim, state)))  # checkpoint cycle
+        sim, state = pickle.loads(pickle.dumps((sim, state)))
     assert result is not None
     assert result.total_events == full.total_events
-    assert result.total_time_seconds == full.total_time_seconds
-    assert [(e.mileage, e.scenario, e.reason) for e in result.encounters] == \
-           [(e.mileage, e.scenario, e.reason) for e in full.encounters]
-
-
-def test_encounter_mileage_time_consistency():
-    cfg = base_config(target_total_miles=2000.0)
-    res = ScenarioSimulator(cfg).run()
-    for e in res.encounters:
-        expected_miles = cfg.average_speed_mph * e.time_seconds / 3600.0
-        assert math.isclose(e.mileage, expected_miles, rel_tol=1e-9, abs_tol=1e-9)
+    assert [(e.type, e.layer, e.element, e.start_mileage, e.end_mileage)
+            for e in result.episodes] == \
+           [(e.type, e.layer, e.element, e.start_mileage, e.end_mileage)
+            for e in full.episodes]

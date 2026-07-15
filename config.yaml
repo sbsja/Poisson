@@ -1,42 +1,56 @@
 # ==========================================================================
-# Layered Scenario Model - Configuration
+# Layered Scenario Model - Configuration (v2: unknown-episode semantics)
 # Units: durations in seconds, distances in miles, speed in mph.
 # ==========================================================================
 
 # --- Reproducibility ------------------------------------------------------
-# One independent, configurable seed per random source. Running the
-# simulator twice with the same config (all seeds included) produces
-# identical results.
+# One independent, configurable seed per random source. The same config
+# (all seeds included) always produces identical results.
 seeds:
-  element_count: 12345        # number of elements per layer
+  element_count: 12345        # number of elements per sampled layer
   rarity_assignment: 23456    # shuffling rarity categories across elements
   transition_matrix: 34567    # Dirichlet sampling of transition vectors
   duration: 45678             # Gamma duration sampling (initial + simulation)
   initial_state: 56789        # initial element selection per layer
   transition_sampling: 67890  # next-element selection during simulation
+  pattern_rules: 78901        # one-time generation of pattern combination rules
 
-global_seed: 42               # Seed for the deterministic SHA-256
-                              # unknown-combination classifier. Changing it
-                              # selects a different fixed set of unknown
-                              # combinations.
+global_seed: 42               # Seed of the (currently DISABLED, see below)
+                              # SHA-256 unknown-combination classifier.
 
 # --- Simulation run -------------------------------------------------------
 target_total_miles: 2000000     # Stop once simulated mileage reaches this.
-average_speed_mph: 50.0         # Constant speed converting seconds -> miles:
-                                # delta_miles = average_speed_mph * dt / 3600
-min_duration_seconds: 1.0       # Lower clamp applied to every sampled duration.
-count_initial_scenario: true    # Also check/count the initial scenario at t=0
-                                # if it is unknown (entering the first tuple).
+average_speed_mph: 50.0         # delta_miles = average_speed_mph * dt / 3600
+min_duration_seconds: 1.0       # Lower clamp for every sampled duration.
 
 # --- Output statistics ------------------------------------------------------
-mileage_window_miles: 10000     # Fixed window size for per-window encounter
+mileage_window_miles: 10000     # Window size for per-window episode-start
                                 # counts, mean, variance, dispersion index.
 
-# --- Elements per layer ---------------------------------------------------
-element_count_min: 50           # Number of elements per layer is sampled
-element_count_max: 100          # uniformly from [min, max] (inclusive).
+# --- Unknown combinations (v3: RE-ENABLED, two mechanisms) -------------------
+# 1) HASH combinations: when the scenario tuple changes and all six elements
+#    are known, the seeded SHA-256 classifier flags ~unknown_combination_
+#    probability of tuples. The episode lasts exactly as long as that tuple
+#    persists (any element change ends it).
+# 2) PATTERN combinations (SOTIF-style interactions): rules below are
+#    conjunctions of specific KNOWN elements in >= 2 layers; a rule's
+#    episode runs while all its elements are simultaneously current -
+#    naturally surviving changes in unrelated layers. Rules are manual
+#    and/or generated once from seeds.pattern_rules: random 2-layer
+#    conjunctions accumulated until generated_target_mass stationary
+#    probability mass is reached (capped at generated_max_rules).
+enable_unknown_combinations: true
+unknown_combination_probability: 0.005   # hash threshold
+combination_rules:
+  manual:                                # hand-written interaction rules
+    - {street: forced_merge_merging, environmental_conditions: environment_000}
+  generated_max_rules: 12
+  generated_layers_per_rule: 2
+  generated_target_mass: 0.005           # ~0.5% total stationary mass
 
 # --- Rarity category proportions (must sum to 1.0) ------------------------
+# Layers with allow_unknown: false use the four known proportions
+# renormalized to sum to 1 (unknown share removed).
 rarity_proportions:
   common:     0.50
   medium:     0.25
@@ -44,7 +58,7 @@ rarity_proportions:
   very_rare:  0.05
   unknown:    0.10
 
-# --- Base transition weights per rarity (unknown is handled separately) ----
+# --- Base transition weights per rarity (unknown handled separately) -------
 base_weights:
   common:     1.0
   medium:     0.4
@@ -52,42 +66,83 @@ base_weights:
   very_rare:  0.03
 
 # --- Unknown element weighting --------------------------------------------
-# "calculated": per layer, solve for the weight that makes the total unknown
-#               probability mass ~= target_unknown_element_probability.
-# "fixed":      use fixed_unknown_weight directly.
-# In both modes the unknown weight must be smaller than the very_rare weight.
-unknown_weight_mode: calculated
+unknown_weight_mode: calculated             # "calculated" | "fixed"
 target_unknown_element_probability: 0.004   # used when mode = calculated
 fixed_unknown_weight: 0.001                 # used when mode = fixed
 
-# --- Unknown combinations (deterministic hash-based) -----------------------
-unknown_combination_probability: 0.005   # ~0.5% of all-known tuples classify
-                                         # as unknown combinations.
-
 # --- Transition probability vectors ----------------------------------------
-concentration_scale: 100.0      # Dirichlet concentration. Higher = sampled
-                                # vector stays closer to the designed weights;
-                                # lower = more random transition behavior.
-allow_self_transition: true     # If false, resample until next != current.
+# concentration_scale = 20000 chosen by the study in concentration_study.md:
+# smallest tested value for which >= 95% of Dirichlet draws land within
+# +/-25% of the 0.4% unknown-rate design target (old default 100 gave ~10%).
+# Lower it consciously if more random transition behavior is wanted.
+concentration_scale: 20000.0
+allow_self_transition: true
 
-# --- Per-layer duration parameters (Gamma distribution) --------------------
-# shape = mean^2 / variance ; scale = variance / mean
+# --- Per-layer configuration ------------------------------------------------
+# Element-count ranges researched in research_element_counts.md (sampled
+# uniformly from [min, max] inclusive). shape = mean^2/var, scale = var/mean.
 layers:
-  street:                       # road segment / street type
+  street:
+    # Fixed real route-composition elements; their probabilities are used
+    # EXACTLY as the permanent transition vector (no Dirichlet) and as the
+    # initial-state distribution. All elements are known.
     mean_duration: 300.0
     variance_duration: 20000.0
-  temporal_modifications:       # e.g. roadworks, temporary signage
+    allow_unknown: false
+    fixed_elements:
+      - {name: constant_lane,            probability: 0.493}
+      - {name: forced_merge_proceeding,  probability: 0.169}
+      - {name: road_split_proceeding,    probability: 0.079}
+      - {name: lane_split_proceeding,    probability: 0.072}
+      - {name: added_lane_proceeding,    probability: 0.034}
+      - {name: road_split_exiting,       probability: 0.014}
+      - {name: lane_split_exiting,       probability: 0.013}
+      - {name: removed_lane,             probability: 0.012}
+      - {name: forced_merge_merging,     probability: 0.010}
+      - {name: added_lane_merging,       probability: 0.006}
+      - {name: added_lane,               probability: 0.003}
+      - {name: overlap_zone,             probability: 0.095}
+
+  temporal_modifications:     # work zones / temporary traffic management
     mean_duration: 600.0
     variance_duration: 90000.0
-  ego_maneuver:                 # ego vehicle maneuver
+    element_count_min: 30     # NOTE: min is a modeling choice (flagged in
+    element_count_max: 46     # research_element_counts.md); max = 46 MUTCD
+    allow_unknown: true       # Part 6 typical applications (TA-1..TA-46)
+
+  ego_maneuver:               # ego vehicle maneuver classes
     mean_duration: 30.0
     variance_duration: 400.0
-  ru_maneuver:                  # road-user (RU) maneuver
+    element_count_min: 7      # 7 = IGP2 maneuver library; research max is 14,
+    element_count_max: 12     # but n=13-14 are INFEASIBLE under calculated
+    allow_unknown: true       # unknown weighting: with a single unknown
+                              # element the required weight (0.0335-0.0351)
+                              # would exceed the very_rare weight (0.03).
+                              # Range clipped to [7,12]; to use 13-14 either
+                              # lower target_unknown_element_probability or
+                              # switch unknown_weight_mode to "fixed".
+
+  ru_maneuver:                # road-user (surrounding vehicle) maneuvers
     mean_duration: 45.0
     variance_duration: 900.0
-  environmental_conditions:     # weather / lighting
+    element_count_min: 7      # same taxonomy family as ego (14 = surrounding-
+    element_count_max: 12     # vehicle maneuver study); clipped to [7,12] for
+    allow_unknown: true       # the same feasibility reason as ego_maneuver.
+
+  environmental_conditions:   # weather / lighting; NO unknown elements
     mean_duration: 1800.0
     variance_duration: 500000.0
-  triggering_conditions:        # unexpected AV triggering condition
+    element_count_min: 15     # 15 = CARLA weather presets;
+    element_count_max: 21     # 21 = BSI PAS 1883 environment leaf conditions
+    allow_unknown: false
+
+  triggering_conditions:      # unexpected AV triggering condition
+    # TODO (future investigation, deliberately NOT part of this change):
+    # vary the element count of this layer and quantify the effect on
+    # unknown-episode statistics (count, durations, dispersion). Range left
+    # at the original 50-100; no defensible literature count exists yet.
     mean_duration: 120.0
     variance_duration: 8000.0
+    element_count_min: 50
+    element_count_max: 100
+    allow_unknown: true
