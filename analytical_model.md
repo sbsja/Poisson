@@ -15,36 +15,30 @@ Two prediction levels: **design** (a priori: every unknown-bearing layer has exa
 | environmental_conditions | 80,000 | 0.0000% | 0.0 | nan |
 | triggering_conditions | 1,200,000 | 0.4197% | 5,033.4 | 120.08 |
 
-## Combination episodes (conditional predictions)
+## Full-scenario rarity episodes (conditional predictions)
 
-| rule | mass | E[episodes] | E[duration] (s) |
-|---|---|---|---|
-| street=forced_merge_merging & environmental_conditions=environment_000 | 0.0696% | 382.6 | 262.0 |
-| street=lane_split_proceeding & temporal_modifications=temporal_024 | 0.2684% | 1,815.6 | 212.9 |
-| street=lane_split_exiting & triggering_conditions=trigger_066 | 0.0328% | 539.5 | 87.6 |
-| temporal_modifications=temporal_000 & environmental_conditions=environment_007 | 0.2549% | 778.8 | 471.3 |
-| (hash, threshold 0.005) | - | 42,055.5 | 16.8 |
-
-Pattern-rule formulas: E[episodes] = T*mass*hazard with hazard = sum over referenced layers of (1-q)/mu; E[duration] = 1/hazard. Hash: E[episodes] = T * tuple-change-rate * P(all known) * threshold; E[duration] = 1/tuple-change-rate.
+- calibrated stationary rare mass: 0.4000% (= expected fraction of simulated time in rare tuples)
+- E[episodes] ~= T * tuple-change-rate * mass = 34,205 (entry-rate approximation, ~10%)
+- E[episode duration] ~= 1/tuple-change-rate = 16.8 s
 
 ## Headline predictions vs the delivered 2M-mile run
 
 | quantity | design (a priori) | conditional (this config) | simulated |
 |---|---|---|---|
-| total unknown episodes | 83,221 | 84,724 | 84,296 |
-| episodes per 1M miles | 41,610.5 | 42,361.9 | 42,148.0 |
-| mean episode duration (s) | 47.0 | 47.0 | 47.2 |
-| total unknown time (s, union) | 2,290,213 | 2,359,833 | 3,946,822 |
-| unknown-time fraction (%) | 1.590 | 1.639 | 2.741 |
-| inter-arrival mean (mi) | 24.0 | 23.6 | 23.7 |
-| inter-arrival median (mi) | 16.7 | 16.4 | 16.1 |
-| inter-arrival p90 (mi) | 55.3 | 54.4 | 55.6 |
-| mean episode starts / 10k-mi window | 416.1 | 423.6 | 421.5 |
-| dispersion index | 1.000 | 1.000 | 1.261 |
+| total unknown episodes | 71,833 | 73,357 | 75,227 |
+| episodes per 1M miles | 35,916.6 | 36,678.4 | 37,613.5 |
+| mean episode duration (s) | 40.1 | 40.2 | 39.1 |
+| total unknown time (s, union) | 2,290,213 | 2,359,833 | 2,685,954 |
+| unknown-time fraction (%) | 1.590 | 1.639 | 1.865 |
+| inter-arrival mean (mi) | 27.8 | 27.3 | 26.6 |
+| inter-arrival median (mi) | 19.3 | 18.9 | 9.4 |
+| inter-arrival p90 (mi) | 64.1 | 62.8 | 77.9 |
+| mean episode starts / 10k-mi window | 359.2 | 366.8 | 376.1 |
+| dispersion index | 1.000 | 1.000 | 4.414 |
 
 Per-layer episode counts, conditional prediction vs simulated: temporal_modifications 977 vs 977; ego_maneuver 20,881 vs 21,018; ru_maneuver 12,260 vs 12,217; triggering_conditions 5,033 vs 5,015
 
-Expected statistical noise on the episode count is ~sqrt(N) = 291; the simulated total should (and does) fall within a few sigma of the conditional prediction.
+Expected statistical noise on the episode count is ~sqrt(N) = 271; the simulated total should (and does) fall within a few sigma of the conditional prediction.
 
 ## What the closed forms do and do not cover
 

@@ -74,6 +74,11 @@ def base_config(**over):
         "min_duration_seconds": 1.0,
         "mileage_window_miles": 10.0,
         "enable_unknown_combinations": True,
+        "enable_hash_combinations": False,
+        "enable_hidden_triggering_unknowns": True,
+        "full_scenario_unknowns": {
+            "enabled": True, "target_stationary_mass": 0.004,
+            "calibration_samples": 200_000, "calibration_seed": 90123},
         "combination_rules": {
             "manual": [{"street": "forced_merge_merging",
                         "environmental_conditions": "environment_000"}],
@@ -396,14 +401,29 @@ def test_episodes_only_from_unknown_bearing_layers():
     elem = [e for e in res.episodes if e.type == "element"]
     assert len(elem) > 0
     for e in elem:
-        assert e.layer in _UNKNOWN_LAYERS      # never street / environment
+        assert e.layer in _UNKNOWN_LAYERS - {"triggering_conditions"}
     by_layer = {st["layer"]: st["episodes"] for st in res.layer_stats}
     assert by_layer["street"] == 0
     assert by_layer["environmental_conditions"] == 0
     assert sum(by_layer.values()) == len(elem)
     for e in res.episodes:
-        if e.type != "element":
+        if e.type == "full_scenario":
+            assert e.layer == "scenario"
+        elif e.type == "hidden_triggering_unknown":
+            assert e.layer == "triggering_conditions"
+            assert e.element == "hidden_triggering_unknown"
+        elif e.type != "element":
             assert e.layer == "combination"
+
+
+def test_triggering_unknowns_use_the_dedicated_hidden_category():
+    res = _run(miles=20_000.0)
+    hidden = [e for e in res.episodes
+              if e.type == "hidden_triggering_unknown"]
+    assert hidden
+    assert not any(e.type == "element" and e.layer == "triggering_conditions"
+                   for e in res.episodes)
+    assert res.hidden_triggering_stats["episodes"] == len(hidden)
 
 
 def test_episode_elements_are_unknown_rarity():
@@ -458,19 +478,19 @@ def test_episode_count_matches_unknown_entries_without_self_transitions():
     res = _run(miles=3000.0, allow_self_transition=False)
     elem = [e for e in res.episodes if e.type == "element"]
     initial = sum(1 for e in elem if e.start_time_seconds == 0.0)
-    selected = sum(st["unknown_selected"] for st in res.layer_stats)
+    selected = sum(st["unknown_selected"] for st in res.layer_stats
+                   if st["layer"] != "triggering_conditions")
     assert len(elem) == selected + initial
 
 
 def test_other_layer_changes_do_not_end_episodes():
     # episode durations must equal the element sojourn time of their own
-    # layer; ego transitions every ~30 s, so temporal/trigger episodes must
+    # layer; ego transitions every ~30 s, so temporal episodes must
     # frequently span multiple ego changes without being cut
     res = _run(miles=20000.0)
     long_eps = [e for e in res.episodes
                 if e.type == "element"
-                and e.layer in ("temporal_modifications",
-                                "triggering_conditions")
+                and e.layer == "temporal_modifications"
                 and not e.truncated]
     if long_eps:   # statistically ~always present at 20k miles
         assert max(e.duration_seconds for e in long_eps) > 60.0
@@ -478,7 +498,7 @@ def test_other_layer_changes_do_not_end_episodes():
 
 def test_hash_episodes_gated_by_element_unknowns():
     """A hash episode never starts while an element episode is running."""
-    res = _run(miles=20000.0)
+    res = _run(miles=20000.0, enable_hash_combinations=True)
     elem = [(e.start_time_seconds, e.end_time_seconds)
             for e in res.episodes if e.type == "element"]
     for h in res.episodes:
@@ -497,11 +517,23 @@ def test_pattern_episode_counts_match_rule_stats():
            sum(r["episodes"] for r in cs["rules"])
     n_hash = sum(1 for e in res.episodes if e.type == "hash_combination")
     assert n_hash == cs["hash_episodes"]
-    assert n_hash > 0    # ~0.5% of tuple changes over 20k miles
+    assert n_hash == 0
+    assert cs["hash_enabled"] is False
+
+
+def test_hash_combinations_are_not_instantiated_or_evaluated_by_default():
+    sim = ScenarioSimulator(base_config(target_total_miles=20000.0))
+    assert sim.classifier is None
+    res = sim.run()
+    assert not any(e.type == "hash_combination" for e in res.episodes)
+    assert res.combination_stats["hash_episodes"] == 0
+    assert res.combination_stats["hash_enabled"] is False
 
 
 def test_combinations_can_be_disabled():
-    res = _run(miles=2000.0, enable_unknown_combinations=False)
+    res = _run(miles=2000.0, enable_unknown_combinations=False,
+               full_scenario_unknowns={"enabled": False},
+               enable_hidden_triggering_unknowns=False)
     assert all(e.type == "element" for e in res.episodes)
     assert res.combination_stats["enabled"] is False
 
@@ -578,3 +610,138 @@ def test_chunked_resume_bit_identical():
             for e in result.episodes] == \
            [(e.type, e.layer, e.element, e.start_mileage, e.end_mileage)
             for e in full.episodes]
+
+
+# ------------------------------------------------------ full-scenario rarity
+
+def _fs(**over):
+    d = {"enabled": True, "target_stationary_mass": 0.004,
+         "calibration_samples": 200_000, "calibration_seed": 90123}
+    d.update(over)
+    return d
+
+
+def test_full_scenario_config_validated():
+    with pytest.raises(ConfigError):
+        base_config(full_scenario_unknowns=_fs(target_stationary_mass=0.0))
+    with pytest.raises(ConfigError):
+        base_config(full_scenario_unknowns=_fs(target_stationary_mass=1.0))
+    with pytest.raises(ConfigError):
+        base_config(full_scenario_unknowns=_fs(calibration_samples=5000))
+    with pytest.raises(ConfigError):
+        base_config(full_scenario_unknowns=_fs(calibration_seed="abc"))
+    with pytest.raises(ConfigError):
+        base_config(full_scenario_unknowns=_fs(bogus=1))
+    with pytest.raises(ConfigError):
+        base_config(enable_hidden_triggering_unknowns="yes")
+
+
+def test_full_scenario_threshold_reproducible():
+    s1 = ScenarioSimulator(base_config())
+    s2 = ScenarioSimulator(base_config())
+    assert s1.full_scenario.calibrated_rarity_threshold == \
+           s2.full_scenario.calibrated_rarity_threshold
+    assert s1.full_scenario.achieved_sampled_mass == \
+           s2.full_scenario.achieved_sampled_mass
+    s3 = ScenarioSimulator(base_config(
+        full_scenario_unknowns=_fs(calibration_seed=555)))
+    assert s3.full_scenario.calibrated_rarity_threshold != \
+           s1.full_scenario.calibrated_rarity_threshold
+    # calibration must not touch the other streams: layers identical
+    assert all(a.names == b.names for a, b in zip(s1.layers, s3.layers))
+
+
+def test_full_scenario_calibration_mass_within_tolerance():
+    clf = ScenarioSimulator(base_config()).full_scenario
+    n = clf.calibration_samples
+    # in-sample achieved mass matches the target up to quantile rounding
+    assert abs(clf.achieved_sampled_mass
+               - clf.target_stationary_mass) <= 3.0 / n
+    assert clf.eligible_sampled_mass > clf.target_stationary_mass
+
+
+def test_no_hash_or_pattern_episodes_with_full_scenario():
+    res = _run(miles=5000.0, enable_unknown_combinations=False)
+    types = {e.type for e in res.episodes}
+    assert types <= {"element", "hidden_triggering_unknown", "full_scenario"}
+    assert res.combination_stats["hash_episodes"] == 0
+    assert res.combination_stats["pattern_episodes"] == 0
+    assert res.full_scenario_stats["enabled"] is True
+    assert res.full_scenario_stats["episodes"] == \
+           sum(1 for e in res.episodes if e.type == "full_scenario")
+
+
+def test_full_scenario_classification_uses_all_six_layers():
+    sim = ScenarioSimulator(base_config())
+    idx = tuple(0 for _ in range(6))
+    p = sim.tuple_probability(idx)
+    expected = 1.0
+    for k in range(6):
+        expected *= float(sim.layers[k].transition_probs[0])
+    assert math.isclose(p, expected, rel_tol=1e-12)
+    # changing any single coordinate changes the probability
+    for k in range(6):
+        alt = list(idx)
+        alt[k] = 1
+        q0 = float(sim.layers[k].transition_probs[0])
+        q1 = float(sim.layers[k].transition_probs[1])
+        if q0 != q1:      # true for continuous Dirichlet / distinct fixed probs
+            assert sim.tuple_probability(tuple(alt)) != p
+
+    # Unknown elements belong to element/hidden-trigger routes, not the
+    # all-known full-scenario route.
+    for k, layer in enumerate(sim.layers):
+        unknown = next((i for i, value in enumerate(layer.is_unknown)
+                        if value), None)
+        if unknown is not None:
+            alt = list(idx)
+            alt[k] = unknown
+            assert sim.is_rare_tuple(tuple(alt)) is False
+            break
+
+
+def test_full_scenario_rare_to_rare_and_self_transition_continuity():
+    # elevated target -> rare tuples are common enough that back-to-back
+    # rare A -> rare B transitions occur; self-transitions must never split
+    res = _run(miles=3000.0,
+               full_scenario_unknowns=_fs(target_stationary_mass=0.25))
+    full = sorted((e for e in res.episodes if e.type == "full_scenario"),
+                  key=lambda e: e.start_time_seconds)
+    assert len(full) > 50
+    back_to_back = 0
+    for a, b in zip(full, full[1:]):
+        assert b.start_time_seconds >= a.end_time_seconds - 1e-9
+        if abs(b.start_time_seconds - a.end_time_seconds) < 1e-9:
+            back_to_back += 1
+            # rare A -> rare B: the exact scenario must differ; an unchanged
+            # tuple (self-transition) must never split an episode
+            assert a.element != b.element
+    assert back_to_back > 0
+    for e in full:
+        assert e.layer == "scenario"
+        assert len(e.element.split("|")) == 6
+
+
+def test_union_time_with_overlapping_element_and_full_episodes():
+    res = _run(miles=3000.0,
+               full_scenario_unknowns=_fs(target_stationary_mass=0.25))
+    # independent interval-merge over ALL episodes must equal the union
+    ivs = sorted((e.start_time_seconds, e.end_time_seconds)
+                 for e in res.episodes)
+    merged = 0.0
+    cur_s, cur_e = None, None
+    for s, t_end in ivs:
+        if cur_s is None:
+            cur_s, cur_e = s, t_end
+        elif s <= cur_e + 1e-12:
+            cur_e = max(cur_e, t_end)
+        else:
+            merged += cur_e - cur_s
+            cur_s, cur_e = s, t_end
+    if cur_s is not None:
+        merged += cur_e - cur_s
+    assert math.isclose(merged, res.total_unknown_time_seconds,
+                        rel_tol=1e-9, abs_tol=1e-6)
+    # overlaps must exist at this target so the test is meaningful
+    total = sum(e.duration_seconds for e in res.episodes)
+    assert total > res.total_unknown_time_seconds

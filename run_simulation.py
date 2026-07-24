@@ -74,10 +74,23 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
              f"{cfg.average_speed_mph} mph constant average speed")
     L.append(f"- seeds: {json.dumps(cfg.seeds)}")
     L.append(f"- unknown combinations: "
-             f"{'ENABLED' if cfg.enable_unknown_combinations else 'disabled'} "
-             f"(hash threshold {cfg.unknown_combination_probability}, "
-             f"global_seed {cfg.global_seed}; pattern rules from config + "
-             f"seeds.pattern_rules)")
+             f"patterns {'ENABLED' if cfg.enable_unknown_combinations else 'disabled'}; "
+             f"hash combinations {'ENABLED' if cfg.enable_hash_combinations else 'disabled'} "
+             f"(pattern rules from config + seeds.pattern_rules)")
+    fss = result.full_scenario_stats
+    hts = result.hidden_triggering_stats
+    L.append("- hidden triggering-condition unknowns: "
+             f"{'ENABLED' if hts.get('enabled') else 'disabled'}")
+    if fss.get("enabled"):
+        L.append(f"- full-scenario rarity unknowns: ENABLED - "
+                 f"target stationary mass {fss['target_stationary_mass']:.4%}, "
+                 f"calibrated threshold {fss['calibrated_rarity_threshold']:.3e}, "
+                 f"calibration samples {fss['calibration_samples']:,} "
+                 f"(seed {fss['calibration_seed']}), achieved sampled mass "
+                 f"{fss['achieved_sampled_mass']:.4%}; all-known sampled "
+                 f"mass {fss['eligible_sampled_mass']:.4%}")
+    else:
+        L.append("- full-scenario rarity unknowns: disabled")
     L.append(f"- unknown_weight_mode: {cfg.unknown_weight_mode} "
              f"(target_unknown_element_probability = "
              f"{cfg.target_unknown_element_probability})")
@@ -96,10 +109,14 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     L.append("## Unknown episodes\n")
     L.append(f"- total unknown episodes: {n:,} "
              f"(of which truncated at simulation end: {n_trunc})")
-    L.append(f"- by type: element {bt['element']:,}, "
-             f"pattern {bt['pattern']:,}, "
-             f"hash combination {bt['hash_combination']:,}")
-    for typ in ("element", "pattern", "hash_combination"):
+    types = ("element",) + (
+        ("hidden_triggering_unknown",) if hts.get("enabled") else ()) + (
+        ("pattern",) if cfg.enable_unknown_combinations else ()) + (
+        ("hash_combination",) if cfg.enable_hash_combinations else ()) + (
+        ("full_scenario",) if fss.get("enabled") else ())
+    L.append("- by type: " + ", ".join(
+        f"{typ.replace('_', ' ')} {bt[typ]:,}" for typ in types))
+    for typ in types:
         ds = [e.duration_seconds for e in eps if e.type == typ]
         if ds:
             s = _dist_stats(ds)
@@ -111,6 +128,10 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     by_layer = {st["layer"]: st["episodes"] for st in result.layer_stats}
     L.append("- episodes by layer: " + ", ".join(
         f"{k}: {v:,}" for k, v in by_layer.items() if v))
+    if hts.get("enabled"):
+        L.append("- hidden triggering-condition episodes: "
+                 f"{hts['episodes']:,} (one episode per continuous period "
+                 "with any unknown triggering element)")
     L.append(f"- total time in unknown scenario (union of episodes): "
              f"{result.total_unknown_time_seconds:,.1f} s = "
              f"{result.unknown_time_fraction():.4%} of simulated time")
@@ -183,6 +204,16 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
                      f"[{r['source']}] {r['description']} "
                      f"(mass {r['mass']:.4%}, episodes {r['episodes']:,})"
                      for r in cs["rules"]))
+    if fss.get("enabled"):
+        full_time = sum(e.duration_seconds for e in eps
+                        if e.type == "full_scenario")
+        realized = (full_time / result.total_time_seconds
+                    if result.total_time_seconds else 0.0)
+        L.append(f"- realized full-scenario unknown mass (time fraction): "
+                 f"{realized:.4%} vs configured target "
+                 f"{fss['target_stationary_mass']:.4%} (calibration is exact "
+                 "in expectation; single-run deviation is dominated by slow-"
+                 "layer correlation of rare periods)")
     street = result.layer_stats[0]
     tot_v = sum(street["visit_counts"])
     rows = sorted(zip(street["element_names"], street["visit_counts"],
@@ -193,10 +224,11 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
                  f"{nm} {v / tot_v:.3%} vs {p:.1%}"
                  for nm, v, p in rows[:5]))
     L.append("- street and environmental_conditions contain no unknown "
-             "elements (episodes: "
+             "elements (normal element episodes: "
              f"{result.layer_stats[0]['episodes']} and "
-             f"{result.layer_stats[4]['episodes']}); episodes originate only "
-             "in the other four layers, as specified")
+             f"{result.layer_stats[4]['episodes']}); normal element episodes "
+             "originate in the three visible unknown-bearing layers, while "
+             "triggering_conditions uses its hidden category")
     exp_h = result.total_miles / cfg.average_speed_mph
     L.append(f"- time/mileage consistency: {result.total_miles:,.1f} mi / "
              f"{cfg.average_speed_mph} mph = {exp_h:,.1f} h expected, "
@@ -230,6 +262,8 @@ def build_stats_json(result, inter_mi, inter_s, ws, wall_seconds):
             "dispersion_index": ws["dispersion_index"],
         },
         "episodes_by_type": result.episodes_by_type(),
+        "full_scenario_unknowns": result.full_scenario_stats,
+        "hidden_triggering_unknowns": result.hidden_triggering_stats,
         "combination_stats": result.combination_stats,
         "seeds": result.config.seeds,
         "layer_stats": [{k: v for k, v in st.items()
@@ -272,8 +306,15 @@ def make_plots(result, inter_mi, ws, plots_dir):
     # 2. episode duration histogram, overlaid by type
     fig, ax = plt.subplots(figsize=(9, 5))
     if eps:
-        colors = {"element": "tab:blue", "pattern": "tab:green",
-                  "hash_combination": "tab:orange"}
+        colors = {"element": "tab:blue"}
+        if cfg.enable_unknown_combinations:
+            colors["pattern"] = "tab:green"
+        if cfg.enable_hash_combinations:
+            colors["hash_combination"] = "tab:orange"
+        if result.full_scenario_stats.get("enabled"):
+            colors["full_scenario"] = "tab:red"
+        if result.hidden_triggering_stats.get("enabled"):
+            colors["hidden_triggering_unknown"] = "tab:purple"
         all_d = np.asarray([e.duration_seconds for e in eps])
         bins = np.linspace(0.0, float(np.percentile(all_d, 99.5)), 80)
         for typ, col in colors.items():
@@ -396,6 +437,13 @@ def main():
         print(f"seeds: {cfg.seeds}")
         sim = ScenarioSimulator(cfg)
         state = None
+        if sim.full_scenario is not None:
+            st = sim.full_scenario.stats()
+            print(f"full-scenario rarity: threshold "
+                  f"{st['calibrated_rarity_threshold']:.3e} "
+                  f"(target mass {st['target_stationary_mass']:.4%}, "
+                  f"achieved sampled {st['achieved_sampled_mass']:.4%}, "
+                  f"N={st['calibration_samples']:,})")
         for layer in sim.layers:
             unk = sum(layer.is_unknown)
             print(f"layer {layer.key:26s} n={layer.n_elements:3d} "

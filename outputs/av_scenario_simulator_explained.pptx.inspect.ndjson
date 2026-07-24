@@ -1,0 +1,364 @@
+{"kind":"deck","id":"pr/qb97jm","name":"Deck"}
+{"kind":"layout","layoutId":"11c9befd-e9a5-4b20-b5cb-6a7a568cccc7","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"8538bab5-940f-4148-9901-b6286bd482f8","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/h4h04t","slide":1,"title":"LAYERED SCENARIO MODEL","textShapes":10}
+{"kind":"textbox","id":"sh/6h0z2toj","slide":1,"text":"LAYERED SCENARIO MODEL","textPreview":"LAYERED SCENARIO MODEL","textChars":22,"textLines":1,"bbox":[58,56,420,18]}
+{"kind":"textbox","id":"sh/tkbixonu","slide":1,"text":"How the AV scenario\nsimulator works","textPreview":"How the AV scenario | simulator works","textChars":35,"textLines":2,"bbox":[58,148,650,160]}
+{"kind":"textbox","id":"sh/sji14j69","slide":1,"text":"And what the delivered 2-million-mile run actually tells us","textPreview":"And what the delivered 2-million-mile run actually tells us","textChars":59,"textLines":1,"bbox":[62,340,535,66]}
+{"kind":"shape","id":"sh/ju90re5s","slide":1,"bbox":[786,42,390,594]}
+{"kind":"textbox","id":"sh/it0zy9o7","slide":1,"text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[838,105,110,90]}
+{"kind":"textbox","id":"sh/5gritony","slide":1,"text":"independent scenario layers","textPreview":"independent scenario layers","textChars":27,"textLines":1,"bbox":[838,196,270,50]}
+{"kind":"textbox","id":"sh/4vih0j6d","slide":1,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[921,286,70,50]}
+{"kind":"textbox","id":"sh/vqp0nupw","slide":1,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[838,346,110,90]}
+{"kind":"textbox","id":"sh/upgzu9ob","slide":1,"text":"joint scenario tuple at any instant","textPreview":"joint scenario tuple at any instant","textChars":35,"textLines":1,"bbox":[838,437,272,50]}
+{"kind":"textbox","id":"sh/0n6tojeh","slide":1,"text":"Delivered configuration: 2,000,000 miles at 50 mph","textPreview":"Delivered configuration: 2,000,000 miles at 50 mph","textChars":50,"textLines":1,"bbox":[58,618,570,22]}
+{"kind":"textbox","id":"sh/1ofaxofm","slide":1,"text":"Results and mechanism walkthrough","textPreview":"Results and mechanism walkthrough","textChars":33,"textLines":1,"bbox":[58,654,340,18]}
+{"kind":"notes","id":"nt/h4h04t","slide":1,"text":""}
+{"kind":"slide","id":"sl/je7pq1","slide":2,"title":"LAYERED SCENARIO MODEL","textShapes":19}
+{"kind":"textbox","id":"sh/edor6l8f","slide":2,"text":"LAYERED SCENARIO MODEL","textPreview":"LAYERED SCENARIO MODEL","textChars":22,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/lgfah0r6","slide":2,"text":"It estimates unknown-scenario exposure—not vehicle safety risk","textPreview":"It estimates unknown-scenario exposure—not vehicle safety risk","textChars":62,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/0f6t8vql","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/radsbq94","slide":2,"bbox":[48,124,1184,2]}
+{"kind":"textbox","id":"sh/q94r2l8j","slide":2,"text":"The simulator answers a coverage question:","textPreview":"The simulator answers a coverage question:","textChars":42,"textLines":1,"bbox":[48,168,520,32]}
+{"kind":"textbox","id":"sh/dcfadgru","slide":2,"text":"“How often, and for how long, does a modeled scenario enter an unknown state?”","textPreview":"“How often, and for how long, does a modeled scenario enter an unknown state?”","textChars":78,"textLines":1,"bbox":[48,214,570,128]}
+{"kind":"shape","id":"sh/cb694bqp","slide":2,"bbox":[672,158,508,406]}
+{"kind":"textbox","id":"sh/3mds769s","slide":2,"text":"What it does","textPreview":"What it does","textChars":12,"textLines":1,"bbox":[710,194,200,30]}
+{"kind":"textbox","id":"sh/2l4ry187","slide":2,"text":"• samples categorical scenario elements\n• evolves each layer over time\n• tracks contiguous unknown episodes\n• reports exposure, duration, and rate","textPreview":"• samples categorical scenario elements | • evolves each layer over time | • tracks contiguous unknown episodes | • reports exposure, dur...","textChars":146,"textLines":4,"bbox":[710,242,420,158]}
+{"kind":"textbox","id":"sh/87q94v69","slide":2,"text":"What it does not do","textPreview":"What it does not do","textChars":19,"textLines":1,"bbox":[710,430,250,30]}
+{"kind":"textbox","id":"sh/t8zadgnu","slide":2,"text":"No physical dynamics, perception errors, collision model, or calibrated real-world risk estimate.","textPreview":"No physical dynamics, perception errors, collision model, or calibrated real-world risk estimate.","textChars":97,"textLines":1,"bbox":[710,478,420,66]}
+{"kind":"shape","id":"sh/6lor2lo3","slide":2,"bbox":[48,434,175,140]}
+{"kind":"shape","id":"sh/76xsbqpo","slide":2,"bbox":[48,434,8,140]}
+{"kind":"textbox","id":"sh/kj690b6d","slide":2,"text":"DRIVE","textPreview":"DRIVE","textChars":5,"textLines":1,"bbox":[72,454,135,20]}
+{"kind":"textbox","id":"sh/lkfa9g7y","slide":2,"text":"2M mi","textPreview":"2M mi","textChars":5,"textLines":1,"bbox":[72,479,135,34]}
+{"kind":"textbox","id":"sh/yhory1o7","slide":2,"text":"40,000 simulated hours","textPreview":"40,000 simulated hours","textChars":22,"textLines":1,"bbox":[72,512,135,54]}
+{"kind":"shape","id":"sh/jixs76ps","slide":2,"bbox":[246,434,175,140]}
+{"kind":"shape","id":"sh/4fatcf6h","slide":2,"bbox":[246,434,8,140]}
+{"kind":"textbox","id":"sh/5gja5kn2","slide":2,"text":"SPEED","textPreview":"SPEED","textChars":5,"textLines":1,"bbox":[270,454,135,20]}
+{"kind":"textbox","id":"sh/dwfap0f6","slide":2,"text":"50 mph","textPreview":"50 mph","textChars":6,"textLines":1,"bbox":[270,479,135,34]}
+{"kind":"textbox","id":"sh/cv69wvyl","slide":2,"text":"constant conversion from time to miles","textPreview":"constant conversion from time to miles","textChars":38,"textLines":1,"bbox":[270,512,135,54]}
+{"kind":"shape","id":"sh/ruxsnax0","slide":2,"bbox":[444,434,175,140]}
+{"kind":"shape","id":"sh/qt4ru5gf","slide":2,"bbox":[444,434,8,140]}
+{"kind":"textbox","id":"sh/psval0fa","slide":2,"text":"OUTPUT","textPreview":"OUTPUT","textChars":6,"textLines":1,"bbox":[468,454,135,20]}
+{"kind":"textbox","id":"sh/4rm9svyp","slide":2,"text":"Episodes","textPreview":"Episodes","textChars":8,"textLines":1,"bbox":[468,479,135,34]}
+{"kind":"textbox","id":"sh/36dsjqx4","slide":2,"text":"starts, durations, overlaps and rates","textPreview":"starts, durations, overlaps and rates","textChars":37,"textLines":1,"bbox":[468,512,135,54]}
+{"kind":"textbox","id":"sh/254rqlgj","slide":2,"text":"Sources: README.md; DOCUMENTATION.md; config.yaml","textPreview":"Sources: README.md; DOCUMENTATION.md; config.yaml","textChars":49,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"notes","id":"nt/je7pq1","slide":2,"text":""}
+{"kind":"slide","id":"sl/l56qv6","slide":3,"title":"LAYERED SCENARIO MODEL","textShapes":34}
+{"kind":"textbox","id":"sh/wbi1kze9","slide":3,"text":"LAYERED SCENARIO MODEL","textPreview":"LAYERED SCENARIO MODEL","textChars":22,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/bapkbuxo","slide":3,"text":"Six independent layers form every scenario tuple","textPreview":"Six independent layers form every scenario tuple","textChars":48,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/a9gjipw3","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/lgr2hofq","slide":3,"bbox":[48,124,1184,2]}
+{"kind":"textbox","id":"sh/kfiloje5","slide":3,"text":"Each layer has its own dwell-time distribution and transition probabilities. The joint scenario changes whenever any layer changes.","textPreview":"Each layer has its own dwell-time distribution and transition probabilities. The joint scenario changes whenever any layer changes.","textChars":131,"textLines":1,"bbox":[48,150,1120,52]}
+{"kind":"shape","id":"sh/je9kfex0","slide":3,"bbox":[48,232,250,42]}
+{"kind":"textbox","id":"sh/yd03m9wf","slide":3,"text":"Layer","textPreview":"Layer","textChars":5,"textLines":1,"bbox":[62,244,222,20]}
+{"kind":"shape","id":"sh/t4b2lov2","slide":3,"bbox":[315,232,430,42]}
+{"kind":"textbox","id":"sh/832lsjeh","slide":3,"text":"Examples of what it represents","textPreview":"Examples of what it represents","textChars":30,"textLines":1,"bbox":[329,244,402,20]}
+{"kind":"shape","id":"sh/m1c32pgj","slide":3,"bbox":[770,232,145,42]}
+{"kind":"textbox","id":"sh/7mlkvah4","slide":3,"text":"Mean dwell","textPreview":"Mean dwell","textChars":10,"textLines":1,"bbox":[784,244,117,20]}
+{"kind":"shape","id":"sh/8nul4fyp","slide":3,"bbox":[942,232,238,42]}
+{"kind":"textbox","id":"sh/9o32xkza","slide":3,"text":"Element unknowns?","textPreview":"Element unknowns?","textChars":17,"textLines":1,"bbox":[956,244,210,20]}
+{"kind":"shape","id":"sh/upc36pgv","slide":3,"bbox":[48,274,250,54]}
+{"kind":"textbox","id":"sh/vq54zuhg","slide":3,"text":"street","textPreview":"street","textChars":6,"textLines":1,"bbox":[62,291,222,20]}
+{"kind":"shape","id":"sh/wrel8zyl","slide":3,"bbox":[315,274,430,54]}
+{"kind":"textbox","id":"sh/hsnm14z6","slide":3,"text":"route composition","textPreview":"route composition","textChars":17,"textLines":1,"bbox":[329,291,402,20]}
+{"kind":"shape","id":"sh/ats3u5gb","slide":3,"bbox":[770,274,145,54]}
+{"kind":"textbox","id":"sh/bu1knqhw","slide":3,"text":"300 s","textPreview":"300 s","textChars":5,"textLines":1,"bbox":[784,291,117,20]}
+{"kind":"shape","id":"sh/fyx0v6xo","slide":3,"bbox":[942,274,238,54]}
+{"kind":"textbox","id":"sh/exozm1w3","slide":3,"text":"No","textPreview":"No","textChars":2,"textLines":1,"bbox":[956,291,210,20]}
+{"kind":"shape","id":"sh/10zixwfu","slide":3,"bbox":[48,328,250,54]}
+{"kind":"textbox","id":"sh/0z6hore9","slide":3,"text":"temporal modifications","textPreview":"temporal modifications","textChars":22,"textLines":1,"bbox":[62,345,222,20]}
+{"kind":"shape","id":"sh/rax0rmxs","slide":3,"bbox":[315,328,430,54]}
+{"kind":"textbox","id":"sh/q9ozihw7","slide":3,"text":"work zones / traffic management","textPreview":"work zones / traffic management","textChars":31,"textLines":1,"bbox":[329,345,402,20]}
+{"kind":"shape","id":"sh/dcfitwfy","slide":3,"bbox":[770,328,145,54]}
+{"kind":"textbox","id":"sh/sb6hkred","slide":3,"text":"600 s","textPreview":"600 s","textChars":5,"textLines":1,"bbox":[784,345,117,20]}
+{"kind":"shape","id":"sh/b6h03qxw","slide":3,"bbox":[942,328,238,54]}
+{"kind":"textbox","id":"sh/a58julwb","slide":3,"text":"Yes","textPreview":"Yes","textChars":3,"textLines":1,"bbox":[956,345,210,20]}
+{"kind":"shape","id":"sh/8b2xo3ut","slide":3,"bbox":[48,382,250,54]}
+{"kind":"textbox","id":"sh/9cbex8ve","slide":3,"text":"ego maneuver","textPreview":"ego maneuver","textChars":12,"textLines":1,"bbox":[62,399,222,20]}
+{"kind":"shape","id":"sh/m9kfmdcn","slide":3,"bbox":[315,382,430,54]}
+{"kind":"textbox","id":"sh/7atwvid8","slide":3,"text":"AV maneuver class","textPreview":"AV maneuver class","textChars":17,"textLines":1,"bbox":[329,399,402,20]}
+{"kind":"shape","id":"sh/wf2xsnu5","slide":3,"bbox":[770,382,145,54]}
+{"kind":"textbox","id":"sh/hgvy1svq","slide":3,"text":"30 s","textPreview":"30 s","textChars":4,"textLines":1,"bbox":[784,399,117,20]}
+{"kind":"shape","id":"sh/udkfqdcz","slide":3,"bbox":[942,382,238,54]}
+{"kind":"textbox","id":"sh/vetgzidk","slide":3,"text":"Yes","textPreview":"Yes","textChars":3,"textLines":1,"bbox":[956,399,210,20]}
+{"kind":"shape","id":"sh/43mxwnu1","slide":3,"bbox":[48,436,250,54]}
+{"kind":"textbox","id":"sh/54vy5svm","slide":3,"text":"road-user maneuver","textPreview":"road-user maneuver","textChars":18,"textLines":1,"bbox":[62,453,222,20]}
+{"kind":"shape","id":"sh/5036povq","slide":3,"bbox":[315,436,430,54]}
+{"kind":"textbox","id":"sh/4zupwju5","slide":3,"text":"other road-user maneuver","textPreview":"other road-user maneuver","textChars":24,"textLines":1,"bbox":[329,453,402,20]}
+{"kind":"shape","id":"sh/3elonydk","slide":3,"bbox":[770,436,145,54]}
+{"kind":"textbox","id":"sh/idc7utcz","slide":3,"text":"45 s","textPreview":"45 s","textChars":4,"textLines":1,"bbox":[784,453,117,20]}
+{"kind":"shape","id":"sh/hcj6love","slide":3,"bbox":[942,436,238,54]}
+{"kind":"textbox","id":"sh/gbapsjut","slide":3,"text":"Yes","textPreview":"Yes","textChars":3,"textLines":1,"bbox":[956,453,210,20]}
+{"kind":"shape","id":"sh/va1ojed8","slide":3,"bbox":[48,490,250,54]}
+{"kind":"textbox","id":"sh/u9snq9c3","slide":3,"text":"environment","textPreview":"environment","textChars":11,"textLines":1,"bbox":[62,507,222,20]}
+{"kind":"shape","id":"sh/18n6x8vy","slide":3,"bbox":[315,490,430,54]}
+{"kind":"textbox","id":"sh/07ep43ud","slide":3,"text":"weather / lighting","textPreview":"weather / lighting","textChars":18,"textLines":1,"bbox":[329,507,402,20]}
+{"kind":"shape","id":"sh/ydo3y5sv","slide":3,"bbox":[770,490,145,54]}
+{"kind":"textbox","id":"sh/jeh4rat0","slide":3,"text":"1,800 s","textPreview":"1,800 s","textChars":7,"textLines":1,"bbox":[784,507,117,20]}
+{"kind":"shape","id":"sh/kfql0fal","slide":3,"bbox":[942,490,238,54]}
+{"kind":"textbox","id":"sh/lgzmtkb6","slide":3,"text":"No","textPreview":"No","textChars":2,"textLines":1,"bbox":[956,507,210,20]}
+{"kind":"shape","id":"sh/apo3u5cj","slide":3,"bbox":[48,544,250,54]}
+{"kind":"textbox","id":"sh/bax4nat4","slide":3,"text":"triggering conditions","textPreview":"triggering conditions","textChars":21,"textLines":1,"bbox":[62,561,222,20]}
+{"kind":"shape","id":"sh/wb6lwvap","slide":3,"bbox":[315,544,430,54]}
+{"kind":"textbox","id":"sh/xcfmp0ba","slide":3,"text":"unexpected AV context","textPreview":"unexpected AV context","textChars":21,"textLines":1,"bbox":[329,561,402,20]}
+{"kind":"shape","id":"sh/u58n6psn","slide":3,"bbox":[770,544,145,54]}
+{"kind":"textbox","id":"sh/v614zut8","slide":3,"text":"120 s","textPreview":"120 s","textChars":5,"textLines":1,"bbox":[784,561,117,20]}
+{"kind":"shape","id":"sh/rqt0rm90","slide":3,"bbox":[942,544,238,54]}
+{"kind":"textbox","id":"sh/qpkjihsf","slide":3,"text":"Yes","textPreview":"Yes","textChars":3,"textLines":1,"bbox":[956,561,210,20]}
+{"kind":"textbox","id":"sh/dsbitwrq","slide":3,"text":"Independence is an intentional simplifying assumption: there are no conditional links between layers.","textPreview":"Independence is an intentional simplifying assumption: there are no conditional links between layers.","textChars":101,"textLines":1,"bbox":[48,622,1060,32]}
+{"kind":"textbox","id":"sh/cr21kra5","slide":3,"text":"Source: config.yaml; simulator.py (LAYER_DEFINITIONS)","textPreview":"Source: config.yaml; simulator.py (LAYER_DEFINITIONS)","textChars":53,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"notes","id":"nt/l56qv6","slide":3,"text":""}
+{"kind":"slide","id":"sl/f7qk0l","slide":4,"title":"LAYERED SCENARIO MODEL","textShapes":25}
+{"kind":"textbox","id":"sh/zyp4zeho","slide":4,"text":"LAYERED SCENARIO MODEL","textPreview":"LAYERED SCENARIO MODEL","textChars":22,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/kzy58zy9","slide":4,"text":"Each sampled layer gets a fixed probability model","textPreview":"Each sampled layer gets a fixed probability model","textChars":49,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/l0rm14zu","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/m10na9gf","slide":4,"bbox":[48,124,1184,2]}
+{"kind":"textbox","id":"sh/72943eh0","slide":4,"text":"The street layer is special: its 12 configured route-composition probabilities are used exactly, without a Dirichlet draw.","textPreview":"The street layer is special: its 12 configured route-composition probabilities are used exactly, without a Dirichlet draw.","textChars":122,"textLines":1,"bbox":[48,150,1130,44]}
+{"kind":"shape","id":"sh/83i5cjy5","slide":4,"bbox":[62,230,44,44]}
+{"kind":"textbox","id":"sh/t4r65ozq","slide":4,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[62,240,44,22]}
+{"kind":"textbox","id":"sh/25wnypgv","slide":4,"text":"Choose count","textPreview":"Choose count","textChars":12,"textLines":1,"bbox":[132,232,230,28]}
+{"kind":"textbox","id":"sh/n6547uhg","slide":4,"text":"Sample an element count from the layer’s configured range.","textPreview":"Sample an element count from the layer’s configured range.","textChars":58,"textLines":1,"bbox":[370,234,740,44]}
+{"kind":"textbox","id":"sh/7apw3ip0","slide":4,"text":"↓","textPreview":"↓","textChars":1,"textLines":1,"bbox":[76,278,18,24]}
+{"kind":"shape","id":"sh/m9gfadof","slide":4,"bbox":[62,305,44,44]}
+{"kind":"textbox","id":"sh/9c7e5s76","slide":4,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[62,315,44,22]}
+{"kind":"textbox","id":"sh/8byxcn6l","slide":4,"text":"Assign rarity","textPreview":"Assign rarity","textChars":13,"textLines":1,"bbox":[132,307,230,28]}
+{"kind":"textbox","id":"sh/zmpwzyp4","slide":4,"text":"Use largest-remainder category counts, then shuffle labels across elements.","textPreview":"Use largest-remainder category counts, then shuffle labels across elements.","textChars":75,"textLines":1,"bbox":[370,309,740,44]}
+{"kind":"textbox","id":"sh/ylgf6toj","slide":4,"text":"↓","textPreview":"↓","textChars":1,"textLines":1,"bbox":[76,353,18,24]}
+{"kind":"shape","id":"sh/l87e187u","slide":4,"bbox":[62,380,44,44]}
+{"kind":"textbox","id":"sh/k7yx8369","slide":4,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[62,390,44,22]}
+{"kind":"textbox","id":"sh/bi5wvyps","slide":4,"text":"Set weights","textPreview":"Set weights","textChars":11,"textLines":1,"bbox":[132,382,230,28]}
+{"kind":"textbox","id":"sh/ahwv2to7","slide":4,"text":"Common → very rare weights; solve the unknown weight for a 0.4% designed mass.","textPreview":"Common → very rare weights; solve the unknown weight for a 0.4% designed mass.","textChars":78,"textLines":1,"bbox":[370,384,740,44]}
+{"kind":"textbox","id":"sh/edcfetsf","slide":4,"text":"↓","textPreview":"↓","textChars":1,"textLines":1,"bbox":[76,428,18,24]}
+{"kind":"shape","id":"sh/fe5gny9k","slide":4,"bbox":[62,455,44,44]}
+{"kind":"textbox","id":"sh/0fexg3a5","slide":4,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[62,465,44,22]}
+{"kind":"textbox","id":"sh/1gnyporq","slide":4,"text":"Draw probabilities","textPreview":"Draw probabilities","textChars":18,"textLines":1,"bbox":[132,457,230,28]}
+{"kind":"textbox","id":"sh/2hwfitsb","slide":4,"text":"One Dirichlet draw at concentration 20,000 creates the transition vector.","textPreview":"One Dirichlet draw at concentration 20,000 creates the transition vector.","textChars":73,"textLines":1,"bbox":[370,459,740,44]}
+{"kind":"textbox","id":"sh/ni5gry9w","slide":4,"text":"↓","textPreview":"↓","textChars":1,"textLines":1,"bbox":[76,503,18,24]}
+{"kind":"shape","id":"sh/ojexk3qh","slide":4,"bbox":[62,530,44,44]}
+{"kind":"textbox","id":"sh/pknyt8r2","slide":4,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[62,540,44,22]}
+{"kind":"textbox","id":"sh/alwfmd87","slide":4,"text":"Draw dwell times","textPreview":"Draw dwell times","textChars":16,"textLines":1,"bbox":[132,532,230,28]}
+{"kind":"textbox","id":"sh/b6pgvi9s","slide":4,"text":"Gamma(shape = μ²/var, scale = var/μ), clamped to ≥1 second.","textPreview":"Gamma(shape = μ²/var, scale = var/μ), clamped to ≥1 second.","textChars":59,"textLines":1,"bbox":[370,534,740,44]}
+{"kind":"shape","id":"sh/l0rilcba","slide":4,"bbox":[860,594,292,28]}
+{"kind":"textbox","id":"sh/kzi1c7up","slide":4,"text":"Target unknown-element mass: 0.4%","textPreview":"Target unknown-element mass: 0.4%","textChars":33,"textLines":1,"bbox":[872,600,268,16]}
+{"kind":"textbox","id":"sh/ze90j2t4","slide":4,"text":"Sources: config.yaml; simulator.py (build_layer, compute_unknown_weight)","textPreview":"Sources: config.yaml; simulator.py (build_layer, compute_unknown_weight)","textChars":72,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"notes","id":"nt/f7qk0l","slide":4,"text":""}
+{"kind":"slide","id":"sl/aj59gp","slide":5,"title":"LAYERED SCENARIO MODEL","textShapes":26}
+{"kind":"textbox","id":"sh/sb2p8bup","slide":5,"text":"LAYERED SCENARIO MODEL","textPreview":"LAYERED SCENARIO MODEL","textChars":22,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/ratoz6d4","slide":5,"text":"The engine jumps directly to the next layer expiry","textPreview":"The engine jumps directly to the next layer expiry","textChars":50,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/q9k761wj","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/1gv650v6","slide":5,"bbox":[48,124,1184,2]}
+{"kind":"textbox","id":"sh/0fmpwvul","slide":5,"text":"At any instant, every layer has a remaining dwell time. The loop advances by the minimum of those times, then updates only expired layers.","textPreview":"At any instant, every layer has a remaining dwell time. The loop advances by the minimum of those times, then updates only expired layers.","textChars":138,"textLines":1,"bbox":[48,150,1090,48]}
+{"kind":"shape","id":"sh/fedo3qdg","slide":5,"bbox":[55,274,182,176]}
+{"kind":"textbox","id":"sh/ed47ulcv","slide":5,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[73,294,56,24]}
+{"kind":"textbox","id":"sh/p4fq90vi","slide":5,"text":"Current state","textPreview":"Current state","textChars":13,"textLines":1,"bbox":[73,332,146,30]}
+{"kind":"textbox","id":"sh/o36p0vux","slide":5,"text":"six current elements\n+six remaining times","textPreview":"six current elements | +six remaining times","textChars":41,"textLines":2,"bbox":[73,380,146,52]}
+{"kind":"textbox","id":"sh/ytgnmhkn","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[243,340,36,38]}
+{"kind":"shape","id":"sh/zupofml8","slide":5,"bbox":[284,274,182,176]}
+{"kind":"textbox","id":"sh/kvy5or2d","slide":5,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[302,294,56,24]}
+{"kind":"textbox","id":"sh/lw76hwjy","slide":5,"text":"Find next event","textPreview":"Find next event","textChars":15,"textLines":1,"bbox":[302,332,146,30]}
+{"kind":"textbox","id":"sh/mxgnq1kj","slide":5,"text":"dt = min(remaining)","textPreview":"dt = min(remaining)","textChars":19,"textLines":1,"bbox":[302,380,146,52]}
+{"kind":"textbox","id":"sh/7y9oj614","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[472,340,36,38]}
+{"kind":"shape","id":"sh/8zipsb2p","slide":5,"bbox":[513,274,182,176]}
+{"kind":"textbox","id":"sh/9kr6lwja","slide":5,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[531,294,56,24]}
+{"kind":"textbox","id":"sh/21wnexkf","slide":5,"text":"Advance","textPreview":"Advance","textChars":7,"textLines":1,"bbox":[531,332,146,30]}
+{"kind":"textbox","id":"sh/n25o72l0","slide":5,"text":"time += dt\nmiles += 50·dt / 3600","textPreview":"time += dt | miles += 50·dt / 3600","textChars":32,"textLines":2,"bbox":[531,380,146,52]}
+{"kind":"textbox","id":"sh/r61kfy1s","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[701,340,36,38]}
+{"kind":"shape","id":"sh/q5s36t07","slide":5,"bbox":[742,274,182,176]}
+{"kind":"textbox","id":"sh/d832h8ji","slide":5,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[760,294,56,24]}
+{"kind":"textbox","id":"sh/s7ul83id","slide":5,"text":"Transition","textPreview":"Transition","textChars":10,"textLines":1,"bbox":[760,332,146,30]}
+{"kind":"textbox","id":"sh/321kby1g","slide":5,"text":"sample next element\nand new Gamma duration","textPreview":"sample next element | and new Gamma duration","textChars":42,"textLines":2,"bbox":[760,380,146,52]}
+{"kind":"textbox","id":"sh/i1s32t0v","slide":5,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[930,340,36,38]}
+{"kind":"shape","id":"sh/54j2dojm","slide":5,"bbox":[971,274,182,176]}
+{"kind":"textbox","id":"sh/43al43i1","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[989,294,56,24]}
+{"kind":"textbox","id":"sh/nyl4nih0","slide":5,"text":"Track","textPreview":"Track","textChars":5,"textLines":1,"bbox":[989,332,146,30]}
+{"kind":"textbox","id":"sh/2xc3ed0f","slide":5,"text":"update episodes and\ncombination matches","textPreview":"update episodes and | combination matches","textChars":39,"textLines":2,"bbox":[989,380,146,52]}
+{"kind":"shape","id":"sh/07m9svul","slide":5,"bbox":[72,520,1088,84]}
+{"kind":"textbox","id":"sh/l8vql0v6","slide":5,"text":"Why it matters","textPreview":"Why it matters","textChars":14,"textLines":1,"bbox":[98,545,190,28]}
+{"kind":"textbox","id":"sh/y54rqlcf","slide":5,"text":"The delivered 2M-mile run advances through 9,998,505 event steps in about 46 seconds—not 144 million one-second iterations.","textPreview":"The delivered 2M-mile run advances through 9,998,505 event steps in about 46 seconds—not 144 million one-second iterations.","textChars":123,"textLines":1,"bbox":[292,545,824,32]}
+{"kind":"textbox","id":"sh/z6d8jqd0","slide":5,"text":"Sources: simulator.py (ScenarioSimulator.run_resumable); results/summary.md","textPreview":"Sources: simulator.py (ScenarioSimulator.run_resumable); results/summary.md","textChars":75,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"notes","id":"nt/aj59gp","slide":5,"text":""}
+{"kind":"slide","id":"sl/22ldol","slide":6,"title":"LAYERED SCENARIO MODEL","textShapes":24}
+{"kind":"textbox","id":"sh/ny1wr6h8","slide":6,"text":"LAYERED SCENARIO MODEL","textPreview":"LAYERED SCENARIO MODEL","textChars":22,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/8zaxkbit","slide":6,"text":"Episodes measure continuous unknown occupancy","textPreview":"Episodes measure continuous unknown occupancy","textChars":45,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/90jetgze","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/alsfml0z","slide":6,"bbox":[48,124,1184,2]}
+{"kind":"textbox","id":"sh/vm1wvqhk","slide":6,"text":"This avoids inflating counts when a slow unknown condition persists while unrelated fast layers change around it.","textPreview":"This avoids inflating counts when a slow unknown condition persists while unrelated fast layers change around it.","textChars":113,"textLines":1,"bbox":[48,150,1090,48]}
+{"kind":"shape","id":"sh/wnaxovi5","slide":6,"bbox":[48,228,420,44]}
+{"kind":"textbox","id":"sh/xojex0zq","slide":6,"text":"Layer transition","textPreview":"Layer transition","textChars":16,"textLines":1,"bbox":[62,241,392,20]}
+{"kind":"shape","id":"sh/ipcfq50v","slide":6,"bbox":[488,228,270,44]}
+{"kind":"textbox","id":"sh/jqlwzqhg","slide":6,"text":"Action","textPreview":"Action","textChars":6,"textLines":1,"bbox":[502,241,242,20]}
+{"kind":"shape","id":"sh/f698jetk","slide":6,"bbox":[784,228,400,44]}
+{"kind":"textbox","id":"sh/e507a9sz","slide":6,"text":"Meaning","textPreview":"Meaning","textChars":7,"textLines":1,"bbox":[798,241,372,20]}
+{"kind":"shape","id":"sh/1srqlobq","slide":6,"bbox":[48,272,420,58]}
+{"kind":"textbox","id":"sh/0ripcja5","slide":6,"text":"known → unknown","textPreview":"known → unknown","textChars":15,"textLines":1,"bbox":[62,290,392,22]}
+{"kind":"shape","id":"sh/r2p8feto","slide":6,"bbox":[488,272,270,58]}
+{"kind":"textbox","id":"sh/q1g769s3","slide":6,"text":"open","textPreview":"open","textChars":4,"textLines":1,"bbox":[502,290,242,22]}
+{"kind":"shape","id":"sh/d4rqhobe","slide":6,"bbox":[784,272,400,58]}
+{"kind":"textbox","id":"sh/s3yp8jat","slide":6,"text":"A new element episode starts.","textPreview":"A new element episode starts.","textChars":29,"textLines":1,"bbox":[798,290,372,22]}
+{"kind":"shape","id":"sh/byt8ryts","slide":6,"bbox":[48,330,420,58]}
+{"kind":"textbox","id":"sh/axkrits7","slide":6,"text":"unknown → known","textPreview":"unknown → known","textChars":15,"textLines":1,"bbox":[62,348,392,22]}
+{"kind":"shape","id":"sh/6t4baxcf","slide":6,"bbox":[488,330,270,58]}
+{"kind":"textbox","id":"sh/7uxsj2d0","slide":6,"text":"close","textPreview":"close","textChars":5,"textLines":1,"bbox":[502,348,242,22]}
+{"kind":"shape","id":"sh/8v6tc7ul","slide":6,"bbox":[784,330,400,58]}
+{"kind":"textbox","id":"sh/twfulcv6","slide":6,"text":"The current element episode ends.","textPreview":"The current element episode ends.","textChars":33,"textLines":1,"bbox":[798,348,372,22]}
+{"kind":"shape","id":"sh/uhobehcr","slide":6,"bbox":[48,388,420,58]}
+{"kind":"textbox","id":"sh/vixcnmdw","slide":6,"text":"unknown A → unknown B","textPreview":"unknown A → unknown B","textChars":21,"textLines":1,"bbox":[62,406,392,22]}
+{"kind":"shape","id":"sh/gj6tgruh","slide":6,"bbox":[488,388,270,58]}
+{"kind":"textbox","id":"sh/hkfupwv2","slide":6,"text":"close + open","textPreview":"close + open","textChars":12,"textLines":1,"bbox":[502,406,242,22]}
+{"kind":"shape","id":"sh/alkb2dc7","slide":6,"bbox":[784,388,400,58]}
+{"kind":"textbox","id":"sh/bmtsbids","slide":6,"text":"A different unknown gets its own episode.","textPreview":"A different unknown gets its own episode.","textChars":41,"textLines":1,"bbox":[798,406,372,22]}
+{"kind":"shape","id":"sh/dgjehgfa","slide":6,"bbox":[48,446,420,58]}
+{"kind":"textbox","id":"sh/sfad8vep","slide":6,"text":"unknown A → unknown A","textPreview":"unknown A → unknown A","textChars":21,"textLines":1,"bbox":[62,464,392,22]}
+{"kind":"shape","id":"sh/re1wfqx4","slide":6,"bbox":[488,446,270,58]}
+{"kind":"textbox","id":"sh/qd8v6lwz","slide":6,"text":"continue","textPreview":"continue","textChars":8,"textLines":1,"bbox":[502,464,242,22]}
+{"kind":"shape","id":"sh/1kjel0fm","slide":6,"bbox":[784,446,400,58]}
+{"kind":"textbox","id":"sh/0jaxcve1","slide":6,"text":"A self-transition does not split the episode.","textPreview":"A self-transition does not split the episode.","textChars":45,"textLines":1,"bbox":[798,464,372,22]}
+{"kind":"shape","id":"sh/fi1wjqxg","slide":6,"bbox":[48,504,420,58]}
+{"kind":"textbox","id":"sh/ehsvalwv","slide":6,"text":"known → known","textPreview":"known → known","textChars":13,"textLines":1,"bbox":[62,522,392,22]}
+{"kind":"shape","id":"sh/hoze9wf2","slide":6,"bbox":[488,504,270,58]}
+{"kind":"textbox","id":"sh/gnqd0beh","slide":6,"text":"nothing","textPreview":"nothing","textChars":7,"textLines":1,"bbox":[502,522,242,22]}
+{"kind":"shape","id":"sh/k3ehojy5","slide":6,"bbox":[784,504,400,58]}
+{"kind":"textbox","id":"sh/l47yh4zq","slide":6,"text":"No element episode is active.","textPreview":"No element episode is active.","textChars":29,"textLines":1,"bbox":[798,522,372,22]}
+{"kind":"shape","id":"sh/y1wzm9gz","slide":6,"bbox":[48,580,1136,58]}
+{"kind":"textbox","id":"sh/z25gfehk","slide":6,"text":"Key consequence: element episodes are per layer and may overlap; changes in other layers do not start or end them.","textPreview":"Key consequence: element episodes are per layer and may overlap; changes in other layers do not start or end them.","textChars":114,"textLines":1,"bbox":[74,599,1060,25]}
+{"kind":"textbox","id":"sh/cfehkzy9","slide":6,"text":"Source: simulator.py (episode_transition_action and event loop); README.md","textPreview":"Source: simulator.py (episode_transition_action and event loop); README.md","textChars":74,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"notes","id":"nt/22ldol","slide":6,"text":""}
+{"kind":"slide","id":"sl/wyw5n7","slide":7,"title":"LAYERED SCENARIO MODEL","textShapes":20}
+{"kind":"textbox","id":"sh/nedcbm9g","slide":7,"text":"LAYERED SCENARIO MODEL","textPreview":"LAYERED SCENARIO MODEL","textChars":22,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/ofmtkra1","slide":7,"text":"Three distinct mechanisms are tracked at the same time","textPreview":"Three distinct mechanisms are tracked at the same time","textChars":54,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/9gvudwrm","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/e9kbexsz","slide":7,"bbox":[48,124,1184,2]}
+{"kind":"textbox","id":"sh/zatc729k","slide":7,"text":"All episode types contribute to the “unknown time” union, but they answer different questions.","textPreview":"All episode types contribute to the “unknown time” union, but they answer different questions.","textChars":94,"textLines":1,"bbox":[48,150,1090,40]}
+{"kind":"shape","id":"sh/0b2tg7a5","slide":7,"bbox":[48,236,350,286]}
+{"kind":"shape","id":"sh/1cvu9crq","slide":7,"bbox":[48,236,8,286]}
+{"kind":"textbox","id":"sh/qlkbaxs3","slide":7,"text":"ELEMENT","textPreview":"ELEMENT","textChars":7,"textLines":1,"bbox":[72,256,310,20]}
+{"kind":"textbox","id":"sh/rmtc329o","slide":7,"text":"Unknown element","textPreview":"Unknown element","textChars":15,"textLines":1,"bbox":[72,290,310,70]}
+{"kind":"textbox","id":"sh/ji18rmds","slide":7,"text":"A single layer occupies an element labelled “unknown.” Starts and ends follow the occupancy rules.","textPreview":"A single layer occupies an element labelled “unknown.” Starts and ends follow the occupancy rules.","textChars":98,"textLines":1,"bbox":[72,368,310,138]}
+{"kind":"shape","id":"sh/ih87ihc7","slide":7,"bbox":[465,236,350,286]}
+{"kind":"shape","id":"sh/5kjqtwvy","slide":7,"bbox":[465,236,8,286]}
+{"kind":"textbox","id":"sh/kjapkrud","slide":7,"text":"PATTERN","textPreview":"PATTERN","textChars":7,"textLines":1,"bbox":[489,256,310,20]}
+{"kind":"textbox","id":"sh/7m18v6d4","slide":7,"text":"Known interaction","textPreview":"Known interaction","textChars":17,"textLines":1,"bbox":[489,290,310,70]}
+{"kind":"textbox","id":"sh/6ls7m1cj","slide":7,"text":"A configured conjunction across ≥2 layers, e.g. a particular street state + weather state. Survives unrelated changes.","textPreview":"A configured conjunction across ≥2 layers, e.g. a particular street state + weather state. Survives unrelated changes.","textChars":118,"textLines":1,"bbox":[489,368,310,138]}
+{"kind":"shape","id":"sh/tojqxgva","slide":7,"bbox":[882,236,350,286]}
+{"kind":"shape","id":"sh/sna9obup","slide":7,"bbox":[882,236,8,286]}
+{"kind":"textbox","id":"sh/nqh8j2dk","slide":7,"text":"HASH","textPreview":"HASH","textChars":4,"textLines":1,"bbox":[906,256,310,20]}
+{"kind":"textbox","id":"sh/mpo7axcf","slide":7,"text":"Unknown tuple","textPreview":"Unknown tuple","textChars":13,"textLines":1,"bbox":[906,290,310,70]}
+{"kind":"textbox","id":"sh/ahgje90z","slide":7,"text":"A deterministic SHA-256 classifier flags ~0.5% of all-known six-layer tuples. Ends on any tuple change.","textPreview":"A deterministic SHA-256 classifier flags ~0.5% of all-known six-layer tuples. Ends on any tuple change.","textChars":103,"textLines":1,"bbox":[906,368,310,138]}
+{"kind":"textbox","id":"sh/bipk7e1k","slide":7,"text":"Element episode","textPreview":"Element episode","textChars":15,"textLines":1,"bbox":[52,552,148,20]}
+{"kind":"textbox","id":"sh/cjy1gji5","slide":7,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[408,552,28,20]}
+{"kind":"textbox","id":"sh/xk729ojq","slide":7,"text":"Pattern episode","textPreview":"Pattern episode","textChars":15,"textLines":1,"bbox":[469,552,148,20]}
+{"kind":"textbox","id":"sh/2twjap03","slide":7,"text":"+","textPreview":"+","textChars":1,"textLines":1,"bbox":[825,552,28,20]}
+{"kind":"textbox","id":"sh/nupk3u1o","slide":7,"text":"Hash episode","textPreview":"Hash episode","textChars":12,"textLines":1,"bbox":[886,552,148,20]}
+{"kind":"textbox","id":"sh/ofy1czit","slide":7,"text":"= union time in “an unknown scenario” (overlaps counted once)","textPreview":"= union time in “an unknown scenario” (overlaps counted once)","textChars":61,"textLines":1,"bbox":[252,603,776,26]}
+{"kind":"textbox","id":"sh/pg7254je","slide":7,"text":"Sources: README.md; simulator.py (CombinationRule and UnknownCombinationClassifier)","textPreview":"Sources: README.md; simulator.py (CombinationRule and UnknownCombinationClassifier)","textChars":83,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"notes","id":"nt/wyw5n7","slide":7,"text":""}
+{"kind":"slide","id":"sl/3w1tq5","slide":8,"title":"DELIVERED 2M-MILE RUN","textShapes":14}
+{"kind":"textbox","id":"sh/1wbmls32","slide":8,"text":"DELIVERED 2M-MILE RUN","textPreview":"DELIVERED 2M-MILE RUN","textChars":21,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/utknqx4r","slide":8,"text":"84,296 unknown episodes came from three different mechanisms","textPreview":"84,296 unknown episodes came from three different mechanisms","textChars":60,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/fut4jilc","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/oz25w7mt","slide":8,"bbox":[48,124,1184,2]}
+{"kind":"textbox","id":"sh/p0bmpc3e","slide":8,"text":"The headline total blends element-level novelty with two synthetic combination mechanisms.","textPreview":"The headline total blends element-level novelty with two synthetic combination mechanisms.","textChars":90,"textLines":1,"bbox":[48,150,1100,38]}
+{"kind":"shape","id":"sh/3yt4n2l8","slide":8,"bbox":[756,228,404,120]}
+{"kind":"shape","id":"sh/cnm507mp","slide":8,"bbox":[756,228,8,120]}
+{"kind":"textbox","id":"sh/dov6tc3a","slide":8,"text":"RATE","textPreview":"RATE","textChars":4,"textLines":1,"bbox":[780,248,364,20]}
+{"kind":"textbox","id":"sh/1grelk3a","slide":8,"text":"42,148 / 1M mi","textPreview":"42,148 / 1M mi","textChars":14,"textLines":1,"bbox":[780,273,364,34]}
+{"kind":"textbox","id":"sh/0fixcfmp","slide":8,"text":"Episode starts per million miles","textPreview":"Episode starts per million miles","textChars":32,"textLines":1,"bbox":[780,306,364,34]}
+{"kind":"shape","id":"sh/fepwja54","slide":8,"bbox":[756,372,404,120]}
+{"kind":"shape","id":"sh/edgfa54z","slide":8,"bbox":[756,372,8,120]}
+{"kind":"textbox","id":"sh/pkrepk3m","slide":8,"text":"UNION TIME","textPreview":"UNION TIME","textChars":10,"textLines":1,"bbox":[780,392,364,20]}
+{"kind":"textbox","id":"sh/ojixgfm1","slide":8,"text":"2.7408%","textPreview":"2.7408%","textChars":7,"textLines":1,"bbox":[780,417,364,34]}
+{"kind":"textbox","id":"sh/ni9wnulg","slide":8,"text":"3,946,822 seconds of simulated time","textPreview":"3,946,822 seconds of simulated time","textChars":35,"textLines":1,"bbox":[780,450,364,34]}
+{"kind":"shape","id":"sh/2h0fep4v","slide":8,"bbox":[756,516,404,120]}
+{"kind":"shape","id":"sh/5o7ed0n2","slide":8,"bbox":[756,516,8,120]}
+{"kind":"textbox","id":"sh/4ned4vmh","slide":8,"text":"COMPLETION","textPreview":"COMPLETION","textChars":10,"textLines":1,"bbox":[780,536,364,20]}
+{"kind":"textbox","id":"sh/g325gzyp","slide":8,"text":"0 truncated","textPreview":"0 truncated","textChars":11,"textLines":1,"bbox":[780,561,364,34]}
+{"kind":"textbox","id":"sh/h4b694za","slide":8,"text":"No episodes remained open at run end","textPreview":"No episodes remained open at run end","textChars":36,"textLines":1,"bbox":[780,594,364,34]}
+{"kind":"textbox","id":"sh/u1knepgj","slide":8,"text":"Source: results/summary.md; results/stats.json","textPreview":"Source: results/summary.md; results/stats.json","textChars":46,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"chart","id":"ch/ip83a98f","slide":8,"name":"","chartType":"bar","bbox":[48,220,650,388]}
+{"kind":"notes","id":"nt/3w1tq5","slide":8,"text":""}
+{"kind":"slide","id":"sl/0ytoac","slide":9,"title":"DELIVERED 2M-MILE RUN","textShapes":15}
+{"kind":"textbox","id":"sh/svqtsf21","slide":9,"text":"DELIVERED 2M-MILE RUN","textPreview":"DELIVERED 2M-MILE RUN","textChars":21,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/7ahsza1w","slide":9,"text":"Short dwell times drive more episode starts","textPreview":"Short dwell times drive more episode starts","textChars":43,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/698bq5kb","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/58zax0jq","slide":9,"bbox":[48,124,1184,2]}
+{"kind":"textbox","id":"sh/k7qtov25","slide":9,"text":"All four unknown-capable layers target 0.4% unknown selection. Episode counts still differ sharply because their dwell times differ.","textPreview":"All four unknown-capable layers target 0.4% unknown selection. Episode counts still differ sharply because their dwell times differ.","textChars":132,"textLines":1,"bbox":[48,150,1136,50]}
+{"kind":"textbox","id":"sh/i58bmlkz","slide":9,"text":"Element episodes by layer","textPreview":"Element episodes by layer","textChars":25,"textLines":1,"bbox":[170,212,386,24]}
+{"kind":"shape","id":"sh/x4fat03e","slide":9,"bbox":[730,220,426,122]}
+{"kind":"shape","id":"sh/w36tkv29","slide":9,"bbox":[730,220,8,122]}
+{"kind":"textbox","id":"sh/y5knepsf","slide":9,"text":"EGO MANEUVER","textPreview":"EGO MANEUVER","textChars":12,"textLines":1,"bbox":[754,240,386,20]}
+{"kind":"textbox","id":"sh/z6to7ut0","slide":9,"text":"21,018","textPreview":"21,018","textChars":6,"textLines":1,"bbox":[754,265,386,34]}
+{"kind":"textbox","id":"sh/0725gzal","slide":9,"text":"Mean dwell: 30 s → most frequent opportunities to start an episode.","textPreview":"Mean dwell: 30 s → most frequent opportunities to start an episode.","textChars":67,"textLines":1,"bbox":[754,298,386,36]}
+{"kind":"shape","id":"sh/lsb694b6","slide":9,"bbox":[730,366,426,122]}
+{"kind":"shape","id":"sh/q1kna5sj","slide":9,"bbox":[730,366,8,122]}
+{"kind":"textbox","id":"sh/b2to3at4","slide":9,"text":"ROAD-USER MANEUVER","textPreview":"ROAD-USER MANEUVER","textChars":18,"textLines":1,"bbox":[754,386,386,20]}
+{"kind":"textbox","id":"sh/c325cfap","slide":9,"text":"12,217","textPreview":"12,217","textChars":6,"textLines":1,"bbox":[754,411,386,34]}
+{"kind":"textbox","id":"sh/d4b65kba","slide":9,"text":"Mean dwell: 45 s → second highest turnover rate.","textPreview":"Mean dwell: 45 s → second highest turnover rate.","textChars":48,"textLines":1,"bbox":[754,444,386,36]}
+{"kind":"shape","id":"sh/2x0n65sn","slide":9,"bbox":[730,512,426,122]}
+{"kind":"shape","id":"sh/3y9ozats","slide":9,"bbox":[730,512,8,122]}
+{"kind":"textbox","id":"sh/r2pk769k","slide":9,"text":"TEMPORAL MODIFICATIONS","textPreview":"TEMPORAL MODIFICATIONS","textChars":22,"textLines":1,"bbox":[754,532,386,20]}
+{"kind":"textbox","id":"sh/6hw3y18f","slide":9,"text":"977","textPreview":"977","textChars":3,"textLines":1,"bbox":[754,557,386,34]}
+{"kind":"textbox","id":"sh/t4729grq","slide":9,"text":"Mean dwell: 600 s → far fewer transition opportunities.","textPreview":"Mean dwell: 600 s → far fewer transition opportunities.","textChars":55,"textLines":1,"bbox":[754,590,386,36]}
+{"kind":"textbox","id":"sh/s3yl0bq5","slide":9,"text":"Source: results/summary.md; results/stats.json","textPreview":"Source: results/summary.md; results/stats.json","textChars":46,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"chart","id":"ch/fi1cvmh0","slide":9,"name":"","chartType":"bar","bbox":[48,240,630,350]}
+{"kind":"notes","id":"nt/0ytoac","slide":9,"text":""}
+{"kind":"slide","id":"sl/h9b1j6","slide":10,"title":"DELIVERED 2M-MILE RUN","textShapes":14}
+{"kind":"textbox","id":"sh/ovulofe5","slide":10,"text":"DELIVERED 2M-MILE RUN","textPreview":"DELIVERED 2M-MILE RUN","textChars":21,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/nul4vaxk","slide":10,"text":"Duration reveals what ends each kind of episode","textPreview":"Duration reveals what ends each kind of episode","textChars":47,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/2tc3m5wz","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/xknm1kvm","slide":10,"bbox":[48,124,1184,2]}
+{"kind":"textbox","id":"sh/bil4zaxg","slide":10,"text":"Mean duration","textPreview":"Mean duration","textChars":13,"textLines":1,"bbox":[790,172,250,28]}
+{"kind":"shape","id":"sh/ahc3q5wv","slide":10,"bbox":[782,224,394,112]}
+{"kind":"shape","id":"sh/lonmp4vi","slide":10,"bbox":[782,224,8,112]}
+{"kind":"textbox","id":"sh/kne5wzex","slide":10,"text":"ELEMENT","textPreview":"ELEMENT","textChars":7,"textLines":1,"bbox":[806,244,354,20]}
+{"kind":"textbox","id":"sh/6twnql4z","slide":10,"text":"60.5 s","textPreview":"60.5 s","textChars":6,"textLines":1,"bbox":[806,269,354,34]}
+{"kind":"textbox","id":"sh/7u54zq5k","slide":10,"text":"Ends when that layer leaves its unknown element.","textPreview":"Ends when that layer leaves its unknown element.","textChars":48,"textLines":1,"bbox":[806,302,354,26]}
+{"kind":"shape","id":"sh/sfe5sbm5","slide":10,"bbox":[782,360,394,112]}
+{"kind":"shape","id":"sh/tgnm1gnq","slide":10,"bbox":[782,360,8,112]}
+{"kind":"textbox","id":"sh/uhwnul4b","slide":10,"text":"PATTERN","textPreview":"PATTERN","textChars":7,"textLines":1,"bbox":[806,380,354,20]}
+{"kind":"textbox","id":"sh/fi5o3q5w","slide":10,"text":"261.0 s","textPreview":"261.0 s","textChars":7,"textLines":1,"bbox":[806,405,354,34]}
+{"kind":"textbox","id":"sh/gjy5wvm1","slide":10,"text":"Ends only when a referenced layer breaks the rule.","textPreview":"Ends only when a referenced layer breaks the rule.","textChars":50,"textLines":1,"bbox":[806,438,354,26]}
+{"kind":"shape","id":"sh/hk76p0nm","slide":10,"bbox":[782,496,394,112]}
+{"kind":"shape","id":"sh/alcni14r","slide":10,"bbox":[782,496,8,112]}
+{"kind":"textbox","id":"sh/vml4r65c","slide":10,"text":"HASH COMBINATION","textPreview":"HASH COMBINATION","textChars":16,"textLines":1,"bbox":[806,516,354,20]}
+{"kind":"textbox","id":"sh/zqhkj2l4","slide":10,"text":"16.7 s","textPreview":"16.7 s","textChars":6,"textLines":1,"bbox":[806,541,354,34]}
+{"kind":"textbox","id":"sh/ep8jqxkj","slide":10,"text":"Ends on any genuine tuple change.","textPreview":"Ends on any genuine tuple change.","textChars":33,"textLines":1,"bbox":[806,574,354,26]}
+{"kind":"textbox","id":"sh/1sj2ls3a","slide":10,"text":"Sources: results/summary.md; results/plots/episode_durations.png","textPreview":"Sources: results/summary.md; results/plots/episode_durations.png","textChars":64,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"image","id":"im/ds7itgr2","slide":10,"name":"","geometry":"rect","alt":"Histogram of unknown episode durations by type","bbox":[42,154,700,486]}
+{"kind":"notes","id":"nt/h9b1j6","slide":10,"text":""}
+{"kind":"slide","id":"sl/k0xlmz","slide":11,"title":"DELIVERED 2M-MILE RUN","textShapes":12}
+{"kind":"textbox","id":"sh/ilczuls3","slide":11,"text":"DELIVERED 2M-MILE RUN","textPreview":"DELIVERED 2M-MILE RUN","textChars":21,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/5o3y5gru","slide":11,"text":"Episode starts are steady at scale, but modestly more variable than Poisson","textPreview":"Episode starts are steady at scale, but modestly more variable than Poisson","textChars":75,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/4nuhwva9","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/vi1gz69c","slide":11,"bbox":[48,124,1184,2]}
+{"kind":"shape","id":"sh/hk3y1gri","slide":11,"bbox":[790,192,360,128]}
+{"kind":"shape","id":"sh/gjahsbax","slide":11,"bbox":[790,192,8,128]}
+{"kind":"textbox","id":"sh/7u1gv69g","slide":11,"text":"WINDOW MEAN","textPreview":"WINDOW MEAN","textChars":11,"textLines":1,"bbox":[814,212,320,20]}
+{"kind":"textbox","id":"sh/6tszm1sv","slide":11,"text":"421.5","textPreview":"421.5","textChars":5,"textLines":1,"bbox":[814,237,320,34]}
+{"kind":"textbox","id":"sh/crepgvap","slide":11,"text":"episode starts per 10,000 miles\n(200 complete windows)","textPreview":"episode starts per 10,000 miles | (200 complete windows)","textChars":54,"textLines":2,"bbox":[814,270,320,42]}
+{"kind":"shape","id":"sh/dsn690ba","slide":11,"bbox":[790,348,360,128]}
+{"kind":"shape","id":"sh/q5w7elsj","slide":11,"bbox":[790,348,8,128]}
+{"kind":"textbox","id":"sh/b65o7qt4","slide":11,"text":"DISPERSION INDEX","textPreview":"DISPERSION INDEX","textChars":16,"textLines":1,"bbox":[814,368,320,20]}
+{"kind":"textbox","id":"sh/o3u5cbat","slide":11,"text":"1.261","textPreview":"1.261","textChars":5,"textLines":1,"bbox":[814,393,320,34]}
+{"kind":"textbox","id":"sh/p4365gbe","slide":11,"text":"variance / mean\n1.0 would be ideal Poisson","textPreview":"variance / mean | 1.0 would be ideal Poisson","textChars":42,"textLines":2,"bbox":[814,426,320,42]}
+{"kind":"shape","id":"sh/21cna1sn","slide":11,"bbox":[790,504,360,98]}
+{"kind":"textbox","id":"sh/32lo36t8","slide":11,"text":"Interpretation","textPreview":"Interpretation","textChars":14,"textLines":1,"bbox":[818,523,220,22]}
+{"kind":"textbox","id":"sh/8zypofax","slide":11,"text":"Near-Poisson starts are consistent with independent rare transitions, but the process is not exactly Poisson.","textPreview":"Near-Poisson starts are consistent with independent rare transitions, but the process is not exactly Poisson.","textChars":109,"textLines":1,"bbox":[818,551,300,40]}
+{"kind":"textbox","id":"sh/9076hkbi","slide":11,"text":"Sources: results/summary.md; results/plots/window_counts.png; analytical_model.md","textPreview":"Sources: results/summary.md; results/plots/window_counts.png; analytical_model.md","textChars":81,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"image","id":"im/fy5036t4","slide":11,"name":"","geometry":"rect","alt":"Episode start counts in 10,000-mile windows","bbox":[42,164,708,448]}
+{"kind":"notes","id":"nt/k0xlmz","slide":11,"text":""}
+{"kind":"slide","id":"sl/xx9uyq","slide":12,"title":"LAYERED SCENARIO MODEL","textShapes":10}
+{"kind":"textbox","id":"sh/6pcv6xcv","slide":12,"text":"LAYERED SCENARIO MODEL","textPreview":"LAYERED SCENARIO MODEL","textChars":22,"textLines":1,"bbox":[48,32,380,18]}
+{"kind":"textbox","id":"sh/ts3ehcvm","slide":12,"text":"Use the simulator for coverage and sensitivity—not as a calibrated safety forecast","textPreview":"Use the simulator for coverage and sensitivity—not as a calibrated safety forecast","textChars":82,"textLines":1,"bbox":[48,60,1090,48]}
+{"kind":"textbox","id":"sh/srud87u1","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1172,38,60,24]}
+{"kind":"shape","id":"sh/fulwjmdc","slide":12,"bbox":[48,124,1184,2]}
+{"kind":"textbox","id":"sh/etcfahc7","slide":12,"text":"The delivered run is internally coherent: the conditional analytical model predicts 84,724 episodes; simulation produced 84,296 (within 0.5%).","textPreview":"The delivered run is internally coherent: the conditional analytical model predicts 84,724 episodes; simulation produced 84,296 (within 0...","textChars":142,"textLines":1,"bbox":[48,150,1134,52]}
+{"kind":"shape","id":"sh/1wnelwvi","slide":12,"bbox":[48,238,544,284]}
+{"kind":"textbox","id":"sh/gvexcrux","slide":12,"text":"What the results support","textPreview":"What the results support","textChars":24,"textLines":1,"bbox":[78,268,400,30]}
+{"kind":"textbox","id":"sh/vy1w7id8","slide":12,"text":"• Sensitivity analysis of layer rates and dwell times\n• Comparing coverage strategies\n• Identifying which conditions drive exposure\n• Testing episode definitions and overlap handling","textPreview":"• Sensitivity analysis of layer rates and dwell times | • Comparing coverage strategies | • Identifying which conditions drive exposure |...","textChars":182,"textLines":4,"bbox":[78,326,452,136]}
+{"kind":"shape","id":"sh/uxsvydcn","slide":12,"bbox":[640,238,544,284]}
+{"kind":"textbox","id":"sh/ozix4zqh","slide":12,"text":"Critical interpretation caveat","textPreview":"Critical interpretation caveat","textChars":30,"textLines":1,"bbox":[670,268,440,30]}
+{"kind":"textbox","id":"sh/p0bed472","slide":12,"text":"The analytical report’s 1.639% “unknown-time union” is element-only. It is not directly comparable with the simulated 2.741% union once pattern and hash combinations are enabled.","textPreview":"The analytical report’s 1.639% “unknown-time union” is element-only. It is not directly comparable with the simulated 2.741% union once p...","textChars":178,"textLines":1,"bbox":[670,326,452,136]}
+{"kind":"shape","id":"sh/2x0f2p8r","slide":12,"bbox":[48,562,1136,80]}
+{"kind":"textbox","id":"sh/3y9wbupw","slide":12,"text":"Bottom line: the run quantifies exposure to the model’s definition of unknownness—not empirical AV danger or failure probability.","textPreview":"Bottom line: the run quantifies exposure to the model’s definition of unknownness—not empirical AV danger or failure probability.","textChars":129,"textLines":1,"bbox":[80,586,1068,30]}
+{"kind":"textbox","id":"sh/c32x8jqt","slide":12,"text":"Sources: analytical_model.py; analytical_model.md; results/summary.md","textPreview":"Sources: analytical_model.py; analytical_model.md; results/summary.md","textChars":69,"textLines":1,"bbox":[48,684,1020,18]}
+{"kind":"notes","id":"nt/xx9uyq","slide":12,"text":""}

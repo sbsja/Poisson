@@ -91,11 +91,28 @@ def predict(cfg, layers, use_design_mass, sim_rules_holder=None):
                 "episodes": n_eps,
                 "mean_duration_s": (1.0 / hazard) if hazard else 0.0})
             combos["pattern_episodes"] += n_eps
-        combos["hash_episodes"] = (T * lam_change * p_all_known
-                                   * cfg.unknown_combination_probability)
+        if cfg.enable_hash_combinations:
+            combos["hash_episodes"] = (T * lam_change * p_all_known
+                                        * cfg.unknown_combination_probability)
 
+    # full-scenario rarity episodes: stationary rare mass is calibrated to
+    # the target; a rare period ends at the next tuple change, so
+    # E[duration] ~= 1/lam_change and the expected time fraction equals the
+    # calibrated mass. The episode COUNT uses the approximation that a
+    # changed tuple is rare with probability ~= the stationary mass (the
+    # actual entry rate correlates with slow-layer states; ~10% accurate).
+    fs = {"enabled": False, "episodes": 0.0, "mean_duration_s": 0.0,
+          "mass": 0.0}
+    if sim_rules_holder is not None and             getattr(sim_rules_holder, "full_scenario", None) is not None:
+        clf = sim_rules_holder.full_scenario
+        mass = clf.achieved_sampled_mass
+        fs = {"enabled": True, "mass": mass,
+              "episodes": T * lam_change * mass,
+              "mean_duration_s": (1.0 / lam_change) if lam_change else 0.0,
+              "time_fraction": mass}
     total_eps = (sum(v["episodes"] for v in per_layer.values())
-                 + combos["pattern_episodes"] + combos["hash_episodes"])
+                 + combos["pattern_episodes"] + combos["hash_episodes"]
+                 + fs["episodes"])
     masses = [v["unknown_mass"] for v in per_layer.values()]
     union_frac = 1.0 - math.prod(1.0 - m for m in masses)
     mean_inter = cfg.target_total_miles / total_eps if total_eps else math.inf
@@ -106,11 +123,13 @@ def predict(cfg, layers, use_design_mass, sim_rules_holder=None):
     dur_sum += sum(r["episodes"] * r["mean_duration_s"]
                    for r in combos["rules"])
     dur_sum += combos["hash_episodes"] * combos["hash_mean_duration_s"]
+    dur_sum += fs["episodes"] * fs["mean_duration_s"]
     weighted_dur = dur_sum / total_eps if total_eps else float("nan")
     return {
         "total_time_s": T,
         "per_layer": per_layer,
         "combinations": combos,
+        "full_scenario": fs,
         "total_episodes": total_eps,
         "episodes_per_million_miles": total_eps / (cfg.target_total_miles / 1e6),
         "mean_episode_duration_s": weighted_dur,
@@ -136,10 +155,14 @@ def main():
     cond = predict(cfg, sim.layers, use_design_mass=False,
                    sim_rules_holder=sim)
 
+    import sys
+    results_dir = sys.argv[1] if len(sys.argv) > 1 else "results"
     simres = None
-    if os.path.exists("results/stats.json"):
-        with open("results/stats.json", encoding="utf-8") as f:
+    stats_path = os.path.join(results_dir, "stats.json")
+    if os.path.exists(stats_path):
+        with open(stats_path, encoding="utf-8") as f:
             simres = json.load(f)
+        print(f"comparing against: {stats_path}")
 
     L = []
     L.append("# Analytical Expected Results (no simulation)\n")
@@ -170,14 +193,25 @@ def main():
         for r in c["rules"]:
             L.append(f"| {r['description']} | {r['mass']:.4%} | "
                      f"{r['episodes']:,.1f} | {r['mean_duration_s']:.1f} |")
-        L.append(f"| (hash, threshold {cfg.unknown_combination_probability}) "
-                 f"| - | {c['hash_episodes']:,.1f} | "
-                 f"{c['hash_mean_duration_s']:.1f} |")
+        if cfg.enable_hash_combinations:
+            L.append(f"| (hash, threshold {cfg.unknown_combination_probability}) "
+                     f"| - | {c['hash_episodes']:,.1f} | "
+                     f"{c['hash_mean_duration_s']:.1f} |")
         L.append("\nPattern-rule formulas: E[episodes] = T*mass*hazard with "
                  "hazard = sum over referenced layers of (1-q)/mu; "
-                 "E[duration] = 1/hazard. Hash: E[episodes] = "
-                 "T * tuple-change-rate * P(all known) * threshold; "
-                 "E[duration] = 1/tuple-change-rate.")
+                 "E[duration] = 1/hazard.")
+        if cfg.enable_hash_combinations:
+            L.append("Hash: E[episodes] = T * tuple-change-rate * P(all "
+                     "known) * threshold; E[duration] = 1/tuple-change-rate.")
+    if cond["full_scenario"]["enabled"]:
+        f = cond["full_scenario"]
+        L.append("\n## Full-scenario rarity episodes (conditional predictions)\n")
+        L.append(f"- calibrated stationary rare mass: {f['mass']:.4%} "
+                 "(= expected fraction of simulated time in rare tuples)")
+        L.append(f"- E[episodes] ~= T * tuple-change-rate * mass = "
+                 f"{f['episodes']:,.0f} (entry-rate approximation, ~10%)")
+        L.append(f"- E[episode duration] ~= 1/tuple-change-rate = "
+                 f"{f['mean_duration_s']:.1f} s")
     L.append("\n## Headline predictions vs the delivered 2M-mile run\n")
     L.append("| quantity | design (a priori) | conditional (this config) | "
              "simulated |")

@@ -35,9 +35,9 @@ UNKNOWN-EPISODE SEMANTICS (replaces per-tuple encounter counting):
   7. Episodes still open at the end of the simulation are closed at final
      time and flagged truncated.
 
-Unknown COMBINATIONS (re-enabled, v3) - two mechanisms, both episodic:
-  - HASH combinations: when the scenario tuple changes and contains only
-    known elements, the SHA-256 classifier may flag it; the episode lasts
+Unknown combinations are optional and disabled by default:
+  - HASH combinations are optional and disabled by default. When enabled,
+    the SHA-256 classifier may flag an all-known tuple; its episode lasts
     exactly as long as that tuple persists (any element change ends it;
     self-transitions continue it).
   - PATTERN combinations (SOTIF-style interactions): configured rules are
@@ -85,6 +85,7 @@ LAYER_DEFINITIONS = (
     ("triggering_conditions", "trigger"),
 )
 N_LAYERS = len(LAYER_DEFINITIONS)
+TRIGGERING_LAYER_INDEX = N_LAYERS - 1
 
 
 class ConfigError(ValueError):
@@ -131,7 +132,11 @@ class SimConfig:
     average_speed_mph: float = 50.0
     min_duration_seconds: float = 1.0
     mileage_window_miles: float = 10_000.0
-    enable_unknown_combinations: bool = True    # hash + pattern combinations
+    enable_unknown_combinations: bool = False   # pattern combinations disabled
+    enable_hash_combinations: bool = False      # disabled: do not evaluate hashes
+    # A triggering-condition unknown is a dedicated hidden-scenario route,
+    # rather than a normal visible-layer element episode.
+    enable_hidden_triggering_unknowns: bool = True
     combination_rules: dict = field(default_factory=lambda: {
         "manual": [], "generated_max_rules": 0,
         "generated_layers_per_rule": 2, "generated_target_mass": 0.0})
@@ -140,7 +145,10 @@ class SimConfig:
     unknown_weight_mode: str = "calculated"
     target_unknown_element_probability: float = 0.004
     fixed_unknown_weight: float = 0.001
-    unknown_combination_probability: float = 0.005  # dormant classifier parameter
+    unknown_combination_probability: float = 0.005  # used only when hash is enabled
+    full_scenario_unknowns: dict = field(default_factory=lambda: {
+        "enabled": False, "target_stationary_mass": 0.004,
+        "calibration_samples": 2_000_000, "calibration_seed": 90123})
     concentration_scale: float = 20_000.0   # from concentration_study.md
     allow_self_transition: bool = True
     layers: dict = field(default_factory=dict)   # layer key -> LayerParams
@@ -247,6 +255,42 @@ class SimConfig:
                 raise ConfigError(f"base_weights[{r}] must be positive.")
         if "unknown" in self.base_weights:
             raise ConfigError("Do not set base_weights['unknown'].")
+
+        fs = self.full_scenario_unknowns
+        if not isinstance(fs, dict):
+            raise ConfigError("full_scenario_unknowns must be a mapping.")
+        fs_allowed = {"enabled", "target_stationary_mass",
+                      "calibration_samples", "calibration_seed"}
+        fs_bad = [k for k in fs if k not in fs_allowed]
+        if fs_bad:
+            raise ConfigError(f"full_scenario_unknowns has unknown keys: {fs_bad}")
+        fs.setdefault("enabled", False)
+        fs.setdefault("target_stationary_mass", 0.004)
+        fs.setdefault("calibration_samples", 2_000_000)
+        fs.setdefault("calibration_seed", 90123)
+        if not isinstance(fs["enabled"], bool):
+            raise ConfigError("full_scenario_unknowns.enabled must be a bool.")
+        tsm = fs["target_stationary_mass"]
+        if not (0.0 < float(tsm) < 1.0):
+            raise ConfigError("full_scenario_unknowns.target_stationary_mass "
+                              "must be in (0, 1).")
+        cs = fs["calibration_samples"]
+        if isinstance(cs, bool) or not isinstance(cs, int):
+            raise ConfigError("full_scenario_unknowns.calibration_samples "
+                              "must be an integer.")
+        if cs < max(100_000, int(math.ceil(10.0 / float(tsm)))):
+            raise ConfigError(
+                "full_scenario_unknowns.calibration_samples is too small for "
+                "a reliable threshold: need at least "
+                f"max(100000, 10/target) = "
+                f"{max(100_000, int(math.ceil(10.0 / float(tsm))))}.")
+        csd = fs["calibration_seed"]
+        if isinstance(csd, bool) or not isinstance(csd, int):
+            raise ConfigError("full_scenario_unknowns.calibration_seed must "
+                              "be an integer.")
+
+        if not isinstance(self.enable_hidden_triggering_unknowns, bool):
+            raise ConfigError("enable_hidden_triggering_unknowns must be a bool.")
 
         if not (0 < self.target_unknown_element_probability < 1):
             raise ConfigError("target_unknown_element_probability must be in (0,1).")
@@ -582,6 +626,80 @@ class UnknownCombinationClassifier:
         return self.hash_value(element_names) < self.threshold
 
 
+# ------------------------------------------------ full-scenario rarity classifier
+
+class FullScenarioClassifier:
+    """Rare-tuple classifier over COMPLETE six-layer scenarios.
+
+    The stationary probability of the current tuple S is the product of the
+    six realized permanent transition-vector probabilities (layers are
+    independent with i.i.d. transitions, so the stationary tuple
+    distribution is exactly the product measure):
+
+        P(S) = q_street(s1) * q_temporal(s2) * ... * q_trigger(s6)
+
+    S is an unknown (rare) scenario iff every layer is on a known element and
+    P(S) <= calibrated_rarity_threshold.  A triggering-condition unknown is
+    intentionally handled by its separate hidden-triggering route.
+
+    Calibration (deterministic Monte Carlo, dedicated seed): draw N tuples
+    from the stationary product distribution itself. Because samples come
+    from P, the stationary mass of the eligible set {S: all elements known,
+    P(S) <= t} equals the probability that a sampled tuple is eligible and
+    satisfies P <= t. The threshold is therefore chosen from the eligible
+    sampled P(S) values: with k = round(target * N), threshold = k-th
+    smallest eligible sampled P(S), and the achieved (in-sample) mass is
+    count(eligible and P <= threshold)/N ~= k/N.
+
+    Approximation note: the in-sample mass matches the target up to 1/N and
+    float ties; the TRUE stationary mass of {P <= threshold} deviates from
+    the target by the Monte Carlo quantile error, of order
+    sqrt(target*(1-target)/N) (~1.1% relative at target=0.004, N=2e6).
+    No hashing and no per-layer patterns are involved; every classification
+    uses all six current layers via the product above.
+    """
+
+    def __init__(self, cfg: SimConfig, layers):
+        fs = cfg.full_scenario_unknowns
+        self.target_stationary_mass = float(fs["target_stationary_mass"])
+        self.calibration_samples = int(fs["calibration_samples"])
+        self.calibration_seed = int(fs["calibration_seed"])
+        rng = np.random.default_rng(self.calibration_seed)
+        n = self.calibration_samples
+        p_prod = np.ones(n, dtype=np.float64)
+        eligible = np.ones(n, dtype=bool)
+        for layer in layers:
+            q = np.asarray(layer.transition_probs, dtype=np.float64)
+            cum = np.cumsum(q)
+            idx = np.searchsorted(cum, rng.random(n), side="right")
+            np.clip(idx, 0, len(q) - 1, out=idx)
+            p_prod *= q[idx]
+            eligible &= ~np.asarray(layer.is_unknown, dtype=bool)[idx]
+        p_sorted = np.sort(p_prod[eligible])
+        k = max(int(round(self.target_stationary_mass * n)), 1)
+        if k > len(p_sorted):
+            raise ConfigError(
+                "full_scenario_unknowns.target_stationary_mass exceeds the "
+                "sampled all-known stationary mass; lower the target.")
+        self.calibrated_rarity_threshold = float(p_sorted[k - 1])
+        self.eligible_sampled_mass = float(np.mean(eligible))
+        self.achieved_sampled_mass = float(
+            np.mean(eligible & (p_prod <= self.calibrated_rarity_threshold)))
+
+    def is_rare(self, p_tuple: float) -> bool:
+        return p_tuple <= self.calibrated_rarity_threshold
+
+    def stats(self) -> dict:
+        return {
+            "target_stationary_mass": self.target_stationary_mass,
+            "calibration_samples": self.calibration_samples,
+            "calibration_seed": self.calibration_seed,
+            "calibrated_rarity_threshold": self.calibrated_rarity_threshold,
+            "eligible_sampled_mass": self.eligible_sampled_mass,
+            "achieved_sampled_mass": self.achieved_sampled_mass,
+        }
+
+
 # ----------------------------------------------------- pattern combination rules
 
 @dataclass
@@ -692,7 +810,7 @@ class Episode:
     end_time_seconds: float = None
     end_mileage: float = None
     truncated: bool = False
-    type: str = "element"    # "element" | "pattern" | "hash_combination"
+    type: str = "element"    # element | hidden_triggering_unknown | pattern | hash_combination | full_scenario
 
     @property
     def duration_seconds(self) -> float:
@@ -712,10 +830,13 @@ class SimulationResult:
     total_unknown_time_seconds: float  # union of ALL episode intervals
     layer_stats: list
     combination_stats: dict           # rules, masses, per-rule/hash counts
+    full_scenario_stats: dict         # calibration info + episode count
+    hidden_triggering_stats: dict     # dedicated triggering-condition route
     config: SimConfig
 
     def episodes_by_type(self) -> dict:
-        out = {"element": 0, "pattern": 0, "hash_combination": 0}
+        out = {"element": 0, "hidden_triggering_unknown": 0,
+               "pattern": 0, "hash_combination": 0, "full_scenario": 0}
         for e in self.episodes:
             out[e.type] += 1
         return out
@@ -774,8 +895,10 @@ class ScenarioSimulator:
                                    self.rng_rarity,
                                    self.np_rng_transition)
                        for key, prefix in LAYER_DEFINITIONS]
-        self.classifier = UnknownCombinationClassifier(
-            cfg.global_seed, cfg.unknown_combination_probability)
+        self.classifier = (
+            UnknownCombinationClassifier(
+                cfg.global_seed, cfg.unknown_combination_probability)
+            if cfg.enable_hash_combinations else None)
         if cfg.enable_unknown_combinations:
             self.rules = build_combination_rules(cfg, self.layers,
                                                  self.rng_pattern_rules)
@@ -786,6 +909,30 @@ class ScenarioSimulator:
         for rule in self.rules:
             for k, _e in rule.items:
                 self.rules_by_layer[k].append(rule.index)
+        # full-scenario rarity classifier (dedicated calibration seed; does
+        # not consume any of the existing RNG streams)
+        if cfg.full_scenario_unknowns.get("enabled", False):
+            self.full_scenario = FullScenarioClassifier(cfg, self.layers)
+        else:
+            self.full_scenario = None
+        self._layer_probs = [[float(p) for p in l.transition_probs]
+                             for l in self.layers]
+
+    def tuple_probability(self, idx_tuple) -> float:
+        """Stationary probability of a complete six-layer tuple: the product
+        of all six layers' realized transition-vector probabilities."""
+        p = 1.0
+        for k in range(N_LAYERS):
+            p *= self._layer_probs[k][idx_tuple[k]]
+        return p
+
+    def is_rare_tuple(self, idx_tuple) -> bool:
+        if self.full_scenario is None:
+            return False
+        if any(self.layers[k].is_unknown[idx_tuple[k]]
+               for k in range(N_LAYERS)):
+            return False
+        return self.full_scenario.is_rare(self.tuple_probability(idx_tuple))
 
     def scenario_names(self, idx_tuple):
         return tuple(self.layers[k].names[idx_tuple[k]] for k in range(N_LAYERS))
@@ -825,7 +972,11 @@ class ScenarioSimulator:
             "open_element": [None] * N_LAYERS,   # per-layer episode index
             "open_pattern": [None] * len(self.rules),   # per-rule
             "open_hash": None,
+            "open_full": None,
+            "open_hidden_trigger": None,
             "episodes_opened": 0,
+            "full_episode_count": 0,
+            "hidden_trigger_episode_count": 0,
             "episodes_active": 0,              # all types (union tracking)
             "element_unknown_active": 0,       # element episodes only (hash gate)
             "union_started_t": 0.0,
@@ -842,28 +993,44 @@ class ScenarioSimulator:
             "wall_seconds": 0.0,
         }
         # t=0 starts: element episodes for layers on unknown elements, then
-        # pattern episodes for initially matched rules, then a hash episode
-        # if the initial all-known tuple is flagged.
+        # pattern episodes for initially matched rules. Hash episodes are only
+        # considered when the optional hash mechanism is explicitly enabled.
         for k in range(N_LAYERS):
             if layers[k].is_unknown[current[k]]:
-                self._open(state, ("element", k),
-                           LAYER_DEFINITIONS[k][0],
-                           layers[k].names[current[k]], "element", 0.0, 0.0)
+                if (k == TRIGGERING_LAYER_INDEX
+                        and self.cfg.enable_hidden_triggering_unknowns):
+                    self._open(state, ("hidden_trigger",),
+                               "triggering_conditions",
+                               "hidden_triggering_unknown",
+                               "hidden_triggering_unknown", 0.0, 0.0)
+                    state["hidden_trigger_episode_count"] += 1
+                else:
+                    self._open(state, ("element", k),
+                               LAYER_DEFINITIONS[k][0],
+                               layers[k].names[current[k]], "element", 0.0, 0.0)
+                    state["episodes_by_layer"][k] += 1
                 state["element_unknown_active"] += 1
-                state["episodes_by_layer"][k] += 1
         for rule in self.rules:
             if rule.matched(current):
                 self._open(state, ("pattern", rule.index), "combination",
                            rule.description, "pattern", 0.0, 0.0)
                 state["episodes_by_rule"][rule.index] += 1
         if (self.cfg.enable_unknown_combinations
+                and self.cfg.enable_hash_combinations
                 and state["element_unknown_active"] == 0
+                and self.classifier is not None
                 and self.classifier.is_unknown_combination(
                     self.scenario_names(tuple(current)))):
             self._open(state, ("hash",), "combination",
                        self.scenario_string(tuple(current)),
                        "hash_combination", 0.0, 0.0)
             state["hash_episode_count"] += 1
+        # full-scenario rarity of the initial complete tuple
+        if self.is_rare_tuple(tuple(current)):
+            self._open(state, ("full",), "scenario",
+                       self.scenario_string(tuple(current)),
+                       "full_scenario", 0.0, 0.0)
+            state["full_episode_count"] += 1
         return state
 
     # -- generic episode slot management ---------------------------------------
@@ -872,6 +1039,10 @@ class ScenarioSimulator:
             return state["open_element"][slot[1]]
         if slot[0] == "pattern":
             return state["open_pattern"][slot[1]]
+        if slot[0] == "full":
+            return state["open_full"]
+        if slot[0] == "hidden_trigger":
+            return state["open_hidden_trigger"]
         return state["open_hash"]
 
     def _slot_set(self, state, slot, value):
@@ -879,6 +1050,10 @@ class ScenarioSimulator:
             state["open_element"][slot[1]] = value
         elif slot[0] == "pattern":
             state["open_pattern"][slot[1]] = value
+        elif slot[0] == "full":
+            state["open_full"] = value
+        elif slot[0] == "hidden_trigger":
+            state["open_hidden_trigger"] = value
         else:
             state["open_hash"] = value
 
@@ -940,14 +1115,17 @@ class ScenarioSimulator:
         names_l = [l.names for l in layers]
         layer_keys = [key for key, _ in LAYER_DEFINITIONS]
         combos_enabled = cfg.enable_unknown_combinations
+        hash_enabled = combos_enabled and cfg.enable_hash_combinations
         rules = self.rules
         rules_by_layer = self.rules_by_layer
-        sha256 = hashlib.sha256
-        hash_prefix = self.classifier.prefix
-        threshold = self.classifier.threshold
+        sha256 = hashlib.sha256 if hash_enabled else None
+        hash_prefix = self.classifier.prefix if hash_enabled else None
+        threshold = self.classifier.threshold if hash_enabled else None
         two256 = 2 ** 256
         changed_layers = []
         affected = set()
+        full_enabled = self.full_scenario is not None
+        hidden_trigger_enabled = self.cfg.enable_hidden_triggering_unknowns
 
         current = state["current"]
         remaining = state["remaining"]
@@ -996,8 +1174,22 @@ class ScenarioSimulator:
                                         allow_self)
                 cur_u = unk_l[k][cur]
                 nxt_u = unk_l[k][nxt]
-                # element-episode rules 1-4 (per layer)
-                if cur_u:
+                # Triggering conditions are a hidden category: any unknown
+                # triggering element keeps the same episode open.  Other
+                # unknown-bearing layers retain element-level semantics.
+                if k == TRIGGERING_LAYER_INDEX and hidden_trigger_enabled:
+                    if cur_u:
+                        if not nxt_u:
+                            self._close(state, ("hidden_trigger",), t, miles)
+                            state["element_unknown_active"] -= 1
+                    elif nxt_u:
+                        self._open(state, ("hidden_trigger",),
+                                   "triggering_conditions",
+                                   "hidden_triggering_unknown",
+                                   "hidden_triggering_unknown", t, miles)
+                        state["hidden_trigger_episode_count"] += 1
+                        state["element_unknown_active"] += 1
+                elif cur_u:
                     if nxt != cur:
                         if nxt_u:                       # rule 3: restart
                             self._close(state, ("element", k), t, miles)
@@ -1040,10 +1232,11 @@ class ScenarioSimulator:
                         state["episodes_by_rule"][ri] += 1
                     elif is_open and not now:
                         self._close(state, ("pattern", ri), t, miles)
-                # hash episode: the previous tuple no longer exists
-                if state["open_hash"] is not None:
+                # Hash episodes are fully skipped while the optional hash
+                # mechanism is disabled.
+                if hash_enabled and state["open_hash"] is not None:
                     self._close(state, ("hash",), t, miles)
-                if state["element_unknown_active"] == 0:
+                if hash_enabled and state["element_unknown_active"] == 0:
                     names_str = "|".join([names_l[k][current[k]]
                                           for k in layer_range])
                     payload = hash_prefix + names_str.encode()
@@ -1052,6 +1245,20 @@ class ScenarioSimulator:
                         self._open(state, ("hash",), "combination",
                                    names_str, "hash_combination", t, miles)
                         state["hash_episode_count"] += 1
+            # ---- full-scenario rarity: evaluated once per event on the
+            # complete six-layer tuple, only when the tuple genuinely
+            # changed (self-transitions leave it - and any episode - intact)
+            if changed and full_enabled:
+                if state["open_full"] is not None:
+                    # the previous exact scenario no longer exists: close it
+                    # (rare A -> rare B reopens below at the same timestamp)
+                    self._close(state, ("full",), t, miles)
+                if self.is_rare_tuple(tuple(current)):
+                    self._open(state, ("full",), "scenario",
+                               "|".join([names_l[k][current[k]]
+                                         for k in layer_range]),
+                               "full_scenario", t, miles)
+                    state["full_episode_count"] += 1
             changed_layers.clear()
             events += 1
 
@@ -1074,11 +1281,15 @@ class ScenarioSimulator:
         for k in layer_range:
             if state["open_element"][k] is not None:
                 self._close(state, ("element", k), t, miles, truncated=True)
+        if state["open_hidden_trigger"] is not None:
+            self._close(state, ("hidden_trigger",), t, miles, truncated=True)
         for ri in range(len(self.rules)):
             if state["open_pattern"][ri] is not None:
                 self._close(state, ("pattern", ri), t, miles, truncated=True)
-        if state["open_hash"] is not None:
+        if hash_enabled and state["open_hash"] is not None:
             self._close(state, ("hash",), t, miles, truncated=True)
+        if state["open_full"] is not None:
+            self._close(state, ("full",), t, miles, truncated=True)
 
         return self._build_result(state), state
 
@@ -1114,6 +1325,7 @@ class ScenarioSimulator:
 
         combination_stats = {
             "enabled": cfg.enable_unknown_combinations,
+            "hash_enabled": cfg.enable_hash_combinations,
             "hash_threshold": cfg.unknown_combination_probability,
             "hash_episodes": state["hash_episode_count"],
             "pattern_episodes": sum(state["episodes_by_rule"]),
@@ -1123,6 +1335,10 @@ class ScenarioSimulator:
                 "episodes": state["episodes_by_rule"][r.index],
             } for r in self.rules],
         }
+        full_stats = {"enabled": self.full_scenario is not None,
+                      "episodes": state["full_episode_count"]}
+        if self.full_scenario is not None:
+            full_stats.update(self.full_scenario.stats())
         return SimulationResult(
             total_miles=state["miles"],
             total_time_seconds=state["t"],
@@ -1131,5 +1347,12 @@ class ScenarioSimulator:
             total_unknown_time_seconds=state["union_time"],
             layer_stats=layer_stats,
             combination_stats=combination_stats,
+            full_scenario_stats=full_stats,
+            hidden_triggering_stats={
+                "enabled": cfg.enable_hidden_triggering_unknowns,
+                "layer": "triggering_conditions",
+                "category": "hidden_triggering_unknown",
+                "episodes": state["hidden_trigger_episode_count"],
+            },
             config=cfg,
         )

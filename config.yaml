@@ -13,10 +13,9 @@ seeds:
   duration: 45678             # Gamma duration sampling (initial + simulation)
   initial_state: 56789        # initial element selection per layer
   transition_sampling: 67890  # next-element selection during simulation
-  pattern_rules: 78901        # one-time generation of pattern combination rules
+  pattern_rules: 78901        # retained for optional pattern rules (disabled)
 
-global_seed: 42               # Seed of the (currently DISABLED, see below)
-                              # SHA-256 unknown-combination classifier.
+global_seed: 42               # Used only if optional hash combinations are enabled.
 
 # --- Simulation run -------------------------------------------------------
 target_total_miles: 2000000     # Stop once simulated mileage reaches this.
@@ -27,26 +26,33 @@ min_duration_seconds: 1.0       # Lower clamp for every sampled duration.
 mileage_window_miles: 10000     # Window size for per-window episode-start
                                 # counts, mean, variance, dispersion index.
 
-# --- Unknown combinations (v3: RE-ENABLED, two mechanisms) -------------------
-# 1) HASH combinations: when the scenario tuple changes and all six elements
-#    are known, the seeded SHA-256 classifier flags ~unknown_combination_
-#    probability of tuples. The episode lasts exactly as long as that tuple
-#    persists (any element change ends it).
-# 2) PATTERN combinations (SOTIF-style interactions): rules below are
-#    conjunctions of specific KNOWN elements in >= 2 layers; a rule's
-#    episode runs while all its elements are simultaneously current -
-#    naturally surviving changes in unrelated layers. Rules are manual
-#    and/or generated once from seeds.pattern_rules: random 2-layer
-#    conjunctions accumulated until generated_target_mass stationary
-#    probability mass is reached (capped at generated_max_rules).
-enable_unknown_combinations: true
-unknown_combination_probability: 0.005   # hash threshold
-combination_rules:
-  manual:                                # hand-written interaction rules
-    - {street: forced_merge_merging, environmental_conditions: environment_000}
-  generated_max_rules: 12
-  generated_layers_per_rule: 2
-  generated_target_mass: 0.005           # ~0.5% total stationary mass
+# --- Unknown combinations ------------------------------------------------------
+# Pattern and hash combinations are disabled.
+enable_unknown_combinations: false
+enable_hash_combinations: false
+
+# Route 2: unknown triggering-condition elements are represented as one
+# dedicated hidden category, separate from normal visible-layer elements.
+enable_hidden_triggering_unknowns: true
+
+# --- Full-scenario rarity unknowns (v4) --------------------------------------
+# A COMPLETE six-layer tuple S is an unknown scenario iff its stationary
+# probability P(S) = product of the six realized transition-vector
+# probabilities is <= calibrated_rarity_threshold. The threshold is
+# calibrated once at initialization by deterministic Monte Carlo (dedicated
+# calibration_seed; no other RNG stream is touched): N tuples are drawn
+# from the stationary product distribution and the threshold is set to the
+# target quantile, so the total stationary MASS (not the tuple count) of
+# rare all-known tuples ~= target_stationary_mass. Tuples containing any
+# unknown element are excluded, because they are handled by routes 1 or 2.
+# The achieved sampled mass is
+# reported in summary.md / stats.json. No hashing, no partial-layer
+# patterns; every classification uses all six current layers.
+full_scenario_unknowns:
+  enabled: true
+  target_stationary_mass: 0.004   # ~0.4% of simulated time in expectation
+  calibration_samples: 2000000
+  calibration_seed: 90123
 
 # --- Rarity category proportions (must sum to 1.0) ------------------------
 # Layers with allow_unknown: false use the four known proportions

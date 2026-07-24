@@ -9,6 +9,12 @@ duration measurement (replacing per-tuple encounter counting), a fixed
 real-element street layer, no unknown elements in street/weather,
 research-based element counts, and a studied Dirichlet concentration.
 
+> **Current configuration override:** Both pattern and hash combinations are
+> disabled in `config.yaml`. The active simulation builds no combination
+> rules, does not instantiate the hash classifier, and emits only
+> element-level unknown episodes. Later combination sections describe optional
+> mechanisms retained in the code, not behavior of the delivered configuration.
+
 ---
 
 ## 1. Big picture
@@ -295,3 +301,57 @@ inputs; inter-arrival consistency; target/time consistency; bit-identical
 reproducibility and chunked resume.
 
 Run with `pytest test_simulator.py -q`.
+
+
+---
+
+## 12. (v4) Full-scenario rarity unknowns
+
+The current simulator uses three mutually distinct routes to an unknown
+scenario: normal unknown elements in visible unknown-bearing layers; the
+`hidden_triggering_unknown` category for any unknown element in the hidden
+`triggering_conditions` layer; and rare full six-layer tuples that contain
+known elements only. The latter excludes every tuple covered by either of
+the first two routes.
+
+`FullScenarioClassifier` (simulator.py) implements the scenario-level
+unknown mechanism that replaces pattern/hash combinations (both disabled
+in config):
+
+- **Definition.** For the current complete tuple S, the stationary
+  probability is P(S) = q_street(s1)*q_temporal(s2)*...*q_trigger(s6),
+  using each layer's realized permanent `transition_probs`. Because layers
+  are independent with i.i.d. transitions and duration distributions that
+  do not depend on the element, the time-stationary tuple distribution is
+  exactly this product measure. S is a full-scenario unknown iff every
+  element is known and P(S) <= `calibrated_rarity_threshold`. All six layers
+  always enter the classification; there is no hashing and no partial-layer
+  matching.
+- **Calibration.** At initialization, N = `calibration_samples` tuples are
+  drawn from the stationary product distribution itself using a dedicated
+  `numpy` RNG seeded with `calibration_seed` (none of the six existing
+  streams is consumed, so all other randomness is unchanged). Since the
+  samples come from P, the stationary mass of {S : all elements known and
+  P(S) <= t} equals the fraction of eligible samples below t; the threshold
+  is therefore the k = round(target*N)-th smallest eligible sampled P value.
+  The in-sample achieved mass (reported in summary.md/stats.json) matches
+  the target up to 1/N; the true mass of the thresholded set carries the
+  Monte Carlo quantile error ~ sqrt(target(1-target)/N) (~1.1% relative at
+  the defaults). Coverage is measured in probability MASS, never in the
+  number of rare tuples.
+- **Episode semantics** (type `full_scenario`, layer `scenario`, element =
+  pipe-separated tuple): evaluated once per event after all simultaneously
+  expired layers are updated, and only when the tuple genuinely changed -
+  self-transitions leave both the tuple and any open episode untouched.
+  Known -> rare opens; rare -> known closes; rare A -> rare B closes A and
+  opens B at the same timestamp; t=0 opens an episode if the initial tuple
+  is rare; episodes still open at the end close truncated. It cannot overlap
+  with either element route, because every full-scenario tuple is all-known.
+- **Expected values** (analytical_model.py): time fraction in rare tuples
+  = calibrated mass (exact in expectation); E[duration] ~= 1/tuple-change-
+  rate; E[episodes] ~= T * tuple-change-rate * mass (entry-rate
+  approximation, ~10%, because rare-set membership correlates with
+  slow-layer states).
+- **Historical results:** `results/` predates this configuration and is
+  not valid for it until regenerated; the delivered v4 run is in
+  `results_full_scenario/`.

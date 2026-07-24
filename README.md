@@ -2,10 +2,8 @@
 
 Simulates an autonomous vehicle driving 2,000,000 miles through a 6-layer
 scenario model and measures **unknown episodes**: how often the vehicle
-enters an unknown scenario and **how long each one lasts**. Three episode
-types are tracked concurrently: unknown **elements**, pattern-based
-unknown **combinations** (SOTIF-style interactions), and hash-based
-unknown combinations.
+enters an unknown scenario and **how long each one lasts**. The delivered
+configuration tracks unknown **elements** only.
 
 ## Files
 
@@ -45,28 +43,10 @@ Episodes still open at the end of the run are closed and flagged
 `truncated`. One unknown period = one count, however many other layers
 change meanwhile.
 
-**Unknown combinations (re-enabled in v3, two mechanisms):**
-
-- **Pattern combinations** — configured rules that are conjunctions of
-  specific known-rarity elements in ≥2 layers (wildcards elsewhere), e.g.
-  `street=forced_merge_merging & environmental_conditions=environment_000`.
-  A rule's episode runs while all its elements are simultaneously current,
-  so it naturally survives changes in unrelated layers (mean duration
-  ~4 min in the delivered run). Rules are hand-written in the config
-  and/or generated once from `seeds.pattern_rules` — random 2-layer
-  conjunctions accumulated until `generated_target_mass` (~0.5%)
-  stationary probability mass is reached. Rules may only reference known
-  elements; each rule's mass is the product of its elements' stationary
-  probabilities, so everything stays analytically closed-form.
-- **Hash combinations** — the original SHA-256 classifier (`global_seed`,
-  `unknown_combination_probability` = 0.005), applied when the tuple
-  changes and all six elements are known. The episode lasts exactly as
-  long as that tuple persists (any element change ends it), so these are
-  short (mean ≈ 17 s ≈ the mean tuple lifetime).
-
-All three types can overlap; each is counted separately, and the union
-unknown time merges overlaps. `enable_unknown_combinations: false` turns
-both combination mechanisms off.
+**Unknown combinations:** Pattern and hash combinations are disabled in the
+delivered configuration. No rules are loaded or generated, and the hash
+classifier is not instantiated or evaluated. The union unknown time therefore
+contains only overlapping element-level unknown episodes.
 
 ## The six layers (v2 configuration)
 
@@ -114,12 +94,37 @@ randomness: its vector is exact regardless of seeds.
 
 ## Headline results of the delivered 2M-mile run (seeds as in config)
 
-84,296 unknown episodes total (42,148 per million miles), none truncated:
-element 39,227 (mean duration 60.5 s — bit-identical to the v2 run, since
-combination tracking consumes no randomness), pattern 3,476 (mean 261 s —
-long-lived interactions), hash combination 41,593 (mean 16.7 s ≈ mean
-tuple lifetime). Total unknown time (union of all types) 3,946,822 s =
-2.74% of the 40,000 simulated hours. Unknown-element selection rate
-0.417% vs the 0.40% target; street composition reproduced to ~0.1%. The
-closed-form analytical model predicts 84,724 episodes — within 0.5% of
-the simulation (`analytical_model.md`).
+The checked-in `results/` directory was generated before combinations were
+disabled and is retained as a historical baseline. Regenerate the run after
+this configuration change before interpreting its totals as results of the
+current element-only model.
+
+
+## v4: Full-scenario rarity unknowns (current)
+
+Pattern and hash combinations are **disabled**. In addition to the
+unchanged element-level episodes, a scenario-level mechanism classifies
+the COMPLETE six-layer tuple S by its stationary probability
+P(S) = product of the six realized transition-vector probabilities. For
+the full-scenario route, S must contain known elements in all six layers
+and P(S) must be <= a threshold calibrated once at
+initialization (deterministic Monte Carlo from the stationary product
+distribution, dedicated `calibration_seed`) so that the total stationary
+MASS of rare tuples matches `target_stationary_mass` (0.4%). Episode
+semantics: open on entering a rare tuple, close when the exact tuple
+changes to a known one, close+reopen on rare A -> rare B, unaffected by
+self-transitions. Configuration: `full_scenario_unknowns` in config.yaml.
+
+**Delivered run (`results_full_scenario/`)** predates the three-route change
+below; regenerate it before comparing results.
+
+The simulator now treats unknown scenarios through three non-overlapping
+routes: a normal unknown element in a visible unknown-bearing layer; a
+dedicated `hidden_triggering_unknown` episode whenever the hidden triggering
+conditions layer is unknown; or a rare full six-layer combination made only
+of known elements. The full-scenario route is therefore never used for a
+tuple already covered by either element route.
+
+**NOTE: the historical `results/` directory predates this configuration
+and is NOT valid for it — regenerate before comparing. The current
+configuration's results live in `results_full_scenario/`.**
