@@ -1,0 +1,39 @@
+{
+  "concentration_scale": 100.0,
+  "replicate": 3,
+  "transition_matrix_seed": 2034573,
+  "target_miles": 2000000,
+  "simulated_miles": 2000000.0558726417,
+  "total_events": 9998505,
+  "wall_seconds": 38.05832230002852,
+  "mean_realized_unknown_mass": 0.0008812750566837081,
+  "max_layer_relative_error": 0.9900643569661475,
+  "all_layers_within_25pct": false,
+  "element_route_episodes": 12052,
+  "full_scenario_episodes": 35974,
+  "total_unknown_episodes": 48026,
+  "episodes_per_million_miles": 24012.999329165148,
+  "unknown_time_fraction": 0.007559027538656661,
+  "mean_episode_duration_seconds": 22.668979512282107,
+  "window_dispersion_index": 6.002373086437476,
+  "layer_realized_unknown_mass": {
+    "temporal_modifications": 5.803314250136183e-05,
+    "ego_maneuver": 0.000590938423089482,
+    "ru_maneuver": 0.0028363860890085785,
+    "triggering_conditions": 3.974257213540999e-05
+  },
+  "layer_empirical_unknown_rate": {
+    "temporal_modifications": 4.1693593779315805e-05,
+    "ego_maneuver": 0.0006001042209484107,
+    "ru_maneuver": 0.0028564271328405722,
+    "triggering_conditions": 3.6676722201336866e-05
+  },
+  "episodes_by_type": {
+    "element": 12008,
+    "hidden_triggering_unknown": 44,
+    "pattern": 0,
+    "hash_combination": 0,
+    "full_scenario": 35974
+  },
+  "full_scenario_achieved_sampled_mass": 0.004
+}
