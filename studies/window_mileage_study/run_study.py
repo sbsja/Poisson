@@ -440,9 +440,15 @@ def write_report(mileage_summary, window_summary, elapsed_seconds):
         f"{default_full['n_windows']} windows and measured dispersion "
         f"{default_full['dispersion_index_mean']:.2f} ± "
         f"{default_full['dispersion_index_sd']:.2f}. A 100,000-mile window "
-        f"supplies only {largest_full['n_windows']} windows; its dispersion "
-        "estimate is therefore much less well replicated even though each "
-        "window contains more episodes.",
+        f"supplies only {largest_full['n_windows']} windows. Its observed "
+        f"across-run variation was {largest_full['dispersion_across_run_cv']:.1%}, "
+        "but 20 observations remain too few for a robust variance estimate.",
+        "",
+        "In these five full histories, the 1,000- and 5,000-mile windows "
+        "produced the most repeatable dispersion estimates. The current "
+        "10,000-mile window remains a practical balance: 200 observations, "
+        "hundreds of episodes per window, and less granular reporting than "
+        "the smaller alternatives.",
         "",
         "**Recommendation:** keep the existing 2,000,000-mile target and "
         "10,000-mile window for final reporting. For exploratory runs, use at "
