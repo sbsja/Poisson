@@ -42,6 +42,11 @@ from simulator import LAYER_DEFINITIONS, ScenarioSimulator, SimConfig
 
 
 def predict(cfg, layers, use_design_mass, sim_rules_holder=None):
+    if cfg.transition_model["mode"] != "independent":
+        raise ValueError(
+            "analytical_model.py supports only transition_model.mode="
+            "'independent'. Conditional transitions require dependency-aware "
+            "occupancy and entry-rate calculations.")
     T = cfg.target_total_miles / cfg.average_speed_mph * 3600.0
     per_layer = {}
     for k, (key, _p) in enumerate(LAYER_DEFINITIONS):

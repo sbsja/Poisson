@@ -12,6 +12,7 @@ from simulator import (KNOWN_RARITIES, LAYER_DEFINITIONS, RARITIES, SEED_KEYS,
                        UnknownCombinationClassifier, assign_rarity_counts,
                        compute_unknown_weight, compute_window_stats,
                        episode_transition_action)
+from run_simulation import build_stats_json, build_summary
 
 _STREET_ELEMENTS = [
     {"name": "constant_lane", "probability": 0.493},
@@ -106,6 +107,20 @@ def seeds_with(**over):
     s = dict(_SEEDS)
     s.update(over)
     return s
+
+
+def conditional_config(rules, apply_to_initial_state=True, **over):
+    return base_config(
+        full_scenario_unknowns={"enabled": False},
+        transition_model={
+            "mode": "conditional",
+            "conditional": {
+                "apply_to_initial_state": apply_to_initial_state,
+                "rules": rules,
+            },
+        },
+        **over,
+    )
 
 
 _COUNTS = {"common": 37, "medium": 19, "rare": 8, "very_rare": 4, "unknown": 7}
@@ -609,7 +624,344 @@ def test_chunked_resume_bit_identical():
     assert [(e.type, e.layer, e.element, e.start_mileage, e.end_mileage)
             for e in result.episodes] == \
            [(e.type, e.layer, e.element, e.start_mileage, e.end_mileage)
-            for e in full.episodes]
+           for e in full.episodes]
+
+
+# ------------------------------------------------ conditional transition model
+
+def _merge_ego_rule(rule_id="merge_affects_ego", multiplier=4.0):
+    return {
+        "id": rule_id,
+        "target_layer": "ego_maneuver",
+        "when": {
+            "street": {
+                "elements": [
+                    "forced_merge_proceeding",
+                    "forced_merge_merging",
+                ],
+            },
+        },
+        "multipliers": {"elements": {"ego_000": multiplier}},
+    }
+
+
+def test_transition_model_omitted_and_explicit_independent_are_bit_identical():
+    omitted = ScenarioSimulator(
+        base_config(target_total_miles=500.0)).run()
+    explicit = ScenarioSimulator(base_config(
+        target_total_miles=500.0,
+        transition_model={
+            "mode": "independent",
+            "conditional": {
+                "apply_to_initial_state": True,
+                "rules": [],
+            },
+        },
+    )).run()
+    assert omitted.total_events == explicit.total_events
+    assert omitted.total_miles == explicit.total_miles
+    assert omitted.total_time_seconds == explicit.total_time_seconds
+    assert omitted.total_unknown_time_seconds == \
+        explicit.total_unknown_time_seconds
+    assert omitted.episodes == explicit.episodes
+    assert [row["visit_counts"] for row in omitted.layer_stats] == \
+        [row["visit_counts"] for row in explicit.layer_stats]
+
+
+def test_independent_mode_does_not_compile_or_evaluate_dormant_rules():
+    dormant = _merge_ego_rule()
+    dormant["multipliers"]["elements"] = {"not_a_real_element": 5.0}
+    sim = ScenarioSimulator(base_config(
+        transition_model={
+            "mode": "independent",
+            "conditional": {
+                "apply_to_initial_state": True,
+                "rules": [dormant],
+            },
+        },
+    ))
+    assert sim.conditional_model is None
+    result = sim.run()
+    assert result.transition_model_stats["mode"] == "independent"
+    assert result.transition_model_stats["rules"][0]["active"] is False
+    assert result.transition_model_stats["rules"][0]["match_count"] == 0
+
+
+def test_conditional_matching_reweights_elements_and_rarities():
+    rule = _merge_ego_rule(multiplier=4.0)
+    rule["when"]["environmental_conditions"] = {
+        "rarities": ["common", "medium"],
+    }
+    rule["multipliers"]["rarities"] = {"common": 1.5}
+    sim = ScenarioSimulator(conditional_config([rule]))
+    street = sim.layers[0]
+    environment = sim.layers[4]
+    current = [0] * len(sim.layers)
+    current[0] = street.names.index("forced_merge_merging")
+    current[4] = next(
+        i for i, rarity in enumerate(environment.rarities)
+        if rarity == "common")
+    base = sim.layers[2].transition_probs
+    rng_before = sim.rng_transition.getstate()
+    actual = sim.conditional_model.probabilities_for(2, current, base)
+    assert sim.rng_transition.getstate() == rng_before
+    expected = base.copy()
+    expected[sim.layers[2].names.index("ego_000")] *= 4.0
+    for i, rarity in enumerate(sim.layers[2].rarities):
+        if rarity == "common":
+            expected[i] *= 1.5
+    expected /= expected.sum()
+    assert np.allclose(actual, expected)
+
+    current[0] = street.names.index("constant_lane")
+    unchanged = sim.conditional_model.probabilities_for(2, current, base)
+    assert np.allclose(unchanged, base)
+
+
+def test_conditional_selector_or_and_semantics():
+    rule = _merge_ego_rule()
+    rule["when"]["environmental_conditions"] = {
+        "elements": ["environment_000"],
+        "rarities": ["very_rare"],
+    }
+    sim = ScenarioSimulator(conditional_config([rule]))
+    current = [0] * len(sim.layers)
+    current[0] = sim.layers[0].names.index("forced_merge_proceeding")
+    current[4] = sim.layers[4].names.index("environment_000")
+    evaluation = sim.conditional_model.evaluate(
+        2, current, sim.layers[2].transition_probs)
+    assert evaluation.matched_rule_ids == ("merge_affects_ego",)
+
+    # The street condition is false, so the cross-layer AND must fail even
+    # though the environment condition still matches.
+    current[0] = sim.layers[0].names.index("constant_lane")
+    evaluation = sim.conditional_model.evaluate(
+        2, current, sim.layers[2].transition_probs)
+    assert evaluation.matched_rule_ids == ()
+
+
+def test_multiple_rules_combine_multiplicatively_and_ignore_yaml_order():
+    first = _merge_ego_rule("a_element", 2.0)
+    second = {
+        "id": "b_rarity",
+        "target_layer": "ego_maneuver",
+        "when": {
+            "street": {"elements": ["forced_merge_merging"]},
+        },
+        "multipliers": {"rarities": {"common": 3.0}},
+    }
+    sim_a = ScenarioSimulator(conditional_config([first, second]))
+    sim_b = ScenarioSimulator(conditional_config([second, first]))
+    current = [0] * len(sim_a.layers)
+    current[0] = sim_a.layers[0].names.index("forced_merge_merging")
+    pa = sim_a.conditional_model.probabilities_for(
+        2, current, sim_a.layers[2].transition_probs)
+    pb = sim_b.conditional_model.probabilities_for(
+        2, current, sim_b.layers[2].transition_probs)
+    assert np.array_equal(pa, pb)
+
+
+@pytest.mark.parametrize("transition_model", [
+    {
+        "mode": "conditional",
+        "conditional": {
+            "rules": [
+                {
+                    "id": "self",
+                    "target_layer": "ego_maneuver",
+                    "when": {"ego_maneuver": {"rarities": ["common"]}},
+                    "multipliers": {"rarities": {"common": 2.0}},
+                },
+            ],
+        },
+    },
+    {
+        "mode": "conditional",
+        "conditional": {
+            "rules": [
+                {
+                    "id": "street_to_ego",
+                    "target_layer": "ego_maneuver",
+                    "when": {"street": {"rarities": ["common"]}},
+                    "multipliers": {"rarities": {"common": 2.0}},
+                },
+                {
+                    "id": "ego_to_street",
+                    "target_layer": "street",
+                    "when": {"ego_maneuver": {"rarities": ["common"]}},
+                    "multipliers": {
+                        "elements": {"constant_lane": 2.0},
+                    },
+                },
+            ],
+        },
+    },
+])
+def test_conditional_self_dependencies_and_cycles_rejected(transition_model):
+    with pytest.raises(ConfigError):
+        base_config(
+            full_scenario_unknowns={"enabled": False},
+            transition_model=transition_model,
+        )
+
+
+def test_conditional_invalid_references_and_multipliers_rejected():
+    bad_multiplier = _merge_ego_rule()
+    bad_multiplier["multipliers"]["elements"]["ego_000"] = float("nan")
+    with pytest.raises(ConfigError):
+        conditional_config([bad_multiplier])
+
+    duplicate = [_merge_ego_rule("same"), _merge_ego_rule("same")]
+    with pytest.raises(ConfigError):
+        conditional_config(duplicate)
+
+    bad_element = _merge_ego_rule()
+    bad_element["when"]["street"]["elements"] = ["does_not_exist"]
+    with pytest.raises(ConfigError):
+        ScenarioSimulator(conditional_config([bad_element]))
+
+
+def test_conditional_zero_distribution_rejected_and_self_exclusion_applied():
+    zero_rule = {
+        "id": "zero_everything",
+        "target_layer": "ego_maneuver",
+        "when": {"street": {"elements": ["constant_lane"]}},
+        "multipliers": {
+            "rarities": {rarity: 0.0 for rarity in RARITIES},
+        },
+    }
+    sim = ScenarioSimulator(conditional_config([zero_rule]))
+    current = [0] * len(sim.layers)
+    current[0] = sim.layers[0].names.index("constant_lane")
+    with pytest.raises(ConfigError):
+        sim.conditional_model.probabilities_for(
+            2, current, sim.layers[2].transition_probs)
+
+    empty = ScenarioSimulator(conditional_config([]))
+    probs = empty.conditional_model.probabilities_for(
+        2, [0] * len(empty.layers), empty.layers[2].transition_probs,
+        current_element=0, allow_self_transition=False)
+    assert probs[0] == 0.0
+    assert math.isclose(float(probs.sum()), 1.0)
+
+
+def test_conditional_initialization_uses_dependency_order():
+    force_ego_zero = {
+        "id": "initial_street_to_ego",
+        "target_layer": "ego_maneuver",
+        "when": {"street": {"elements": ["constant_lane"]}},
+        "multipliers": {
+            "elements": {
+                **{f"ego_{i:03d}": 0.0 for i in range(12)},
+                "ego_000": 1.0,
+            },
+        },
+    }
+    sim = ScenarioSimulator(conditional_config([force_ego_zero]))
+    state = sim._new_state()
+    assert sim.layers[0].names[state["current"][0]] == "constant_lane"
+    assert sim.layers[2].names[state["current"][2]] == "ego_000"
+    assert sim.conditional_model.dependency_order.index(0) < \
+        sim.conditional_model.dependency_order.index(2)
+
+
+def test_simultaneous_expiries_use_new_parent_state():
+    rule = {
+        "id": "environment_to_ego",
+        "target_layer": "ego_maneuver",
+        "when": {
+            "environmental_conditions": {"rarities": ["rare"]},
+        },
+        "multipliers": {
+            "rarities": {
+                "common": 1.0,
+                "medium": 0.0,
+                "rare": 0.0,
+                "very_rare": 0.0,
+                "unknown": 0.0,
+            },
+        },
+    }
+    sim = ScenarioSimulator(conditional_config(
+        [rule], apply_to_initial_state=False, target_total_miles=0.001))
+    state = sim._new_state()
+    environment = sim.layers[4]
+    rare_index = next(
+        i for i, rarity in enumerate(environment.rarities)
+        if rarity == "rare")
+    common_index = next(
+        i for i, rarity in enumerate(environment.rarities)
+        if rarity == "common")
+    state["current"][4] = common_index
+    state["current"][2] = next(
+        i for i, rarity in enumerate(sim.layers[2].rarities)
+        if rarity == "common")
+    state["remaining"] = [100.0] * len(sim.layers)
+    state["remaining"][2] = 1.0
+    state["remaining"][4] = 1.0
+    forced = np.zeros(environment.n_elements)
+    forced[rare_index] = 1.0
+    environment.transition_probs = forced
+    environment.transition_cum = list(np.cumsum(forced))
+
+    result, final_state = sim.run_resumable(state)
+    assert result is not None
+    assert environment.rarities[final_state["current"][4]] == "rare"
+    assert sim.layers[2].rarities[final_state["current"][2]] == "common"
+    assert sim.conditional_model.dependency_order.index(4) < \
+        sim.conditional_model.dependency_order.index(2)
+
+
+def test_conditional_checkpoint_resume_bit_identical():
+    cfg = conditional_config(
+        [_merge_ego_rule()], target_total_miles=200.0)
+    full = ScenarioSimulator(cfg).run()
+    resumed_sim = ScenarioSimulator(cfg)
+    result, state = resumed_sim.run_resumable(
+        state=None, wall_limit_seconds=0.0)
+    assert result is None
+    resumed_sim, state = pickle.loads(pickle.dumps((resumed_sim, state)))
+    resumed, _state = resumed_sim.run_resumable(state)
+    assert resumed.total_events == full.total_events
+    assert resumed.total_time_seconds == full.total_time_seconds
+    assert resumed.episodes == full.episodes
+    assert resumed.transition_model_stats == full.transition_model_stats
+
+
+def test_conditional_mode_rejects_independent_full_scenario_classifier():
+    with pytest.raises(ConfigError, match="dependency-aware"):
+        base_config(transition_model={
+            "mode": "conditional",
+            "conditional": {
+                "apply_to_initial_state": True,
+                "rules": [],
+            },
+        })
+
+
+def test_conditional_outputs_include_diagnostics_and_unknown_warning():
+    rule = {
+        "id": "street_changes_unknown_prior",
+        "target_layer": "ego_maneuver",
+        "when": {"street": {"elements": ["constant_lane"]}},
+        "multipliers": {"rarities": {"unknown": 2.0}},
+    }
+    result = ScenarioSimulator(conditional_config(
+        [rule], target_total_miles=20.0)).run()
+    inter_mi = result.inter_arrival_miles()
+    inter_s = result.inter_arrival_seconds()
+    ws = result.window_stats()
+    stats = build_stats_json(result, inter_mi, inter_s, ws, 0.0)
+    summary = build_summary(result, inter_mi, inter_s, ws, 0.0)
+    assert stats["transition_model"]["mode"] == "conditional"
+    assert stats["transition_model"]["rules"][0]["match_count"] > 0
+    ego = next(row for row in stats["transition_model"]["layers"]
+               if row["layer"] == "ego_maneuver")
+    assert ego["selections_under_matched_context"]
+    assert "baseline_unknown_mass" in ego
+    assert "empirical_unknown_occupancy" in ego
+    assert "Conditional-transition diagnostics" in summary
+    assert "WARNING: conditional rules modify unknown-rarity" in summary
 
 
 # ------------------------------------------------------ full-scenario rarity

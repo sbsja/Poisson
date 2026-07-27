@@ -9,11 +9,11 @@ duration measurement (replacing per-tuple encounter counting), a fixed
 real-element street layer, no unknown elements in street/weather,
 research-based element counts, and a studied Dirichlet concentration.
 
-> **Current configuration override:** Both pattern and hash combinations are
-> disabled in `config.yaml`. The active simulation builds no combination
-> rules, does not instantiate the hash classifier, and emits only
-> element-level unknown episodes. Later combination sections describe optional
-> mechanisms retained in the code, not behavior of the delivered configuration.
+> **Current configuration:** Pattern and hash combinations are disabled. The
+> active independent transition model emits visible element episodes, a
+> dedicated hidden triggering-condition category, and all-known
+> full-scenario rarity episodes. Conditional mode is available but requires
+> full-scenario rarity to be disabled.
 
 ---
 
@@ -24,7 +24,7 @@ config.yaml
     │  SimConfig.from_yaml()  →  validation (incl. per-n feasibility)
     ▼
 ScenarioSimulator.__init__()
-    │  6 independent RNG streams (one per random source)
+    │  7 independent RNG streams (one per random source)
     │  build_layer() ×6:
     │     street: fixed 12 elements, exact vector (no Dirichlet, no RNG)
     │     others: element count → rarity counts → shuffle → unknown weight
@@ -48,8 +48,9 @@ run_simulation.py → episodes.csv, windows.csv, summary.md, stats.json,
 
 Layer order (constant `LAYER_DEFINITIONS`): street, temporal_modifications,
 ego_maneuver, ru_maneuver, environmental_conditions, triggering_conditions.
-Layers are fully independent — no conditional probabilities between layers,
-one transition vector per layer.
+In independent mode, layers use no conditional probabilities and each has one
+permanent transition vector. Conditional mode uses those vectors as base
+probabilities and reweights them from matching cross-layer rules.
 
 ---
 
@@ -60,9 +61,10 @@ one transition vector per layer.
 `element_count_min/max` + `allow_unknown`, or `fixed_elements`), rejects
 unknown keys, then runs `validate()`.
 
-Validation highlights: the `seeds` mapping must contain exactly the six
-required integer entries; `enable_unknown_combinations: true` is rejected
-with an explanatory error (mechanism temporarily disabled, see §7);
+Validation highlights: the `seeds` mapping must contain exactly the seven
+required integer entries; conditional transition rules must be structurally
+valid and acyclic; conditional mode is incompatible with the
+independent-product full-scenario classifier;
 rarity proportions must cover all five categories and sum to 1; base
 weights positive, `base_weights['unknown']` forbidden; per layer —
 durations positive, and either a valid fixed-element list (unique names,
@@ -77,6 +79,57 @@ infeasibility documented in `research_element_counts.md`.
 (environmental_conditions) use the four known proportions renormalized to
 sum to 1 (0.50/0.25/0.10/0.05 → ≈0.5556/0.2778/0.1111/0.0556), unknown
 share 0.
+
+### 2.1 Transition model
+
+The `transition_model` block has two modes:
+
+```yaml
+transition_model:
+  mode: independent
+  conditional:
+    apply_to_initial_state: true
+    rules: []
+```
+
+`independent` is the default and retains the original fixed-order sampling
+path, including RNG consumption. Conditional rules may remain in the file but
+are not compiled or evaluated.
+
+In `conditional` mode, a rule has a target layer, a cross-layer `when`
+context, and element and/or rarity multipliers. For target element `i`:
+
+```
+adjusted[i] = base[i] * product(applicable multipliers for i)
+P(i | context) = adjusted[i] / sum(adjusted)
+```
+
+Different condition layers are AND; element and rarity selectors inside one
+condition layer are OR. Multiple matching rules multiply together. Zero
+multipliers can prohibit states, but a context that zeros the complete target
+distribution is rejected.
+
+Each condition layer creates a dependency edge to the target layer. Validation
+rejects self-dependencies and cycles. When multiple layers expire at the same
+event, expired parents are sampled first; a dependent layer sees a parent's
+new value if that parent also expired, otherwise its current value. Unrelated
+ties use `LAYER_DEFINITIONS` order. Conditional initial states use the same
+topological order when `apply_to_initial_state` is true.
+
+Conditional rules consume no random values; categorical sampling still uses
+the existing `initial_state` and `transition_sampling` streams. Exact generated
+element names such as `ego_003` depend on construction seeds, so meaningful
+calibration should use fixed, versioned semantic catalogs.
+
+The 0.4% unknown-element target remains a baseline used to construct each
+layer. Conditional weighting may change empirical selection and occupancy.
+The output reports baseline mass, empirical occupancy, rule matches,
+influenced transitions, and selections in matched/unmatched contexts.
+
+The current full-scenario rarity classifier multiplies independent stationary
+probabilities. It is therefore rejected in conditional mode; enable
+conditional behavior only with `full_scenario_unknowns.enabled: false` until a
+dependency-aware classifier is implemented.
 
 ---
 

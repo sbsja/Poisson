@@ -1,5 +1,12 @@
 # Analytical Expected Results (no simulation)
 
+> This closed-form model supports `transition_model.mode: independent` only.
+> Conditional transition rules require dependency-aware occupancy and
+> entry-rate calculations and are intentionally rejected by
+> `analytical_model.py`. In this document, “conditional prediction” means
+> conditioned on the realized Dirichlet vectors, not conditional cross-layer
+> behavior.
+
 Derivation: each layer is a renewal process (i.i.d. Gamma sojourns, i.i.d. categorical transitions from its permanent vector), so episode statistics follow from renewal theory and Poisson thinning; see the docstring of analytical_model.py for the formulas.
 
 Two prediction levels: **design** (a priori: every unknown-bearing layer has exactly the 0.4% target mass) and **conditional** (given the actually built layers of this config, i.e. the realized Dirichlet vectors).

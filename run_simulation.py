@@ -73,6 +73,13 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     L.append(f"- target mileage: {cfg.target_total_miles:,.0f} miles at "
              f"{cfg.average_speed_mph} mph constant average speed")
     L.append(f"- seeds: {json.dumps(cfg.seeds)}")
+    tms = result.transition_model_stats
+    L.append(f"- transition model: {tms['mode']}")
+    if tms["mode"] == "conditional":
+        L.append("- conditional initialization: "
+                 f"{'ENABLED' if tms['conditional_initialization'] else 'disabled'}")
+        L.append("- conditional dependency order: "
+                 + " -> ".join(tms["dependency_order"]))
     L.append(f"- unknown combinations: "
              f"patterns {'ENABLED' if cfg.enable_unknown_combinations else 'disabled'}; "
              f"hash combinations {'ENABLED' if cfg.enable_hash_combinations else 'disabled'} "
@@ -97,6 +104,25 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     L.append(f"- concentration_scale: {cfg.concentration_scale:,.0f} "
              "(see concentration_study.md), "
              f"allow_self_transition: {cfg.allow_self_transition}\n")
+
+    if tms["mode"] == "conditional":
+        L.append("## Conditional-transition diagnostics\n")
+        if tms["rules"]:
+            for rule in tms["rules"]:
+                L.append(
+                    f"- `{rule['id']}` -> {rule['target_layer']}: "
+                    f"{rule['match_count']:,} matches; "
+                    f"{rule['influenced_transition_count']:,} influenced "
+                    "transitions"
+                    + ("; modifies unknown-rarity probabilities"
+                       if rule["modifies_unknown"] else ""))
+        else:
+            L.append("- no conditional rules configured")
+        if any(rule["modifies_unknown"] for rule in tms["rules"]):
+            L.append("- WARNING: conditional rules modify unknown-rarity "
+                     "probabilities; 0.4% is a baseline construction target, "
+                     "not a guaranteed conditional or overall rate.")
+        L.append("")
 
     L.append("## Totals\n")
     L.append(f"- total simulated mileage: {result.total_miles:,.1f} miles")
@@ -187,16 +213,37 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
             f"{st['mean_duration_config']:.0f}/"
             f"{st['mean_duration_empirical']:.1f} |")
 
+    if tms["mode"] == "conditional":
+        L.append("\n### Conditional occupancy and selection\n")
+        L.append("| layer | baseline unknown mass | empirical unknown "
+                 "occupancy | conditional unknown selection | matched / "
+                 "unmatched contexts | influenced transitions |")
+        L.append("|---|---|---|---|---|---|")
+        for row in tms["layers"]:
+            L.append(
+                f"| {row['layer']} | {row['baseline_unknown_mass']:.4%} | "
+                f"{row['empirical_unknown_occupancy']:.4%} | "
+                f"{row['conditional_unknown_selection_rate']:.4%} | "
+                f"{row['matched_context_transitions']:,} / "
+                f"{row['unmatched_context_transitions']:,} | "
+                f"{row['influenced_transitions']:,} |")
+
     L.append("\n## Verification against configured targets\n")
     unk_layers = [st for st in result.layer_stats if st["has_unknown"]]
     tot_trans = sum(st["transitions"] for st in unk_layers)
     tot_unk = sum(st["unknown_selected"] for st in unk_layers)
     overall = tot_unk / tot_trans if tot_trans else 0.0
-    L.append(f"- unknown-element selection rate across unknown-bearing "
-             f"layers: {overall:.4%} (design target "
-             f"{cfg.target_unknown_element_probability:.2%}; per-layer "
-             f"adherence is tight at concentration_scale="
-             f"{cfg.concentration_scale:,.0f})")
+    if tms["mode"] == "conditional":
+        L.append(f"- unknown-element selection rate across unknown-bearing "
+                 f"layers: {overall:.4%} (baseline construction target "
+                 f"{cfg.target_unknown_element_probability:.2%}; conditional "
+                 "rules may legitimately move the empirical rate)")
+    else:
+        L.append(f"- unknown-element selection rate across unknown-bearing "
+                 f"layers: {overall:.4%} (design target "
+                 f"{cfg.target_unknown_element_probability:.2%}; per-layer "
+                 f"adherence is tight at concentration_scale="
+                 f"{cfg.concentration_scale:,.0f})")
     cs = result.combination_stats
     if cs["enabled"] and cs["rules"]:
         L.append("- pattern rules (episodes vs mass*T*hazard expectation in "
@@ -265,6 +312,7 @@ def build_stats_json(result, inter_mi, inter_s, ws, wall_seconds):
         "full_scenario_unknowns": result.full_scenario_stats,
         "hidden_triggering_unknowns": result.hidden_triggering_stats,
         "combination_stats": result.combination_stats,
+        "transition_model": result.transition_model_stats,
         "seeds": result.config.seeds,
         "layer_stats": [{k: v for k, v in st.items()
                          if k not in ("visit_counts", "element_names",

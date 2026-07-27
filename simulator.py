@@ -2,8 +2,15 @@
 Layered scenario model with event-driven simulation and unknown-episode
 duration measurement.
 
-Six independent layers (street, temporal modifications, ego maneuver,
-RU maneuver, environmental conditions, triggering conditions):
+Six layers (street, temporal modifications, ego maneuver, RU maneuver,
+environmental conditions, triggering conditions). Their transition behavior
+is configurable:
+
+  - independent (default): the original behavior; each layer samples from its
+    permanent transition vector without considering other layers.
+  - conditional: matching configuration rules reweight a target layer's base
+    probabilities from the current states of parent layers. Dependencies must
+    form a DAG, so simultaneous expiries have a deterministic causal order.
 
   - street: FIXED list of 12 real route-composition elements whose exact
     probabilities form the permanent transition vector (no Dirichlet, no
@@ -124,6 +131,13 @@ def _default_base_weights():
     return {"common": 1.0, "medium": 0.4, "rare": 0.1, "very_rare": 0.03}
 
 
+def _default_transition_model():
+    return {
+        "mode": "independent",
+        "conditional": {"apply_to_initial_state": True, "rules": []},
+    }
+
+
 @dataclass
 class SimConfig:
     seeds: dict = field(default_factory=_default_seeds)
@@ -149,6 +163,7 @@ class SimConfig:
     full_scenario_unknowns: dict = field(default_factory=lambda: {
         "enabled": False, "target_stationary_mass": 0.004,
         "calibration_samples": 2_000_000, "calibration_seed": 90123})
+    transition_model: dict = field(default_factory=_default_transition_model)
     concentration_scale: float = 20_000.0   # from concentration_study.md
     allow_self_transition: bool = True
     layers: dict = field(default_factory=dict)   # layer key -> LayerParams
@@ -203,6 +218,8 @@ class SimConfig:
             v = self.seeds[k]
             if isinstance(v, bool) or not isinstance(v, int):
                 raise ConfigError(f"seeds[{k}] must be an integer, got {v!r}")
+
+        self._validate_transition_model()
 
         cr = self.combination_rules
         if not isinstance(cr, dict):
@@ -288,6 +305,14 @@ class SimConfig:
         if isinstance(csd, bool) or not isinstance(csd, int):
             raise ConfigError("full_scenario_unknowns.calibration_seed must "
                               "be an integer.")
+        if (self.transition_model["mode"] == "conditional"
+                and fs["enabled"]):
+            raise ConfigError(
+                "full_scenario_unknowns.enabled cannot be true when "
+                "transition_model.mode='conditional': the current "
+                "full-scenario classifier assumes independent stationary "
+                "layer probabilities. Disable full_scenario_unknowns until "
+                "dependency-aware rarity calibration is implemented.")
 
         if not isinstance(self.enable_hidden_triggering_unknowns, bool):
             raise ConfigError("enable_hidden_triggering_unknowns must be a bool.")
@@ -353,6 +378,173 @@ class SimConfig:
                  if k not in [key for key, _ in LAYER_DEFINITIONS]]
         if extra:
             raise ConfigError(f"Unknown layer keys in config: {extra}")
+
+    def _validate_transition_model(self) -> None:
+        tm = self.transition_model
+        if not isinstance(tm, dict):
+            raise ConfigError("transition_model must be a mapping.")
+        allowed = {"mode", "conditional"}
+        bad = [k for k in tm if k not in allowed]
+        if bad:
+            raise ConfigError(f"transition_model has unknown keys: {bad}")
+        tm.setdefault("mode", "independent")
+        tm.setdefault("conditional",
+                      {"apply_to_initial_state": True, "rules": []})
+        if tm["mode"] not in ("independent", "conditional"):
+            raise ConfigError(
+                "transition_model.mode must be 'independent' or "
+                f"'conditional', got {tm['mode']!r}.")
+
+        cond = tm["conditional"]
+        if not isinstance(cond, dict):
+            raise ConfigError("transition_model.conditional must be a mapping.")
+        allowed_cond = {"apply_to_initial_state", "rules"}
+        bad = [k for k in cond if k not in allowed_cond]
+        if bad:
+            raise ConfigError(
+                "transition_model.conditional has unknown keys: "
+                f"{bad}")
+        cond.setdefault("apply_to_initial_state", True)
+        cond.setdefault("rules", [])
+        if not isinstance(cond["apply_to_initial_state"], bool):
+            raise ConfigError(
+                "transition_model.conditional.apply_to_initial_state must "
+                "be a bool.")
+        if not isinstance(cond["rules"], list):
+            raise ConfigError(
+                "transition_model.conditional.rules must be a list.")
+
+        layer_keys = {key for key, _prefix in LAYER_DEFINITIONS}
+        seen_ids = set()
+        edges = {key: set() for key in layer_keys}
+        for pos, rule in enumerate(cond["rules"]):
+            where = f"transition_model.conditional.rules[{pos}]"
+            if not isinstance(rule, dict):
+                raise ConfigError(f"{where} must be a mapping.")
+            allowed_rule = {"id", "target_layer", "when", "multipliers"}
+            bad = [k for k in rule if k not in allowed_rule]
+            if bad:
+                raise ConfigError(f"{where} has unknown keys: {bad}")
+            missing = [k for k in allowed_rule if k not in rule]
+            if missing:
+                raise ConfigError(f"{where} is missing keys: {missing}")
+
+            rule_id = rule["id"]
+            if not isinstance(rule_id, str) or not rule_id.strip():
+                raise ConfigError(f"{where}.id must be a non-empty string.")
+            if rule_id in seen_ids:
+                raise ConfigError(
+                    f"Duplicate conditional rule id: {rule_id!r}.")
+            seen_ids.add(rule_id)
+
+            target = rule["target_layer"]
+            if target not in layer_keys:
+                raise ConfigError(
+                    f"{where}.target_layer is unknown: {target!r}.")
+            when = rule["when"]
+            if not isinstance(when, dict) or not when:
+                raise ConfigError(f"{where}.when must be a non-empty mapping.")
+            for parent, selector in when.items():
+                if parent not in layer_keys:
+                    raise ConfigError(
+                        f"{where}.when references unknown layer {parent!r}.")
+                if parent == target:
+                    raise ConfigError(
+                        f"{where} makes layer {target!r} condition on itself.")
+                self._validate_condition_selector(
+                    selector, f"{where}.when[{parent!r}]")
+                edges[parent].add(target)
+
+            multipliers = rule["multipliers"]
+            if not isinstance(multipliers, dict) or not multipliers:
+                raise ConfigError(
+                    f"{where}.multipliers must be a non-empty mapping.")
+            allowed_mult = {"elements", "rarities"}
+            bad = [k for k in multipliers if k not in allowed_mult]
+            if bad:
+                raise ConfigError(
+                    f"{where}.multipliers has unknown keys: {bad}")
+            if not any(multipliers.get(k) for k in allowed_mult):
+                raise ConfigError(
+                    f"{where}.multipliers must contain at least one effect.")
+            element_effects = multipliers.get("elements", {})
+            rarity_effects = multipliers.get("rarities", {})
+            if not isinstance(element_effects, dict):
+                raise ConfigError(
+                    f"{where}.multipliers.elements must be a mapping.")
+            if not isinstance(rarity_effects, dict):
+                raise ConfigError(
+                    f"{where}.multipliers.rarities must be a mapping.")
+            for element, value in element_effects.items():
+                if not isinstance(element, str) or not element:
+                    raise ConfigError(
+                        f"{where}.multipliers.elements keys must be "
+                        "non-empty strings.")
+                self._validate_multiplier(
+                    value, f"{where}.multipliers.elements[{element!r}]")
+            for rarity, value in rarity_effects.items():
+                if rarity not in RARITIES:
+                    raise ConfigError(
+                        f"{where}.multipliers.rarities has unknown rarity "
+                        f"{rarity!r}.")
+                self._validate_multiplier(
+                    value, f"{where}.multipliers.rarities[{rarity!r}]")
+
+        # Stable Kahn traversal doubles as an early cycle check. Exact element
+        # references are validated after seeded layers have been constructed.
+        indegree = {key: 0 for key in layer_keys}
+        for parent in layer_keys:
+            for child in edges[parent]:
+                indegree[child] += 1
+        order = []
+        remaining = set(layer_keys)
+        fixed_order = [key for key, _prefix in LAYER_DEFINITIONS]
+        while remaining:
+            ready = [key for key in fixed_order
+                     if key in remaining and indegree[key] == 0]
+            if not ready:
+                raise ConfigError(
+                    "Conditional transition dependencies contain a cycle.")
+            for parent in ready:
+                remaining.remove(parent)
+                order.append(parent)
+                for child in edges[parent]:
+                    indegree[child] -= 1
+
+    @staticmethod
+    def _validate_condition_selector(selector, where):
+        if not isinstance(selector, dict) or not selector:
+            raise ConfigError(f"{where} must be a non-empty mapping.")
+        allowed = {"elements", "rarities"}
+        bad = [k for k in selector if k not in allowed]
+        if bad:
+            raise ConfigError(f"{where} has unknown keys: {bad}")
+        if not any(selector.get(k) for k in allowed):
+            raise ConfigError(
+                f"{where} must contain non-empty elements or rarities.")
+        elements = selector.get("elements", [])
+        rarities = selector.get("rarities", [])
+        if not isinstance(elements, list) or any(
+                not isinstance(value, str) or not value for value in elements):
+            raise ConfigError(
+                f"{where}.elements must be a list of non-empty strings.")
+        if len(set(elements)) != len(elements):
+            raise ConfigError(f"{where}.elements contains duplicates.")
+        if not isinstance(rarities, list) or any(
+                value not in RARITIES for value in rarities):
+            raise ConfigError(
+                f"{where}.rarities must contain only {RARITIES}.")
+        if len(set(rarities)) != len(rarities):
+            raise ConfigError(f"{where}.rarities contains duplicates.")
+
+    @staticmethod
+    def _validate_multiplier(value, where):
+        if (isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(float(value))
+                or float(value) < 0):
+            raise ConfigError(
+                f"{where} must be a finite non-negative number.")
 
     @staticmethod
     def _validate_fixed_elements(key, lp: LayerParams):
@@ -597,6 +789,226 @@ def build_layer(key, prefix, cfg: SimConfig, rng_element_count, rng_rarity,
                  gamma_shape=shape, gamma_scale=scale, is_fixed=False)
 
 
+# ------------------------------------------------ conditional transition model
+
+@dataclass(frozen=True)
+class ConditionSelector:
+    layer_index: int
+    element_indices: frozenset
+    rarities: frozenset
+
+    def matches(self, current, layers) -> bool:
+        element_index = current[self.layer_index]
+        return (element_index in self.element_indices
+                or layers[self.layer_index].rarities[element_index]
+                in self.rarities)
+
+
+@dataclass(frozen=True)
+class ConditionalRule:
+    id: str
+    target_layer_index: int
+    conditions: tuple
+    multiplier_vector: np.ndarray
+    modifies_unknown: bool
+
+    def matches(self, current, layers) -> bool:
+        return all(selector.matches(current, layers)
+                   for selector in self.conditions)
+
+
+@dataclass(frozen=True)
+class ConditionalEvaluation:
+    probabilities: np.ndarray
+    matched_rule_ids: tuple
+    influential_rule_ids: tuple
+    distribution_modified: bool
+
+
+class ConditionalTransitionModel:
+    """Context-dependent reweighting of permanent layer probabilities.
+
+    Rules are deterministic. They consume no RNG state: the caller performs
+    one categorical draw from the returned normalized vector using the
+    existing initial-state or transition-sampling stream.
+    """
+
+    def __init__(self, cfg: SimConfig, layers):
+        self.layers = layers
+        self.apply_to_initial_state = bool(
+            cfg.transition_model["conditional"]["apply_to_initial_state"])
+        self.layer_index = {
+            key: index for index, (key, _prefix)
+            in enumerate(LAYER_DEFINITIONS)
+        }
+        self.rules = self._compile_rules(
+            cfg.transition_model["conditional"]["rules"])
+        self.rules_by_target = [[] for _ in range(N_LAYERS)]
+        for rule in self.rules:
+            self.rules_by_target[rule.target_layer_index].append(rule)
+        self.dependency_order = self._dependency_order()
+
+    def _compile_rules(self, raw_rules):
+        compiled = []
+        # Sorting by ID makes multiplication and diagnostics independent of
+        # the order in which rules appear in YAML.
+        for raw in sorted(raw_rules, key=lambda value: value["id"]):
+            target_index = self.layer_index[raw["target_layer"]]
+            selectors = []
+            for layer_key in sorted(
+                    raw["when"], key=lambda key: self.layer_index[key]):
+                selector = raw["when"][layer_key]
+                layer_index = self.layer_index[layer_key]
+                layer = self.layers[layer_index]
+                element_indices = set()
+                for name in selector.get("elements", []):
+                    try:
+                        element_indices.add(layer.names.index(name))
+                    except ValueError as exc:
+                        raise ConfigError(
+                            f"Conditional rule {raw['id']!r} references "
+                            f"unknown element {name!r} in layer "
+                            f"{layer_key!r}. Generated element names depend "
+                            "on the configured construction seeds.") from exc
+                selectors.append(ConditionSelector(
+                    layer_index=layer_index,
+                    element_indices=frozenset(element_indices),
+                    rarities=frozenset(selector.get("rarities", [])),
+                ))
+
+            target = self.layers[target_index]
+            vector = np.ones(target.n_elements, dtype=np.float64)
+            for name, multiplier in raw["multipliers"].get(
+                    "elements", {}).items():
+                try:
+                    element_index = target.names.index(name)
+                except ValueError as exc:
+                    raise ConfigError(
+                        f"Conditional rule {raw['id']!r} targets unknown "
+                        f"element {name!r} in layer {target.key!r}. "
+                        "Generated element names depend on the configured "
+                        "construction seeds.") from exc
+                vector[element_index] *= float(multiplier)
+            for rarity, multiplier in raw["multipliers"].get(
+                    "rarities", {}).items():
+                for element_index, element_rarity in enumerate(target.rarities):
+                    if element_rarity == rarity:
+                        vector[element_index] *= float(multiplier)
+            modifies_unknown = any(
+                target.is_unknown[index] and vector[index] != 1.0
+                for index in range(target.n_elements))
+            compiled.append(ConditionalRule(
+                id=raw["id"],
+                target_layer_index=target_index,
+                conditions=tuple(selectors),
+                multiplier_vector=vector,
+                modifies_unknown=modifies_unknown,
+            ))
+        return tuple(compiled)
+
+    def _dependency_order(self):
+        children = [set() for _ in range(N_LAYERS)]
+        indegree = [0] * N_LAYERS
+        for rule in self.rules:
+            child = rule.target_layer_index
+            for selector in rule.conditions:
+                parent = selector.layer_index
+                if child not in children[parent]:
+                    children[parent].add(child)
+                    indegree[child] += 1
+        remaining = set(range(N_LAYERS))
+        order = []
+        while remaining:
+            ready = [index for index in range(N_LAYERS)
+                     if index in remaining and indegree[index] == 0]
+            if not ready:
+                # SimConfig catches this before construction; retain the
+                # runtime guard for programmatically mutated configurations.
+                raise ConfigError(
+                    "Conditional transition dependencies contain a cycle.")
+            for parent in ready:
+                remaining.remove(parent)
+                order.append(parent)
+                for child in children[parent]:
+                    indegree[child] -= 1
+        return tuple(order)
+
+    @staticmethod
+    def _normalize(weights, target_layer_key):
+        total = float(np.sum(weights))
+        if not math.isfinite(total) or total <= 0.0:
+            raise ConfigError(
+                "Conditional rules leave no valid next element for target "
+                f"layer {target_layer_key!r} in the current context.")
+        return weights / total
+
+    def evaluate(self, target_layer_index, current_state, base_probabilities,
+                 current_element=None, allow_self_transition=True):
+        base = np.asarray(base_probabilities, dtype=np.float64)
+        baseline = base.copy()
+        if current_element is not None and not allow_self_transition:
+            baseline[current_element] = 0.0
+        baseline = self._normalize(
+            baseline, self.layers[target_layer_index].key)
+
+        adjusted = base.copy()
+        matched_rules = []
+        for rule in self.rules_by_target[target_layer_index]:
+            if rule.matches(current_state, self.layers):
+                matched_rules.append(rule)
+                adjusted *= rule.multiplier_vector
+        if current_element is not None and not allow_self_transition:
+            adjusted[current_element] = 0.0
+        adjusted = self._normalize(
+            adjusted, self.layers[target_layer_index].key)
+        modified = not np.allclose(
+            adjusted, baseline, rtol=1e-14, atol=1e-15)
+        influential = []
+        if modified:
+            for candidate in matched_rules:
+                without = base.copy()
+                for rule in matched_rules:
+                    if rule.id != candidate.id:
+                        without *= rule.multiplier_vector
+                if current_element is not None and not allow_self_transition:
+                    without[current_element] = 0.0
+                without = self._normalize(
+                    without, self.layers[target_layer_index].key)
+                if not np.allclose(
+                        adjusted, without, rtol=1e-14, atol=1e-15):
+                    influential.append(candidate.id)
+        return ConditionalEvaluation(
+            probabilities=adjusted,
+            matched_rule_ids=tuple(rule.id for rule in matched_rules),
+            influential_rule_ids=tuple(influential),
+            distribution_modified=modified,
+        )
+
+    def probabilities_for(self, target_layer_index, current_state,
+                          base_probabilities, current_element=None,
+                          allow_self_transition=True):
+        return self.evaluate(
+            target_layer_index, current_state, base_probabilities,
+            current_element=current_element,
+            allow_self_transition=allow_self_transition,
+        ).probabilities
+
+    def stats_template(self):
+        order_names = [LAYER_DEFINITIONS[index][0]
+                       for index in self.dependency_order]
+        return {
+            "mode": "conditional",
+            "conditional_initialization": self.apply_to_initial_state,
+            "dependency_order": order_names,
+            "rules": [{
+                "id": rule.id,
+                "target_layer":
+                    LAYER_DEFINITIONS[rule.target_layer_index][0],
+                "modifies_unknown": rule.modifies_unknown,
+            } for rule in self.rules],
+        }
+
+
 # ------------------------------------------------- unknown-combination classifier
 # NOTE: temporarily unused (enable_unknown_combinations=false). Kept intact,
 # with its global_seed semantics, for later reintroduction within the episode
@@ -832,6 +1244,7 @@ class SimulationResult:
     combination_stats: dict           # rules, masses, per-rule/hash counts
     full_scenario_stats: dict         # calibration info + episode count
     hidden_triggering_stats: dict     # dedicated triggering-condition route
+    transition_model_stats: dict      # independent/conditional diagnostics
     config: SimConfig
 
     def episodes_by_type(self) -> dict:
@@ -895,6 +1308,10 @@ class ScenarioSimulator:
                                    self.rng_rarity,
                                    self.np_rng_transition)
                        for key, prefix in LAYER_DEFINITIONS]
+        self.transition_mode = cfg.transition_model["mode"]
+        self.conditional_model = (
+            ConditionalTransitionModel(cfg, self.layers)
+            if self.transition_mode == "conditional" else None)
         self.classifier = (
             UnknownCombinationClassifier(
                 cfg.global_seed, cfg.unknown_combination_probability)
@@ -948,10 +1365,26 @@ class ScenarioSimulator:
         duration_sum = [0.0] * N_LAYERS
         duration_n = [0] * N_LAYERS
 
-        current = []
+        current = [None] * N_LAYERS
+        if (self.conditional_model is not None
+                and self.conditional_model.apply_to_initial_state):
+            initial_order = self.conditional_model.dependency_order
+            for k in initial_order:
+                evaluation = self.conditional_model.evaluate(
+                    k, current, layers[k].initial_probs,
+                    current_element=None, allow_self_transition=True)
+                cum = np.cumsum(evaluation.probabilities)
+                i = sample_index_from_cum(
+                    cum, layers[k].n_elements, self.rng_initial.random())
+                current[k] = i
+        else:
+            # Keep the original fixed-order path untouched for independent
+            # mode and conditional configurations opting out of conditional
+            # initialization.
+            for k in range(N_LAYERS):
+                current[k] = layers[k].sample_initial_index(self.rng_initial)
         for k in range(N_LAYERS):
-            i = layers[k].sample_initial_index(self.rng_initial)
-            current.append(i)
+            i = current[k]
             selected_by_rarity[k][layers[k].rarities[i]] += 1
             visit_counts[k][i] += 1
         remaining = []
@@ -983,11 +1416,29 @@ class ScenarioSimulator:
             "union_time": 0.0,
             "transitions": [0] * N_LAYERS,
             "unknown_selected": [0] * N_LAYERS,
+            "unknown_occupancy_time": [0.0] * N_LAYERS,
             "episodes_by_layer": [0] * N_LAYERS,       # element episodes
             "episodes_by_rule": [0] * len(self.rules),  # pattern episodes
             "hash_episode_count": 0,
             "selected_by_rarity": selected_by_rarity,
             "visit_counts": visit_counts,
+            "conditional_rule_match_counts": {
+                rule.id: 0 for rule in (
+                    self.conditional_model.rules
+                    if self.conditional_model is not None else ())
+            },
+            "conditional_rule_influenced_counts": {
+                rule.id: 0 for rule in (
+                    self.conditional_model.rules
+                    if self.conditional_model is not None else ())
+            },
+            "conditional_influenced_transitions": [0] * N_LAYERS,
+            "conditional_matched_context_transitions": [0] * N_LAYERS,
+            "conditional_unmatched_context_transitions": [0] * N_LAYERS,
+            "conditional_matched_selections": [
+                [0] * layer.n_elements for layer in layers],
+            "conditional_unmatched_selections": [
+                [0] * layer.n_elements for layer in layers],
             "duration_sum": duration_sum,
             "duration_n": duration_n,
             "wall_seconds": 0.0,
@@ -1126,6 +1577,11 @@ class ScenarioSimulator:
         affected = set()
         full_enabled = self.full_scenario is not None
         hidden_trigger_enabled = self.cfg.enable_hidden_triggering_unknowns
+        conditional_model = self.conditional_model
+        conditional_enabled = conditional_model is not None
+        conditional_order = (
+            conditional_model.dependency_order if conditional_enabled
+            else layer_range)
 
         current = state["current"]
         remaining = state["remaining"]
@@ -1138,6 +1594,21 @@ class ScenarioSimulator:
         visit_counts = state["visit_counts"]
         duration_sum = state["duration_sum"]
         duration_n = state["duration_n"]
+        unknown_occupancy_time = state["unknown_occupancy_time"]
+        conditional_rule_match_counts = state[
+            "conditional_rule_match_counts"]
+        conditional_rule_influenced_counts = state[
+            "conditional_rule_influenced_counts"]
+        conditional_influenced_transitions = state[
+            "conditional_influenced_transitions"]
+        conditional_matched_context_transitions = state[
+            "conditional_matched_context_transitions"]
+        conditional_unmatched_context_transitions = state[
+            "conditional_unmatched_context_transitions"]
+        conditional_matched_selections = state[
+            "conditional_matched_selections"]
+        conditional_unmatched_selections = state[
+            "conditional_unmatched_selections"]
 
         def sample_dur(k):
             d = gamma(shape_l[k], scale_l[k])
@@ -1163,15 +1634,46 @@ class ScenarioSimulator:
             miles += mph * dt / 3600.0
             expired = []
             for k in layer_range:
+                if unk_l[k][current[k]]:
+                    unknown_occupancy_time[k] += dt
                 r = remaining[k] - dt
                 remaining[k] = r
                 if r <= 1e-12:
                     expired.append(k)
             changed = False
-            for k in expired:
+            if conditional_enabled:
+                expired_set = set(expired)
+                expired_order = [k for k in conditional_order
+                                 if k in expired_set]
+            else:
+                # This is the original path and preserves independent-mode
+                # iteration and RNG consumption exactly.
+                expired_order = expired
+            for k in expired_order:
                 cur = current[k]
-                nxt = sample_next_index(cum_l[k], n_l[k], trans_rng, cur,
-                                        allow_self)
+                matched_context = False
+                if conditional_enabled:
+                    evaluation = conditional_model.evaluate(
+                        k, current, layers[k].transition_probs,
+                        current_element=cur,
+                        allow_self_transition=allow_self)
+                    nxt = sample_index_from_cum(
+                        np.cumsum(evaluation.probabilities), n_l[k],
+                        trans_rng.random())
+                    matched_context = bool(evaluation.matched_rule_ids)
+                    if matched_context:
+                        conditional_matched_context_transitions[k] += 1
+                        for rule_id in evaluation.matched_rule_ids:
+                            conditional_rule_match_counts[rule_id] += 1
+                    else:
+                        conditional_unmatched_context_transitions[k] += 1
+                    if evaluation.distribution_modified:
+                        conditional_influenced_transitions[k] += 1
+                        for rule_id in evaluation.influential_rule_ids:
+                            conditional_rule_influenced_counts[rule_id] += 1
+                else:
+                    nxt = sample_next_index(cum_l[k], n_l[k], trans_rng, cur,
+                                            allow_self)
                 cur_u = unk_l[k][cur]
                 nxt_u = unk_l[k][nxt]
                 # Triggering conditions are a hidden category: any unknown
@@ -1213,6 +1715,12 @@ class ScenarioSimulator:
                 transitions[k] += 1
                 selected_by_rarity[k][rar_l[k][nxt]] += 1
                 visit_counts[k][nxt] += 1
+                if conditional_enabled:
+                    selection_counts = (
+                        conditional_matched_selections
+                        if matched_context
+                        else conditional_unmatched_selections)
+                    selection_counts[k][nxt] += 1
                 if nxt_u:
                     unknown_selected[k] += 1
             # ---- combination episodes: evaluated once per event, after all
@@ -1309,10 +1817,17 @@ class ScenarioSimulator:
                 "unknown_weight": layer.unknown_weight,
                 "designed_unknown_mass": layer.designed_unknown_mass(),
                 "realized_unknown_mass": layer.realized_unknown_mass(),
+                "baseline_unknown_mass": layer.realized_unknown_mass(),
+                "empirical_unknown_occupancy":
+                    (state["unknown_occupancy_time"][k] / state["t"])
+                    if state["t"] else 0.0,
                 "transitions": n_trans,
                 "unknown_selected": state["unknown_selected"][k],
                 "empirical_unknown_rate":
                     (state["unknown_selected"][k] / n_trans) if n_trans else 0.0,
+                "conditional_selection_rate":
+                    (state["unknown_selected"][k] / n_trans)
+                    if n_trans else 0.0,
                 "episodes": state["episodes_by_layer"][k],
                 "selected_by_rarity": dict(state["selected_by_rarity"][k]),
                 "visit_counts": list(state["visit_counts"][k]),
@@ -1339,6 +1854,7 @@ class ScenarioSimulator:
                       "episodes": state["full_episode_count"]}
         if self.full_scenario is not None:
             full_stats.update(self.full_scenario.stats())
+        transition_stats = self._build_transition_model_stats(state)
         return SimulationResult(
             total_miles=state["miles"],
             total_time_seconds=state["t"],
@@ -1354,5 +1870,71 @@ class ScenarioSimulator:
                 "category": "hidden_triggering_unknown",
                 "episodes": state["hidden_trigger_episode_count"],
             },
+            transition_model_stats=transition_stats,
             config=cfg,
         )
+
+    def _build_transition_model_stats(self, state):
+        if self.conditional_model is None:
+            dormant_rules = self.cfg.transition_model[
+                "conditional"].get("rules", [])
+            return {
+                "mode": "independent",
+                "conditional_initialization": False,
+                "dependency_order": [
+                    key for key, _prefix in LAYER_DEFINITIONS],
+                "rules": [{
+                    "id": rule["id"],
+                    "target_layer": rule["target_layer"],
+                    "active": False,
+                    "match_count": 0,
+                    "influenced_transition_count": 0,
+                } for rule in sorted(
+                    dormant_rules, key=lambda value: value["id"])],
+                "layers": [],
+            }
+
+        template = self.conditional_model.stats_template()
+        match_counts = state["conditional_rule_match_counts"]
+        rule_influenced_counts = state[
+            "conditional_rule_influenced_counts"]
+        influenced = state["conditional_influenced_transitions"]
+        for rule_stats in template["rules"]:
+            rule_stats.update({
+                "active": True,
+                "match_count": match_counts[rule_stats["id"]],
+                "influenced_transition_count":
+                    rule_influenced_counts[rule_stats["id"]],
+            })
+        layer_rows = []
+        for k, (key, _prefix) in enumerate(LAYER_DEFINITIONS):
+            layer = self.layers[k]
+
+            def nonzero_counts(values):
+                return {
+                    name: count for name, count
+                    in zip(layer.names, values) if count
+                }
+
+            n_trans = state["transitions"][k]
+            layer_rows.append({
+                "layer": key,
+                "matched_context_transitions":
+                    state["conditional_matched_context_transitions"][k],
+                "unmatched_context_transitions":
+                    state["conditional_unmatched_context_transitions"][k],
+                "influenced_transitions": influenced[k],
+                "selections_under_matched_context": nonzero_counts(
+                    state["conditional_matched_selections"][k]),
+                "selections_under_unmatched_context": nonzero_counts(
+                    state["conditional_unmatched_selections"][k]),
+                "baseline_unknown_mass": layer.realized_unknown_mass(),
+                "empirical_unknown_occupancy":
+                    (state["unknown_occupancy_time"][k] / state["t"])
+                    if state["t"] else 0.0,
+                "conditional_unknown_selection_rate":
+                    (state["unknown_selected"][k] / n_trans)
+                    if n_trans else 0.0,
+            })
+        template["layers"] = layer_rows
+        return template

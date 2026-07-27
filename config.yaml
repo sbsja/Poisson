@@ -26,6 +26,37 @@ min_duration_seconds: 1.0       # Lower clamp for every sampled duration.
 mileage_window_miles: 10000     # Window size for per-window episode-start
                                 # counts, mean, variance, dispersion index.
 
+# --- Transition behavior -----------------------------------------------------
+# "independent" is the original model and remains the default. Every layer
+# samples from its permanent probability vector without considering the other
+# layers. Conditional rules may remain configured while mode is independent;
+# they are not compiled, evaluated, or allowed to consume RNG state.
+transition_model:
+  mode: independent             # "independent" | "conditional"
+  conditional:
+    apply_to_initial_state: true
+    rules: []
+
+# To enable conditional transitions, set mode: conditional, disable
+# full_scenario_unknowns below (its current product classifier assumes
+# independence), and add rules. Example:
+#
+#    rules:
+#      - id: merge_affects_ego
+#        target_layer: ego_maneuver
+#        when:
+#          street:
+#            elements: [forced_merge_proceeding, forced_merge_merging]
+#        multipliers:
+#          elements: {ego_003: 4.0}
+#          rarities: {rare: 1.5, common: 0.7}
+#
+# A matching rule multiplies the target layer's base probabilities and the
+# result is normalized before sampling. Different condition layers are AND;
+# elements/rarities within one layer are OR. Dependencies must be acyclic.
+# Generated names such as ego_003 depend on the construction seeds; fixed,
+# versioned semantic element catalogs are preferable for calibrated rules.
+
 # --- Unknown combinations ------------------------------------------------------
 # Pattern and hash combinations are disabled.
 enable_unknown_combinations: false
