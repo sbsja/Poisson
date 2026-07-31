@@ -1,8 +1,10 @@
 """Unit tests for the layered scenario simulator (episode semantics)."""
 
+import copy
 import math
 import pickle
 import random
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -126,6 +128,217 @@ def conditional_config(rules, apply_to_initial_state=True, **over):
 _COUNTS = {"common": 37, "medium": 19, "rare": 8, "very_rare": 4, "unknown": 7}
 _UNKNOWN_LAYERS = {"temporal_modifications", "ego_maneuver", "ru_maneuver",
                    "triggering_conditions"}
+
+
+def _semantic_ego_layer():
+    return {
+        "mean_duration": 30.0,
+        "variance_duration": 400.0,
+        "allow_unknown": True,
+        "semantic_catalog": {
+            "version": "test-1.0",
+            "elements": [
+                {"id": "lane_follow", "label": "Lane following",
+                 "description": "Continue in the current lane.",
+                 "rarity": "common"},
+                {"id": "merge", "label": "Merge",
+                 "description": "Join another traffic stream.",
+                 "rarity": "medium"},
+                {"id": "emergency_braking", "label": "Emergency braking",
+                 "description": "Perform high-urgency braking.",
+                 "rarity": "very_rare"},
+                {"id": "unclassified_ego_maneuver",
+                 "label": "Unclassified ego maneuver",
+                 "description": "A maneuver outside this catalog.",
+                 "rarity": "unknown"},
+            ],
+        },
+    }
+
+
+def _layers_with_semantic_ego():
+    return _layers(ego_maneuver=_semantic_ego_layer())
+
+
+# ------------------------------------------------------ semantic catalogs (v5)
+
+def test_default_config_uses_versioned_semantic_catalogs():
+    config_path = Path(__file__).with_name("config.yaml")
+    sim = ScenarioSimulator(SimConfig.from_yaml(str(config_path)))
+    assert sim.layers[0].construction_mode == "fixed"
+    for layer in sim.layers[1:]:
+        assert layer.construction_mode == "semantic_catalog"
+        assert layer.catalog_version == "1.0"
+    assert "lane_follow" in sim.layers[2].names
+    assert "cut_in" in sim.layers[3].names
+    assert "fog" in sim.layers[4].names
+    assert "sensor_occlusion" in sim.layers[5].names
+    assert not any(name.startswith("ego_") for name in sim.layers[2].names)
+
+
+def test_named_semantic_and_generated_profiles_are_distinct():
+    root = Path(__file__).parent
+    semantic_cfg = SimConfig.from_yaml(
+        str(root / "config_semantic_catalog_v5s.yaml"))
+    generated_cfg = SimConfig.from_yaml(
+        str(root / "config_generated_elements_v5g.yaml"))
+    semantic = ScenarioSimulator(semantic_cfg)
+    generated = ScenarioSimulator(generated_cfg)
+
+    assert semantic_cfg.profile_name == "semantic_catalog_v5s"
+    assert semantic_cfg.profile_kind == "semantic_catalog"
+    assert generated_cfg.profile_name == "generated_elements_v5g"
+    assert generated_cfg.profile_kind == "generated_elements"
+
+    assert semantic.layers[0].names == generated.layers[0].names
+    assert semantic.layers[0].transition_probs.tolist() == \
+        generated.layers[0].transition_probs.tolist()
+    assert all(layer.construction_mode == "semantic_catalog"
+               for layer in semantic.layers[1:])
+    assert all(layer.construction_mode == "generated"
+               for layer in generated.layers[1:])
+
+    expected_ranges = {
+        "temporal_modifications": (40, 45, "temporal_"),
+        "ego_maneuver": (20, 24, "ego_"),
+        "ru_maneuver": (20, 24, "ru_"),
+        "environmental_conditions": (22, 22, "environment_"),
+        "triggering_conditions": (80, 90, "trigger_"),
+    }
+    for layer in generated.layers[1:]:
+        lower, upper, prefix = expected_ranges[layer.key]
+        assert lower <= layer.n_elements <= upper
+        assert all(name.startswith(prefix) for name in layer.names)
+        assert layer.catalog_version is None
+
+    assert "lane_follow" in semantic.layers[2].names
+    assert "cut_in" in semantic.layers[3].names
+    assert "fog" in semantic.layers[4].names
+    assert "sensor_occlusion" in semantic.layers[5].names
+    assert "lane_follow" not in generated.layers[2].names
+
+
+def test_high_quality_semantic_catalog_v2_is_fixed_and_traceable():
+    config_path = Path(__file__).with_name("config_semantic_catalog_v2.yaml")
+    cfg = SimConfig.from_yaml(str(config_path))
+    sim = ScenarioSimulator(cfg)
+
+    assert cfg.profile_name == "semantic_catalog_v2_high_quality"
+    expected_counts = {
+        "street": 12,
+        "temporal_modifications": 45,
+        "ego_maneuver": 24,
+        "ru_maneuver": 24,
+        "environmental_conditions": 22,
+        "triggering_conditions": 50,
+    }
+    assert {layer.key: layer.n_elements for layer in sim.layers} == \
+        expected_counts
+
+    for layer in sim.layers[1:]:
+        assert layer.construction_mode == "semantic_catalog"
+        assert layer.catalog_version == "2.0"
+        assert layer.catalog_sources
+        assert all(layer.families)
+        assert all(layer.source_refs)
+        assert all(set(refs) <= set(layer.catalog_sources)
+                   for refs in layer.source_refs)
+
+    assert "work_beyond_shoulder" in sim.layers[1].names
+    assert "follow_lane" in sim.layers[2].names
+    assert "passing_object" in sim.layers[3].names
+    assert "heavy_rain_night" in sim.layers[4].names
+    assert "radar_multipath" in sim.layers[5].names
+
+
+def test_semantic_catalog_v2_requires_source_traceability():
+    layer = copy.deepcopy(_semantic_ego_layer())
+    layer["semantic_catalog"]["version"] = "2.0"
+    with pytest.raises(ConfigError, match="requires sources"):
+        base_config(layers=_layers(ego_maneuver=layer))
+
+
+def test_semantic_catalog_identity_is_independent_of_construction_seeds():
+    kwargs = {
+        "layers": _layers_with_semantic_ego(),
+        "full_scenario_unknowns": {"enabled": False},
+    }
+    first = ScenarioSimulator(base_config(
+        seeds=seeds_with(element_count=1, rarity_assignment=2), **kwargs))
+    second = ScenarioSimulator(base_config(
+        seeds=seeds_with(element_count=999, rarity_assignment=888), **kwargs))
+    for attribute in ("names", "labels", "descriptions", "rarities"):
+        assert getattr(first.layers[2], attribute) == \
+            getattr(second.layers[2], attribute)
+    assert np.array_equal(first.layers[2].initial_probs,
+                          second.layers[2].initial_probs)
+    assert math.isclose(first.layers[2].designed_unknown_mass(), 0.004,
+                        rel_tol=1e-12)
+
+
+@pytest.mark.parametrize("mutation, expected", [
+    (lambda layer: layer["semantic_catalog"]["elements"].append(
+        dict(layer["semantic_catalog"]["elements"][0])), "unique"),
+    (lambda layer: layer["semantic_catalog"]["elements"][0].update(
+        rarity="frequent"), "rarity"),
+    (lambda layer: layer.update(element_count_min=4,
+                                element_count_max=4), "exactly one"),
+])
+def test_semantic_catalog_validation_rejects_invalid_definitions(
+        mutation, expected):
+    layer = copy.deepcopy(_semantic_ego_layer())
+    mutation(layer)
+    with pytest.raises(ConfigError) as error:
+        base_config(layers=_layers(ego_maneuver=layer))
+    assert expected in str(error.value)
+
+
+def test_conditional_rules_resolve_stable_semantic_ids():
+    cfg = conditional_config([{
+        "id": "merge_context",
+        "target_layer": "ego_maneuver",
+        "when": {"street": {"elements": ["forced_merge_proceeding"]}},
+        "multipliers": {"elements": {"merge": 4.0}},
+    }], layers=_layers_with_semantic_ego())
+    sim = ScenarioSimulator(cfg)
+    current = [0] * len(sim.layers)
+    current[0] = sim.layers[0].names.index("forced_merge_proceeding")
+    evaluation = sim.conditional_model.evaluate(
+        2, current, sim.layers[2].transition_probs)
+    merge_index = sim.layers[2].names.index("merge")
+    lane_follow_index = sim.layers[2].names.index("lane_follow")
+    assert evaluation.matched_rule_ids == ("merge_context",)
+    assert (evaluation.probabilities[merge_index]
+            / evaluation.probabilities[lane_follow_index]) > (
+                sim.layers[2].transition_probs[merge_index]
+                / sim.layers[2].transition_probs[lane_follow_index])
+
+
+def test_semantic_metadata_is_in_layer_statistics():
+    cfg = base_config(
+        layers=_layers_with_semantic_ego(),
+        full_scenario_unknowns={"enabled": False},
+        enable_unknown_combinations=False,
+    )
+    result = ScenarioSimulator(cfg).run()
+    ego = result.layer_stats[2]
+    assert ego["catalog_version"] == "test-1.0"
+    assert ego["construction_mode"] == "semantic_catalog"
+    merge = next(element for element in ego["elements"]
+                 if element["id"] == "merge")
+    assert merge["label"] == "Merge"
+    assert merge["description"]
+    assert merge["rarity"] == "medium"
+    assert merge["visit_count"] >= 0
+    assert 0.0 <= merge["realized_selection_rate"] <= 1.0
+
+
+def test_legacy_generated_layers_remain_supported():
+    sim = ScenarioSimulator(base_config(full_scenario_unknowns={"enabled": False}))
+    ego = sim.layers[2]
+    assert ego.construction_mode == "generated"
+    assert ego.catalog_version is None
+    assert all(name.startswith("ego_") for name in ego.names)
 
 
 # ------------------------------------------------------ episode rules (unit)
@@ -953,6 +1166,9 @@ def test_conditional_outputs_include_diagnostics_and_unknown_warning():
     ws = result.window_stats()
     stats = build_stats_json(result, inter_mi, inter_s, ws, 0.0)
     summary = build_summary(result, inter_mi, inter_s, ws, 0.0)
+    assert stats["profile_name"] == "custom"
+    assert stats["profile_kind"] == "custom"
+    assert "simulator profile: `custom` (`custom`)" in summary
     assert stats["transition_model"]["mode"] == "conditional"
     assert stats["transition_model"]["rules"][0]["match_count"] > 0
     ego = next(row for row in stats["transition_model"]["layers"]

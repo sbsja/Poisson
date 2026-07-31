@@ -1,0 +1,338 @@
+{
+  "total_simulated_mileage": 2000000.19521768,
+  "total_simulated_time_seconds": 144000014.0556638,
+  "total_events": 9962276,
+  "wall_seconds": 74.63110190001316,
+  "total_unknown_episodes": 76989,
+  "episodes_truncated": 0,
+  "episodes_per_million_miles": 38494.49624259688,
+  "total_unknown_time_seconds": 3016196.679511343,
+  "unknown_time_fraction": 0.020945808229889618,
+  "episode_duration_seconds": {
+    "mean": 39.38436405667069,
+    "median": 21.47695602476597,
+    "p90": 71.60247248560191,
+    "min": 0.000746309757232666,
+    "max": 1846.1501958966255
+  },
+  "episode_duration_miles": {
+    "mean": 0.5470050563418726,
+    "median": 0.2982910559512675,
+    "p90": 0.994478784641251,
+    "min": 1.0365387424826622e-05,
+    "max": 25.64097494375892
+  },
+  "inter_arrival_miles": {
+    "mean": 25.975730945282347,
+    "median": 11.229653308051638,
+    "p90": 73.09712713849726,
+    "min": 3.260653465986252e-05,
+    "max": 456.14676062349463
+  },
+  "inter_arrival_seconds": {
+    "mean": 1870.252628060206,
+    "median": 808.5350381657481,
+    "p90": 5262.993153875318,
+    "min": 0.0023476630449295044,
+    "max": 32842.56676492095
+  },
+  "mileage_windows": {
+    "window_miles": 10000.0,
+    "n_windows": 200,
+    "empirical_mean_count_per_window": 384.945,
+    "empirical_variance_count_per_window": 2328.454246231156,
+    "dispersion_index": 6.048797220982624
+  },
+  "episodes_by_type": {
+    "element": 35433,
+    "hidden_triggering_unknown": 5295,
+    "pattern": 0,
+    "hash_combination": 0,
+    "full_scenario": 36261
+  },
+  "full_scenario_unknowns": {
+    "enabled": true,
+    "episodes": 36261,
+    "target_stationary_mass": 0.004,
+    "calibration_samples": 2000000,
+    "calibration_seed": 4090135,
+    "calibrated_rarity_threshold": 1.1096572559329956e-09,
+    "eligible_sampled_mass": 0.9831305,
+    "achieved_sampled_mass": 0.004
+  },
+  "hidden_triggering_unknowns": {
+    "enabled": true,
+    "layer": "triggering_conditions",
+    "category": "hidden_triggering_unknown",
+    "episodes": 5295
+  },
+  "combination_stats": {
+    "enabled": false,
+    "hash_enabled": false,
+    "hash_threshold": 0.005,
+    "hash_episodes": 0,
+    "pattern_episodes": 0,
+    "rules": []
+  },
+  "transition_model": {
+    "mode": "independent",
+    "conditional_initialization": false,
+    "dependency_order": [
+      "street",
+      "temporal_modifications",
+      "ego_maneuver",
+      "ru_maneuver",
+      "environmental_conditions",
+      "triggering_conditions"
+    ],
+    "rules": [],
+    "layers": []
+  },
+  "seeds": {
+    "element_count": 4012357,
+    "rarity_assignment": 4023468,
+    "transition_matrix": 4034579,
+    "duration": 4045690,
+    "initial_state": 4056801,
+    "transition_sampling": 4067902,
+    "pattern_rules": 4078913
+  },
+  "layer_stats": [
+    {
+      "layer": "street",
+      "n_elements": 12,
+      "is_fixed": true,
+      "has_unknown": false,
+      "counts": {
+        "common": 2,
+        "medium": 4,
+        "rare": 3,
+        "very_rare": 3,
+        "unknown": 0
+      },
+      "unknown_weight": null,
+      "designed_unknown_mass": 0.0,
+      "realized_unknown_mass": 0.0,
+      "baseline_unknown_mass": 0.0,
+      "empirical_unknown_occupancy": 0.0,
+      "transitions": 479878,
+      "unknown_selected": 0,
+      "empirical_unknown_rate": 0.0,
+      "conditional_selection_rate": 0.0,
+      "episodes": 0,
+      "selected_by_rarity": {
+        "common": 318064,
+        "medium": 133818,
+        "rare": 18757,
+        "very_rare": 9240,
+        "unknown": 0
+      },
+      "mean_duration_config": 300.0,
+      "mean_duration_empirical": 300.0756839821702
+    },
+    {
+      "layer": "temporal_modifications",
+      "n_elements": 30,
+      "is_fixed": false,
+      "has_unknown": true,
+      "counts": {
+        "common": 15,
+        "medium": 8,
+        "rare": 3,
+        "very_rare": 1,
+        "unknown": 3
+      },
+      "unknown_weight": 0.024805890227576975,
+      "designed_unknown_mass": 0.004,
+      "realized_unknown_mass": 0.003787699696667159,
+      "baseline_unknown_mass": 0.003787699696667159,
+      "empirical_unknown_occupancy": 0.003962948437306073,
+      "transitions": 240101,
+      "unknown_selected": 910,
+      "empirical_unknown_rate": 0.0037900716781687706,
+      "conditional_selection_rate": 0.0037900716781687706,
+      "episodes": 910,
+      "selected_by_rarity": {
+        "common": 192506,
+        "medium": 42355,
+        "rare": 3960,
+        "very_rare": 371,
+        "unknown": 910
+      },
+      "mean_duration_config": 600.0,
+      "mean_duration_empirical": 599.7455479061229
+    },
+    {
+      "layer": "ego_maneuver",
+      "n_elements": 9,
+      "is_fixed": false,
+      "has_unknown": true,
+      "counts": {
+        "common": 5,
+        "medium": 2,
+        "rare": 1,
+        "very_rare": 0,
+        "unknown": 1
+      },
+      "unknown_weight": 0.023694779116465867,
+      "designed_unknown_mass": 0.004000000000000001,
+      "realized_unknown_mass": 0.004291314454789429,
+      "baseline_unknown_mass": 0.004291314454789429,
+      "empirical_unknown_occupancy": 0.004276006996197471,
+      "transitions": 4799946,
+      "unknown_selected": 20491,
+      "empirical_unknown_rate": 0.004269006359654879,
+      "conditional_selection_rate": 0.004269006359654879,
+      "episodes": 20415,
+      "selected_by_rarity": {
+        "common": 4057926,
+        "medium": 637873,
+        "rare": 83657,
+        "very_rare": 0,
+        "unknown": 20491
+      },
+      "mean_duration_config": 30.0,
+      "mean_duration_empirical": 30.000338977556144
+    },
+    {
+      "layer": "ru_maneuver",
+      "n_elements": 12,
+      "is_fixed": false,
+      "has_unknown": true,
+      "counts": {
+        "common": 6,
+        "medium": 3,
+        "rare": 1,
+        "very_rare": 1,
+        "unknown": 1
+      },
+      "unknown_weight": 0.029437751004016067,
+      "designed_unknown_mass": 0.004,
+      "realized_unknown_mass": 0.004404584577015922,
+      "baseline_unknown_mass": 0.004404584577015922,
+      "empirical_unknown_occupancy": 0.0044028146958892045,
+      "transitions": 3201280,
+      "unknown_selected": 14161,
+      "empirical_unknown_rate": 0.004423543082766893,
+      "conditional_selection_rate": 0.004423543082766893,
+      "episodes": 14108,
+      "selected_by_rarity": {
+        "common": 2610867,
+        "medium": 521241,
+        "rare": 43068,
+        "very_rare": 11944,
+        "unknown": 14161
+      },
+      "mean_duration_config": 45.0,
+      "mean_duration_empirical": 44.98199891367165
+    },
+    {
+      "layer": "environmental_conditions",
+      "n_elements": 15,
+      "is_fixed": false,
+      "has_unknown": false,
+      "counts": {
+        "common": 8,
+        "medium": 4,
+        "rare": 2,
+        "very_rare": 1,
+        "unknown": 0
+      },
+      "unknown_weight": null,
+      "designed_unknown_mass": 0.0,
+      "realized_unknown_mass": 0.0,
+      "baseline_unknown_mass": 0.0,
+      "empirical_unknown_occupancy": 0.0,
+      "transitions": 40045,
+      "unknown_selected": 0,
+      "empirical_unknown_rate": 0.0,
+      "conditional_selection_rate": 0.0,
+      "episodes": 0,
+      "selected_by_rarity": {
+        "common": 32424,
+        "medium": 6731,
+        "rare": 763,
+        "very_rare": 128,
+        "unknown": 0
+      },
+      "mean_duration_config": 3600.0,
+      "mean_duration_empirical": 3595.9416714807503
+    },
+    {
+      "layer": "triggering_conditions",
+      "n_elements": 84,
+      "is_fixed": false,
+      "has_unknown": true,
+      "counts": {
+        "common": 42,
+        "medium": 21,
+        "rare": 9,
+        "very_rare": 4,
+        "unknown": 8
+      },
+      "unknown_weight": 0.025813253012048194,
+      "designed_unknown_mass": 0.004,
+      "realized_unknown_mass": 0.004376315248626994,
+      "baseline_unknown_mass": 0.004376315248626994,
+      "empirical_unknown_occupancy": 0.004419836196168697,
+      "transitions": 1201026,
+      "unknown_selected": 5312,
+      "empirical_unknown_rate": 0.004422885099906247,
+      "conditional_selection_rate": 0.004422885099906247,
+      "episodes": 0,
+      "selected_by_rarity": {
+        "common": 980806,
+        "medium": 192068,
+        "rare": 20080,
+        "very_rare": 2761,
+        "unknown": 5312
+      },
+      "mean_duration_config": 120.0,
+      "mean_duration_empirical": 119.89746206387278
+    }
+  ],
+  "street_composition": {
+    "elements": [
+      "constant_lane",
+      "forced_merge_proceeding",
+      "road_split_proceeding",
+      "lane_split_proceeding",
+      "added_lane_proceeding",
+      "road_split_exiting",
+      "lane_split_exiting",
+      "removed_lane",
+      "forced_merge_merging",
+      "added_lane_merging",
+      "added_lane",
+      "overlap_zone"
+    ],
+    "configured_probabilities": [
+      0.4929999999999999,
+      0.16899999999999998,
+      0.07899999999999999,
+      0.07199999999999998,
+      0.033999999999999996,
+      0.013999999999999997,
+      0.012999999999999996,
+      0.011999999999999997,
+      0.009999999999999998,
+      0.005999999999999998,
+      0.002999999999999999,
+      0.09499999999999997
+    ],
+    "empirical_visit_share": [
+      0.493163901733562,
+      0.1696365125375355,
+      0.07849478722761363,
+      0.0711075083510635,
+      0.03385436745512931,
+      0.014016033208371277,
+      0.013065793668820682,
+      0.012005109621383724,
+      0.010100462825003802,
+      0.006045273912798852,
+      0.0031091170899330872,
+      0.09540113236878463
+    ]
+  }
+}

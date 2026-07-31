@@ -1,0 +1,36 @@
+# Generated Element Simulator (v5-G)
+#
+# Keeps the same simulation, duration, probability, unknown-scenario, and
+# street settings as v5-S. Non-street catalogs use the older anonymous form.
+# Counts are sampled once per run from inclusive discrete uniform ranges using
+# seeds.element_count. Names use prefixes such as ego_000 and trigger_000.
+extends: config.yaml
+
+profile_name: generated_elements_v5g
+profile_kind: generated_elements
+
+layers:
+  temporal_modifications:
+    semantic_catalog: null
+    element_count_min: 40
+    element_count_max: 45
+
+  ego_maneuver:
+    semantic_catalog: null
+    element_count_min: 20
+    element_count_max: 24
+
+  ru_maneuver:
+    semantic_catalog: null
+    element_count_min: 20
+    element_count_max: 24
+
+  environmental_conditions:
+    semantic_catalog: null
+    element_count_min: 22
+    element_count_max: 22
+
+  triggering_conditions:
+    semantic_catalog: null
+    element_count_min: 80
+    element_count_max: 90

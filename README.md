@@ -1,4 +1,4 @@
-# Layered Scenario Model — Event-Driven AV Simulator (v3)
+# Layered Scenario Model — Event-Driven AV Simulator (v5)
 
 Simulates an autonomous vehicle driving 2,000,000 miles through a 6-layer
 scenario model and measures **unknown episodes**: how often the vehicle
@@ -10,10 +10,16 @@ category, and rare all-known full-scenario tuples.
 
 | File | Purpose |
 |---|---|
-| `config.yaml` | All parameters (documented inline) |
+| `config.yaml` | Shared default and complete v5-S semantic configuration |
+| `config_semantic_catalog_v5s.yaml` | Named Semantic Catalog Simulator profile |
+| `config_semantic_catalog_v2.yaml` | High-quality fixed semantic catalog v2.0 profile |
+| `config_generated_elements_v5g.yaml` | Named Generated Element Simulator profile with anonymous IDs |
+| `SIMULATOR_PROFILES.md` | Profile differences, element amounts, and run commands |
+| `SEMANTIC_CATALOG_V2.md` | v2 fixed counts, primary sources, and quality requirements |
 | `simulator.py` | Core model + event-driven engine + episode tracking |
 | `run_simulation.py` | CLI runner: `episodes.csv`, `windows.csv`, `summary.md`, `stats.json`, plots |
-| `test_simulator.py` | 61 pytest unit tests |
+| `test_simulator.py` | pytest unit and integration tests |
+| `SEMANTIC_CATALOGS.md` | v5 catalog definitions, assumptions, and versioning policy |
 | `results/` | Output of the default 2M-mile run |
 | `research_element_counts.md` | Literature research behind the per-layer element counts |
 | `concentration_study.py/.md/.png` | Study behind `concentration_scale = 20000` |
@@ -29,6 +35,22 @@ pytest test_simulator.py -q
 # optional chunked execution (bit-identical to a single run):
 python run_simulation.py --checkpoint cp.pkl --max-wall-seconds 60
 ```
+
+Two deliberately distinct profiles are available:
+
+```bash
+# v5-S: stable semantic IDs such as lane_follow and sensor_occlusion
+python run_simulation.py --config config_semantic_catalog_v5s.yaml --outdir results_semantic_v5s
+
+# v5-G: anonymous IDs such as ego_000 and trigger_000
+python run_simulation.py --config config_generated_elements_v5g.yaml --outdir results_generated_v5g
+
+# catalog v2.0: larger fixed catalogs with source traceability
+python run_simulation.py --config config_semantic_catalog_v2.yaml --outdir results_semantic_v2
+```
+
+See `SIMULATOR_PROFILES.md` for the complete profile comparison. Profile names
+are recorded in the console, `summary.md`, and `stats.json`.
 
 ## Unknown-episode semantics (v2 — replaces per-tuple counting)
 
@@ -49,25 +71,26 @@ delivered configuration. No rules are loaded or generated, and the hash
 classifier is not instantiated or evaluated. The union unknown time therefore
 contains only overlapping element-level unknown episodes.
 
-## The six layers (v2 configuration)
+## The six layers (v5-S semantic configuration)
 
 | layer | elements | unknowns? | source |
 |---|---|---|---|
 | street | **12 fixed real elements** with exact transition probabilities (no Dirichlet) | no | user route-composition data |
-| temporal_modifications | sampled [30, 46] | yes | max = 46 MUTCD Part-6 typical applications; min flagged as modeling choice |
-| ego_maneuver | sampled [7, 12] | yes | 7 = IGP2 maneuver library; research max 14 clipped to 12 for feasibility (see `research_element_counts.md`) |
-| ru_maneuver | sampled [7, 12] | yes | same taxonomy family; 14-maneuver study; same clip |
-| environmental_conditions | sampled [15, 21] | **no** (known proportions renormalized) | 15 = CARLA weather presets; 21 = BSI PAS 1883 environment leaves |
-| triggering_conditions | sampled [50, 100] | yes | unchanged by design — TODO: investigate varying this layer's element count later |
+| temporal_modifications | **16 semantic elements**, catalog v1.0 | yes | temporary traffic-control concepts |
+| ego_maneuver | **13 semantic elements**, catalog v1.0 | yes | stable maneuver taxonomy |
+| ru_maneuver | **14 semantic elements**, catalog v1.0 | yes | surrounding-road-user interaction taxonomy |
+| environmental_conditions | **13 semantic elements**, catalog v1.0 | **no** | lighting, weather, visibility, surface, and wind concepts |
+| triggering_conditions | **11 semantic elements**, catalog v1.0 | yes | perception, map, signage, geometry, and interference triggers |
 
 The street layer's 12 route-composition probabilities are used **exactly**
-as its permanent transition vector and initial-state distribution. All
-other sampled layers get rarity categories (largest-remainder + shuffle),
-rarity-based weights with a calculated unknown weight (exact 0.4% designed
-unknown mass; must stay below the very_rare weight — every n in a
-configured range is feasibility-checked at validation), and one permanent
-transition vector drawn once from
-Dirichlet(`concentration_scale` · normalized weights).
+as its permanent transition vector and initial-state distribution. Every
+non-street layer now has stable IDs, labels, descriptions, and explicit
+rarities from semantic catalog version 1.0. Rarity-based weights retain the
+calculated unknown weight (exact 0.4% designed unknown mass), followed by one
+permanent transition-vector draw from
+Dirichlet(`concentration_scale` · normalized weights). These weights are
+engineering assumptions, not measurements from real driving data. Legacy
+generated element-count ranges remain supported for older configurations.
 
 `concentration_scale = 20000` comes from `concentration_study.md`: the
 smallest tested value for which ≥95% of Dirichlet draws land within ±25%
@@ -109,7 +132,7 @@ transition_model:
           street:
             elements: [forced_merge_proceeding, forced_merge_merging]
         multipliers:
-          elements: {ego_003: 4.0}
+          elements: {merge: 4.0}
           rarities: {rare: 1.5, common: 0.7}
 
 full_scenario_unknowns:
@@ -118,9 +141,9 @@ full_scenario_unknowns:
 
 If multiple layers expire together, parent layers are sampled before their
 dependants; unrelated ties use the fixed six-layer order. Conditional rules
-are deterministic and consume no random numbers themselves. Exact generated
-names such as `ego_003` depend on construction seeds, so fixed, versioned
-semantic catalogs are preferable for calibrated behavior.
+are deterministic and consume no random numbers themselves. The v5 defaults
+reference stable semantic IDs such as `merge`; only legacy generated-layer
+configurations use seed-dependent names such as `ego_003`.
 
 The current `full_scenario_unknowns` classifier multiplies independent
 stationary probabilities. Conditional mode therefore rejects configurations
@@ -130,7 +153,8 @@ Conditional weighting can also move empirical unknown rates away from the
 
 ## Outputs
 
-Totals (mileage, time, events); every episode with layer, element,
+Totals (mileage, time, events); every episode with layer, stable element ID,
+label, description, catalog version,
 start/end mileage and time, duration in seconds and miles, truncated flag
 (`episodes.csv`); episode-duration statistics; inter-arrival distances and
 times between episode starts; episode-start counts per fixed mileage
@@ -149,6 +173,18 @@ the hash classifier. The same config produces identical results, including
 across checkpoint/resume (unit-tested) in both transition modes. Conditional
 rules consume no randomness themselves. The street layer consumes no
 construction randomness: its vector is exact regardless of seeds.
+Semantic catalogs also consume neither `element_count` nor
+`rarity_assignment`; those streams remain solely for legacy generated layers.
+
+## v5: Semantic element catalogs (current)
+
+All five non-street layers use fixed, ordered catalog version `1.0`. Catalog
+IDs and rarity assignments do not change with construction seeds, so
+conditional rules and downstream analysis remain meaningful across runs.
+Configuration validation enforces exactly one construction form per layer and
+checks catalog structure, stable snake-case IDs, uniqueness, rarity values,
+unknown consistency, and unknown-weight feasibility. See
+`SEMANTIC_CATALOGS.md` and `prompt_v5_changes.md`.
 
 ## Headline results of the delivered 2M-mile run (seeds as in config)
 
@@ -158,7 +194,7 @@ this configuration change before interpreting its totals as results of the
 current multi-route model.
 
 
-## v4: Full-scenario rarity unknowns (current)
+## v4: Full-scenario rarity unknowns (retained in v5)
 
 Pattern and hash combinations are **disabled**. In addition to the
 unchanged element-level episodes, a scenario-level mechanism classifies

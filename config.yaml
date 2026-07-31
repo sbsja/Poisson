@@ -1,14 +1,18 @@
 # ==========================================================================
-# Layered Scenario Model - Configuration (v2: unknown-episode semantics)
+# Layered Scenario Model - Configuration v5 (semantic element catalogs)
 # Units: durations in seconds, distances in miles, speed in mph.
 # ==========================================================================
+
+# Profile identity is included in console output, summary.md, and stats.json.
+profile_name: semantic_catalog_v5s
+profile_kind: semantic_catalog
 
 # --- Reproducibility ------------------------------------------------------
 # One independent, configurable seed per random source. The same config
 # (all seeds included) always produces identical results.
 seeds:
-  element_count: 12345        # number of elements per sampled layer
-  rarity_assignment: 23456    # shuffling rarity categories across elements
+  element_count: 12345        # legacy generated layers only
+  rarity_assignment: 23456    # legacy generated layers only
   transition_matrix: 34567    # Dirichlet sampling of transition vectors
   duration: 45678             # Gamma duration sampling (initial + simulation)
   initial_state: 56789        # initial element selection per layer
@@ -48,14 +52,14 @@ transition_model:
 #          street:
 #            elements: [forced_merge_proceeding, forced_merge_merging]
 #        multipliers:
-#          elements: {ego_003: 4.0}
+#          elements: {merge: 4.0}
 #          rarities: {rare: 1.5, common: 0.7}
 #
 # A matching rule multiplies the target layer's base probabilities and the
 # result is normalized before sampling. Different condition layers are AND;
 # elements/rarities within one layer are OR. Dependencies must be acyclic.
-# Generated names such as ego_003 depend on the construction seeds; fixed,
-# versioned semantic element catalogs are preferable for calibrated rules.
+# The v5 default uses stable semantic IDs, so rules do not change when
+# element-count or rarity-assignment seeds change.
 
 # --- Unknown combinations ------------------------------------------------------
 # Pattern and hash combinations are disabled.
@@ -116,8 +120,10 @@ concentration_scale: 20000.0
 allow_self_transition: true
 
 # --- Per-layer configuration ------------------------------------------------
-# Element-count ranges researched in research_element_counts.md (sampled
-# uniformly from [min, max] inclusive). shape = mean^2/var, scale = var/mean.
+# v5 uses fixed, versioned semantic catalogs for every non-street layer.
+# Rarity assignments are engineering assumptions, not empirical estimates.
+# Legacy element_count_min/max generated layers remain supported.
+# shape = mean^2/var, scale = var/mean.
 layers:
   street:
     # Fixed real route-composition elements; their probabilities are used
@@ -143,43 +149,106 @@ layers:
   temporal_modifications:     # work zones / temporary traffic management
     mean_duration: 600.0
     variance_duration: 90000.0
-    element_count_min: 30     # NOTE: min is a modeling choice (flagged in
-    element_count_max: 46     # research_element_counts.md); max = 46 MUTCD
-    allow_unknown: true       # Part 6 typical applications (TA-1..TA-46)
+    allow_unknown: true
+    semantic_catalog:
+      version: "1.0"
+      elements:
+        - {id: lane_closure, label: "Lane closure", description: "One or more normal travel lanes are temporarily closed.", rarity: common}
+        - {id: shoulder_closure, label: "Shoulder closure", description: "A road shoulder is temporarily unavailable.", rarity: common}
+        - {id: temporary_speed_limit, label: "Temporary speed limit", description: "A temporary regulatory or advisory speed limit is active.", rarity: common}
+        - {id: temporary_lane_shift, label: "Temporary lane shift", description: "Traffic is shifted laterally through temporary channelization.", rarity: common}
+        - {id: reduced_lane_width, label: "Reduced lane width", description: "Temporary controls reduce the usable lane width.", rarity: medium}
+        - {id: temporary_barrier, label: "Temporary barrier", description: "Temporary barriers alter the road boundary or available recovery area.", rarity: medium}
+        - {id: road_surface_work, label: "Road-surface work", description: "Paving, milling, patching, or related surface work affects travel.", rarity: medium}
+        - {id: utility_work, label: "Utility work", description: "Utility activity temporarily changes the normal road environment.", rarity: medium}
+        - {id: bridge_work, label: "Bridge work", description: "Temporary traffic control is associated with bridge maintenance or construction.", rarity: medium}
+        - {id: flagger_control, label: "Flagger control", description: "A human flagger controls alternating or restricted traffic movement.", rarity: rare}
+        - {id: temporary_signal, label: "Temporary traffic signal", description: "A temporary signal controls traffic through a modified road section.", rarity: rare}
+        - {id: detour, label: "Detour", description: "Normal traffic is redirected onto an alternative route.", rarity: rare}
+        - {id: crossover, label: "Median crossover", description: "Traffic crosses a median onto a temporary opposing-carriageway alignment.", rarity: rare}
+        - {id: mobile_work_zone, label: "Mobile work zone", description: "The temporary work activity and its controls move along the road.", rarity: very_rare}
+        - {id: incident_management_zone, label: "Incident-management zone", description: "Temporary controls support an active incident response.", rarity: very_rare}
+        - {id: unclassified_temporal_modification, label: "Unclassified temporal modification", description: "A temporary road modification not represented by catalog version 1.0.", rarity: unknown}
 
   ego_maneuver:               # ego vehicle maneuver classes
     mean_duration: 30.0
     variance_duration: 400.0
-    element_count_min: 7      # 7 = IGP2 maneuver library; research max is 14,
-    element_count_max: 12     # but n=13-14 are INFEASIBLE under calculated
-    allow_unknown: true       # unknown weighting: with a single unknown
-                              # element the required weight (0.0335-0.0351)
-                              # would exceed the very_rare weight (0.03).
-                              # Range clipped to [7,12]; to use 13-14 either
-                              # lower target_unknown_element_probability or
-                              # switch unknown_weight_mode to "fixed".
+    allow_unknown: true
+    semantic_catalog:
+      version: "1.0"
+      elements:
+        - {id: lane_follow, label: "Lane following", description: "The ego vehicle continues within its current lane.", rarity: common}
+        - {id: accelerate, label: "Accelerating", description: "The ego vehicle increases longitudinal speed.", rarity: common}
+        - {id: decelerate, label: "Decelerating", description: "The ego vehicle reduces longitudinal speed without emergency braking.", rarity: common}
+        - {id: stop, label: "Stopping or stopped", description: "The ego vehicle stops or remains stationary as part of normal operation.", rarity: common}
+        - {id: lane_change_left, label: "Lane change left", description: "The ego vehicle moves into an adjacent lane on the left.", rarity: medium}
+        - {id: lane_change_right, label: "Lane change right", description: "The ego vehicle moves into an adjacent lane on the right.", rarity: medium}
+        - {id: merge, label: "Merge", description: "The ego vehicle enters and joins another traffic stream.", rarity: medium}
+        - {id: yield, label: "Yield", description: "The ego vehicle gives priority to another road user or traffic stream.", rarity: medium}
+        - {id: turn_left, label: "Turn left", description: "The ego vehicle performs a left turn at a junction or access point.", rarity: rare}
+        - {id: turn_right, label: "Turn right", description: "The ego vehicle performs a right turn at a junction or access point.", rarity: rare}
+        - {id: diverge, label: "Diverge", description: "The ego vehicle leaves the current traffic stream along a diverging path.", rarity: very_rare}
+        - {id: emergency_braking, label: "Emergency braking", description: "The ego vehicle performs high-urgency braking to avoid or mitigate conflict.", rarity: very_rare}
+        - {id: unclassified_ego_maneuver, label: "Unclassified ego maneuver", description: "An ego maneuver not represented by catalog version 1.0.", rarity: unknown}
 
   ru_maneuver:                # road-user (surrounding vehicle) maneuvers
     mean_duration: 45.0
     variance_duration: 900.0
-    element_count_min: 7      # same taxonomy family as ego (14 = surrounding-
-    element_count_max: 12     # vehicle maneuver study); clipped to [7,12] for
-    allow_unknown: true       # the same feasibility reason as ego_maneuver.
+    allow_unknown: true
+    semantic_catalog:
+      version: "1.0"
+      elements:
+        - {id: car_following, label: "Car following", description: "A surrounding road user follows another vehicle within the traffic stream.", rarity: common}
+        - {id: steady_progress, label: "Steady progress", description: "A surrounding road user proceeds without a major lateral or longitudinal maneuver.", rarity: common}
+        - {id: yielding, label: "Yielding", description: "A surrounding road user gives priority to another participant.", rarity: common}
+        - {id: stopped_road_user, label: "Stopped road user", description: "A surrounding road user is stationary in or near the relevant roadway.", rarity: common}
+        - {id: lane_change_left, label: "Lane change left", description: "A surrounding road user moves into an adjacent lane on the left.", rarity: medium}
+        - {id: lane_change_right, label: "Lane change right", description: "A surrounding road user moves into an adjacent lane on the right.", rarity: medium}
+        - {id: merging, label: "Merging", description: "A surrounding road user joins the ego vehicle's traffic stream.", rarity: medium}
+        - {id: crossing, label: "Crossing", description: "A road user crosses the ego vehicle's intended path.", rarity: medium}
+        - {id: cut_in, label: "Cut-in", description: "A surrounding road user enters the ego vehicle's path with limited longitudinal separation.", rarity: rare}
+        - {id: cut_out, label: "Cut-out", description: "A leading road user leaves the ego lane and reveals the path ahead.", rarity: rare}
+        - {id: overtaking, label: "Overtaking", description: "A surrounding road user passes another participant.", rarity: very_rare}
+        - {id: sudden_braking, label: "Sudden braking", description: "A surrounding road user performs abrupt, high-deceleration braking.", rarity: very_rare}
+        - {id: wrong_way_movement, label: "Wrong-way or unexpected movement", description: "A road user moves against the expected traffic direction or path.", rarity: very_rare}
+        - {id: unclassified_road_user_maneuver, label: "Unclassified road-user maneuver", description: "A road-user maneuver not represented by catalog version 1.0.", rarity: unknown}
 
   environmental_conditions:   # weather / lighting; NO unknown elements
     mean_duration: 1800.0
     variance_duration: 500000.0
-    element_count_min: 15     # 15 = CARLA weather presets;
-    element_count_max: 21     # 21 = BSI PAS 1883 environment leaf conditions
     allow_unknown: false
+    semantic_catalog:
+      version: "1.0"
+      elements:
+        - {id: clear_daylight, label: "Clear daylight", description: "Daylight operation with no significant precipitation or visibility restriction.", rarity: common}
+        - {id: overcast_daylight, label: "Overcast daylight", description: "Daylight operation under substantial cloud cover.", rarity: common}
+        - {id: darkness, label: "Darkness", description: "Night-time operation with limited natural illumination.", rarity: common}
+        - {id: artificial_lighting, label: "Artificial lighting", description: "Road illumination is primarily provided by fixed artificial sources.", rarity: common}
+        - {id: sun_glare, label: "Sun glare", description: "Low-angle or intense sunlight reduces usable visual contrast.", rarity: medium}
+        - {id: light_rain, label: "Light rain", description: "Light precipitation affects visibility or the road surface.", rarity: medium}
+        - {id: heavy_rain, label: "Heavy rain", description: "Heavy precipitation substantially reduces visibility or surface friction.", rarity: medium}
+        - {id: wet_road, label: "Wet road", description: "The road surface is wet independently of current precipitation intensity.", rarity: medium}
+        - {id: snow, label: "Snow", description: "Falling or accumulated snow affects visibility or road condition.", rarity: rare}
+        - {id: fog, label: "Fog or mist", description: "Suspended water droplets restrict visibility.", rarity: rare}
+        - {id: smoke_or_dust, label: "Smoke or dust", description: "Airborne smoke, dust, or sand restricts visibility.", rarity: very_rare}
+        - {id: icy_road, label: "Icy road", description: "Ice or freezing contamination reduces road-surface friction.", rarity: very_rare}
+        - {id: strong_wind, label: "Strong wind", description: "Wind may affect vehicle stability or airborne objects.", rarity: very_rare}
 
   triggering_conditions:      # unexpected AV triggering condition
-    # TODO (future investigation, deliberately NOT part of this change):
-    # vary the element count of this layer and quantify the effect on
-    # unknown-episode statistics (count, durations, dispersion). Range left
-    # at the original 50-100; no defensible literature count exists yet.
     mean_duration: 120.0
     variance_duration: 8000.0
-    element_count_min: 50
-    element_count_max: 100
     allow_unknown: true
+    semantic_catalog:
+      version: "1.0"
+      elements:
+        - {id: sensor_occlusion, label: "Sensor occlusion", description: "A sensor's relevant field of view is partially or fully obstructed.", rarity: common}
+        - {id: faded_lane_markings, label: "Faded lane markings", description: "Lane boundaries have weak or degraded visual contrast.", rarity: common}
+        - {id: temporary_signage, label: "Temporary signage", description: "Temporary signs alter or supplement normal traffic control information.", rarity: common}
+        - {id: partially_obscured_sign, label: "Partially obscured sign", description: "A relevant traffic sign is not fully visible.", rarity: medium}
+        - {id: unusual_object, label: "Unusual object", description: "An object with uncommon shape, position, or appearance is present.", rarity: medium}
+        - {id: emergency_vehicle, label: "Emergency vehicle", description: "An emergency vehicle creates unusual right-of-way or response demands.", rarity: medium}
+        - {id: conflicting_lane_markings, label: "Conflicting lane markings", description: "Permanent and temporary markings provide inconsistent guidance.", rarity: rare}
+        - {id: map_mismatch, label: "Map mismatch", description: "The mapped road representation differs materially from the observed scene.", rarity: rare}
+        - {id: unexpected_road_geometry, label: "Unexpected road geometry", description: "Road geometry differs from the anticipated or represented layout.", rarity: very_rare}
+        - {id: sensor_interference, label: "Sensor interference", description: "Environmental or artificial interference degrades sensor measurements.", rarity: very_rare}
+        - {id: unclassified_triggering_condition, label: "Unclassified triggering condition", description: "A triggering condition not represented by catalog version 1.0.", rarity: unknown}

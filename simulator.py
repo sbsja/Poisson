@@ -15,12 +15,11 @@ is configurable:
   - street: FIXED list of 12 real route-composition elements whose exact
     probabilities form the permanent transition vector (no Dirichlet, no
     unknown elements).
-  - environmental_conditions: sampled elements, but NO unknown elements
-    (known rarity proportions renormalized).
-  - remaining layers: element count sampled uniformly from a per-layer
-    [min, max] range; rarity categories assigned by largest-remainder in
-    configurable proportions and shuffled; rarity-based weights with a
-    "calculated" or "fixed" unknown weight (always below very_rare); ONE
+  - default non-street layers: fixed, versioned semantic catalogs with stable
+    IDs, labels, descriptions, and explicit rarity categories. Legacy sampled
+    element-count ranges remain supported.
+  - semantic and legacy generated layers use rarity-based weights with a
+    "calculated" or "fixed" unknown weight (always below very_rare) and ONE
     permanent transition vector per layer sampled from
     Dirichlet(concentration_scale * normalized_weights) at initialization.
 
@@ -66,11 +65,14 @@ checkpoint/resume.
 from __future__ import annotations
 
 import bisect
+import copy
 import hashlib
 import math
 import random
+import re
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import numpy as np
 import yaml
@@ -109,10 +111,20 @@ class LayerParams:
     element_count_max: int = None
     allow_unknown: bool = True           # sampled layers only
     fixed_elements: list = None          # [{name, probability}, ...] -> fixed layer
+    semantic_catalog: dict = None        # {version, elements:[{id,label,...}]}
 
     @property
     def is_fixed(self) -> bool:
         return self.fixed_elements is not None
+
+    @property
+    def is_semantic(self) -> bool:
+        return self.semantic_catalog is not None
+
+    @property
+    def has_generated_range(self) -> bool:
+        return (self.element_count_min is not None
+                or self.element_count_max is not None)
 
 
 def _default_seeds():
@@ -140,6 +152,8 @@ def _default_transition_model():
 
 @dataclass
 class SimConfig:
+    profile_name: str = "custom"
+    profile_kind: str = "custom"
     seeds: dict = field(default_factory=_default_seeds)
     global_seed: int = 42
     target_total_miles: float = 2_000_000.0
@@ -171,9 +185,48 @@ class SimConfig:
     # -- construction --------------------------------------------------------
     @classmethod
     def from_yaml(cls, path: str) -> "SimConfig":
-        with open(path, "r", encoding="utf-8") as f:
-            raw = yaml.safe_load(f)
+        raw = cls._load_yaml_profile(Path(path), ())
         return cls.from_dict(raw)
+
+    @classmethod
+    def _load_yaml_profile(cls, path: Path, chain: tuple) -> dict:
+        """Load YAML with an optional recursively resolved ``extends``."""
+        resolved = path.resolve()
+        if resolved in chain:
+            cycle = " -> ".join(str(item) for item in chain + (resolved,))
+            raise ConfigError(f"Configuration profile inheritance cycle: {cycle}")
+        try:
+            with resolved.open("r", encoding="utf-8") as f:
+                raw = yaml.safe_load(f)
+        except OSError as exc:
+            raise ConfigError(
+                f"Cannot read configuration profile {str(resolved)!r}: {exc}"
+            ) from exc
+        if not isinstance(raw, dict):
+            raise ConfigError(
+                f"Configuration profile {str(resolved)!r} must contain a mapping.")
+
+        raw = dict(raw)
+        parent = raw.pop("extends", None)
+        if parent is None:
+            return raw
+        if not isinstance(parent, str) or not parent.strip():
+            raise ConfigError("Configuration 'extends' must be a non-empty path.")
+        parent_path = (resolved.parent / parent).resolve()
+        parent_raw = cls._load_yaml_profile(parent_path, chain + (resolved,))
+        return cls._deep_merge(parent_raw, raw)
+
+    @classmethod
+    def _deep_merge(cls, parent: dict, child: dict) -> dict:
+        """Merge a compact profile override into a complete parent config."""
+        merged = copy.deepcopy(parent)
+        for key, value in child.items():
+            if (key in merged and isinstance(merged[key], dict)
+                    and isinstance(value, dict)):
+                merged[key] = cls._deep_merge(merged[key], value)
+            else:
+                merged[key] = copy.deepcopy(value)
+        return merged
 
     @classmethod
     def from_dict(cls, raw: dict) -> "SimConfig":
@@ -206,6 +259,13 @@ class SimConfig:
 
     # -- validation -----------------------------------------------------------
     def validate(self) -> None:
+        if not isinstance(self.profile_name, str) or not self.profile_name.strip():
+            raise ConfigError("profile_name must be a non-empty string.")
+        if self.profile_kind not in (
+                "semantic_catalog", "generated_elements", "custom"):
+            raise ConfigError(
+                "profile_kind must be 'semantic_catalog', "
+                "'generated_elements', or 'custom'.")
         if not isinstance(self.seeds, dict):
             raise ConfigError("'seeds' must be a mapping.")
         missing = [k for k in SEED_KEYS if k not in self.seeds]
@@ -340,8 +400,20 @@ class SimConfig:
             lp = self.layers[key]
             if lp.mean_duration <= 0 or lp.variance_duration <= 0:
                 raise ConfigError(f"Layer '{key}': durations must be positive.")
+            construction_forms = sum((
+                lp.is_fixed,
+                lp.is_semantic,
+                lp.has_generated_range,
+            ))
+            if construction_forms != 1:
+                raise ConfigError(
+                    f"Layer '{key}': use exactly one construction form: "
+                    "fixed_elements, semantic_catalog, or "
+                    "element_count_min/element_count_max.")
             if lp.is_fixed:
                 self._validate_fixed_elements(key, lp)
+            elif lp.is_semantic:
+                self._validate_semantic_catalog(key, lp)
             else:
                 if lp.element_count_min is None or lp.element_count_max is None:
                     raise ConfigError(
@@ -570,6 +642,122 @@ class SimConfig:
             raise ConfigError(f"Layer '{key}': fixed_elements layers contain "
                               "no unknown elements; set allow_unknown: false.")
 
+    def _validate_semantic_catalog(self, key, lp: LayerParams):
+        if key == "street":
+            raise ConfigError(
+                "Layer 'street': keep the configured fixed_elements route "
+                "catalog; semantic_catalog is for non-street layers.")
+        catalog = lp.semantic_catalog
+        if not isinstance(catalog, dict):
+            raise ConfigError(
+                f"Layer '{key}': semantic_catalog must be a mapping.")
+        bad = [name for name in catalog
+               if name not in {"version", "sources", "elements"}]
+        if bad:
+            raise ConfigError(
+                f"Layer '{key}': semantic_catalog has unknown keys: {bad}")
+        version = catalog.get("version")
+        if not isinstance(version, str) or not version.strip():
+            raise ConfigError(
+                f"Layer '{key}': semantic_catalog.version must be a "
+                "non-empty string.")
+        major_version = version.split(".", 1)[0]
+        requires_traceability = major_version.isdigit() and int(major_version) >= 2
+        sources = catalog.get("sources", {})
+        if not isinstance(sources, dict):
+            raise ConfigError(
+                f"Layer '{key}': semantic_catalog.sources must be a mapping.")
+        if requires_traceability and not sources:
+            raise ConfigError(
+                f"Layer '{key}': semantic catalog v{version} requires sources.")
+        for source_id, source_url in sources.items():
+            if (not isinstance(source_id, str)
+                    or re.fullmatch(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*",
+                                    source_id) is None):
+                raise ConfigError(
+                    f"Layer '{key}': source ID {source_id!r} must be snake_case.")
+            if not isinstance(source_url, str) or not source_url.strip():
+                raise ConfigError(
+                    f"Layer '{key}': source {source_id!r} needs a URL or "
+                    "document reference.")
+        elements = catalog.get("elements")
+        if not isinstance(elements, list) or not elements:
+            raise ConfigError(
+                f"Layer '{key}': semantic_catalog.elements must be a "
+                "non-empty list.")
+        base_fields = {"id", "label", "description", "rarity"}
+        traceability_fields = {"family", "source_refs"}
+        allowed = base_fields | traceability_fields
+        ids = []
+        counts = dict.fromkeys(RARITIES, 0)
+        for index, element in enumerate(elements):
+            where = f"Layer '{key}': semantic_catalog.elements[{index}]"
+            if not isinstance(element, dict):
+                raise ConfigError(f"{where} must be a mapping.")
+            required = allowed if requires_traceability else base_fields
+            missing = [name for name in required if name not in element]
+            if missing:
+                raise ConfigError(f"{where} is missing keys: {missing}")
+            extra = [name for name in element if name not in allowed]
+            if extra:
+                raise ConfigError(f"{where} has unknown keys: {extra}")
+            element_id = element["id"]
+            if (not isinstance(element_id, str)
+                    or re.fullmatch(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*",
+                                    element_id) is None):
+                raise ConfigError(
+                    f"{where}.id must be a stable snake_case identifier, "
+                    f"got {element_id!r}.")
+            for field_name in ("label", "description"):
+                value = element[field_name]
+                if not isinstance(value, str) or not value.strip():
+                    raise ConfigError(
+                        f"{where}.{field_name} must be a non-empty string.")
+            rarity = element["rarity"]
+            if rarity not in RARITIES:
+                raise ConfigError(
+                    f"{where}.rarity must be one of {RARITIES}, got "
+                    f"{rarity!r}.")
+            family = element.get("family", "")
+            if not isinstance(family, str) or (requires_traceability
+                                                and not family.strip()):
+                raise ConfigError(f"{where}.family must be a non-empty string.")
+            source_refs = element.get("source_refs", [])
+            if (not isinstance(source_refs, list)
+                    or any(not isinstance(ref, str) or not ref
+                           for ref in source_refs)
+                    or len(source_refs) != len(set(source_refs))):
+                raise ConfigError(
+                    f"{where}.source_refs must be a unique list of source IDs.")
+            if requires_traceability and not source_refs:
+                raise ConfigError(f"{where}.source_refs cannot be empty in v2.")
+            unknown_refs = [ref for ref in source_refs if ref not in sources]
+            if unknown_refs:
+                raise ConfigError(
+                    f"{where}.source_refs contains unknown IDs: {unknown_refs}")
+            ids.append(element_id)
+            counts[rarity] += 1
+        if len(set(ids)) != len(ids):
+            duplicates = sorted({value for value in ids if ids.count(value) > 1})
+            raise ConfigError(
+                f"Layer '{key}': semantic catalog IDs must be unique; "
+                f"duplicates: {duplicates}")
+        if not lp.allow_unknown and counts["unknown"]:
+            raise ConfigError(
+                f"Layer '{key}': allow_unknown is false but its semantic "
+                "catalog contains unknown-rarity elements.")
+        if lp.allow_unknown and counts["unknown"] == 0:
+            raise ConfigError(
+                f"Layer '{key}': allow_unknown is true but its semantic "
+                "catalog contains no unknown-rarity element.")
+        if counts["unknown"]:
+            try:
+                compute_unknown_weight(counts, self)
+            except ConfigError as exc:
+                raise ConfigError(
+                    f"Layer '{key}': semantic catalog is infeasible: {exc}"
+                ) from exc
+
 
 # ------------------------------------------------------- rarity / weight helpers
 
@@ -687,6 +875,10 @@ class Layer:
     key: str
     prefix: str
     names: list
+    labels: list
+    descriptions: list
+    families: list
+    source_refs: list
     rarities: list
     is_unknown: list
     counts: dict
@@ -698,6 +890,9 @@ class Layer:
     gamma_shape: float
     gamma_scale: float
     is_fixed: bool                   # fixed element list (street)
+    construction_mode: str           # fixed | semantic_catalog | generated
+    catalog_version: str = None
+    catalog_sources: dict = field(default_factory=dict)
 
     @property
     def n_elements(self) -> int:
@@ -750,23 +945,43 @@ def build_layer(key, prefix, cfg: SimConfig, rng_element_count, rng_rarity,
         probs = probs / probs.sum()   # exact within float tolerance
         rarities = [_cosmetic_rarity(p) for p in probs]
         counts = {r: rarities.count(r) for r in RARITIES}
-        return Layer(key=key, prefix=prefix, names=names, rarities=rarities,
+        return Layer(key=key, prefix=prefix, names=names, labels=list(names),
+                     descriptions=[""] * len(names),
+                     families=[""] * len(names),
+                     source_refs=[[] for _ in names], rarities=rarities,
                      is_unknown=[False] * len(names), counts=counts,
                      unknown_weight=None,
                      initial_probs=probs, initial_cum=list(np.cumsum(probs)),
                      transition_probs=probs,
                      transition_cum=list(np.cumsum(probs)),
-                     gamma_shape=shape, gamma_scale=scale, is_fixed=True)
+                     gamma_shape=shape, gamma_scale=scale, is_fixed=True,
+                     construction_mode="fixed")
 
-    n = rng_element_count.randint(lp.element_count_min, lp.element_count_max)
-    props = cfg.effective_proportions(lp)
-    counts = assign_rarity_counts(n, props)
-    rarity_list = []
-    for r in RARITIES:
-        rarity_list.extend([r] * counts[r])
-    rng_rarity.shuffle(rarity_list)
+    if lp.is_semantic:
+        catalog = lp.semantic_catalog
+        elements = catalog["elements"]
+        names = [element["id"] for element in elements]
+        labels = [element["label"] for element in elements]
+        descriptions = [element["description"] for element in elements]
+        families = [element.get("family", "") for element in elements]
+        source_refs = [list(element.get("source_refs", []))
+                       for element in elements]
+        rarity_list = [element["rarity"] for element in elements]
+        counts = {rarity: rarity_list.count(rarity) for rarity in RARITIES}
+    else:
+        n = rng_element_count.randint(lp.element_count_min, lp.element_count_max)
+        props = cfg.effective_proportions(lp)
+        counts = assign_rarity_counts(n, props)
+        rarity_list = []
+        for rarity in RARITIES:
+            rarity_list.extend([rarity] * counts[rarity])
+        rng_rarity.shuffle(rarity_list)
 
-    names = [f"{prefix}_{i:03d}" for i in range(n)]
+        names = [f"{prefix}_{i:03d}" for i in range(n)]
+        labels = list(names)
+        descriptions = [""] * n
+        families = [""] * n
+        source_refs = [[] for _ in range(n)]
     weight_of = dict(cfg.base_weights)
     unknown_w = None
     if counts["unknown"] > 0:
@@ -779,14 +994,22 @@ def build_layer(key, prefix, cfg: SimConfig, rng_element_count, rng_rarity,
     transition_probs = np_rng_transition.dirichlet(alpha)
     transition_probs = transition_probs / transition_probs.sum()
 
-    return Layer(key=key, prefix=prefix, names=names, rarities=rarity_list,
+    return Layer(key=key, prefix=prefix, names=names, labels=labels,
+                 descriptions=descriptions, families=families,
+                 source_refs=source_refs, rarities=rarity_list,
                  is_unknown=[r == "unknown" for r in rarity_list],
                  counts=counts, unknown_weight=unknown_w,
                  initial_probs=initial_probs,
                  initial_cum=list(np.cumsum(initial_probs)),
                  transition_probs=transition_probs,
                  transition_cum=list(np.cumsum(transition_probs)),
-                 gamma_shape=shape, gamma_scale=scale, is_fixed=False)
+                 gamma_shape=shape, gamma_scale=scale, is_fixed=False,
+                 construction_mode=("semantic_catalog"
+                                    if lp.is_semantic else "generated"),
+                 catalog_version=(str(lp.semantic_catalog["version"])
+                                  if lp.is_semantic else None),
+                 catalog_sources=(dict(lp.semantic_catalog.get("sources", {}))
+                                  if lp.is_semantic else {}))
 
 
 # ------------------------------------------------ conditional transition model
@@ -868,8 +1091,8 @@ class ConditionalTransitionModel:
                         raise ConfigError(
                             f"Conditional rule {raw['id']!r} references "
                             f"unknown element {name!r} in layer "
-                            f"{layer_key!r}. Generated element names depend "
-                            "on the configured construction seeds.") from exc
+                            f"{layer_key!r}. Use a stable semantic catalog ID "
+                            "or a valid legacy generated element name.") from exc
                 selectors.append(ConditionSelector(
                     layer_index=layer_index,
                     element_indices=frozenset(element_indices),
@@ -886,8 +1109,8 @@ class ConditionalTransitionModel:
                     raise ConfigError(
                         f"Conditional rule {raw['id']!r} targets unknown "
                         f"element {name!r} in layer {target.key!r}. "
-                        "Generated element names depend on the configured "
-                        "construction seeds.") from exc
+                        "Use a stable semantic catalog ID or a valid legacy "
+                        "generated element name.") from exc
                 vector[element_index] *= float(multiplier)
             for rarity, multiplier in raw["multipliers"].get(
                     "rarities", {}).items():
@@ -1808,10 +2031,26 @@ class ScenarioSimulator:
             layer = self.layers[k]
             n_trans = state["transitions"][k]
             n_dur = state["duration_n"][k]
+            visit_counts = list(state["visit_counts"][k])
+            total_visits = sum(visit_counts)
+            element_metadata = [{
+                "id": element_id,
+                "label": layer.labels[index],
+                "description": layer.descriptions[index],
+                "family": layer.families[index],
+                "source_refs": list(layer.source_refs[index]),
+                "rarity": layer.rarities[index],
+                "visit_count": visit_counts[index],
+                "realized_selection_rate":
+                    (visit_counts[index] / total_visits) if total_visits else 0.0,
+            } for index, element_id in enumerate(layer.names)]
             layer_stats.append({
                 "layer": key,
                 "n_elements": layer.n_elements,
                 "is_fixed": layer.is_fixed,
+                "construction_mode": layer.construction_mode,
+                "catalog_version": layer.catalog_version,
+                "catalog_sources": dict(layer.catalog_sources),
                 "has_unknown": layer.has_unknown(),
                 "counts": dict(layer.counts),
                 "unknown_weight": layer.unknown_weight,
@@ -1830,8 +2069,11 @@ class ScenarioSimulator:
                     if n_trans else 0.0,
                 "episodes": state["episodes_by_layer"][k],
                 "selected_by_rarity": dict(state["selected_by_rarity"][k]),
-                "visit_counts": list(state["visit_counts"][k]),
+                "visit_counts": visit_counts,
                 "element_names": list(layer.names),
+                "element_labels": list(layer.labels),
+                "element_descriptions": list(layer.descriptions),
+                "elements": element_metadata,
                 "transition_probs": [float(p) for p in layer.transition_probs],
                 "mean_duration_config": cfg.layers[key].mean_duration,
                 "mean_duration_empirical":

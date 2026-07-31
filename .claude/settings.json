@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for d *)",
+      "Read(//c/Users/SJameel/**)",
+      "Bash(python -c 'import json,sys; d=json.load\\(open\\(r'\\\\''__TRACKED_VAR__/stats.json'\\\\''\\)\\); print\\(list\\(d.keys\\(\\)\\)\\)')",
+      "Bash(git mv *)",
+      "Bash(python -c \"import os,multiprocessing as m; print\\('cores',m.cpu_count\\(\\)\\)\")",
+      "Bash(python -c \"import numpy, scipy, yaml, matplotlib; print\\('deps ok'\\)\")"
+    ]
+  }
+}

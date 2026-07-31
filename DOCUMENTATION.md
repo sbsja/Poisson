@@ -1,9 +1,13 @@
-# Technical Documentation — Layered Scenario Model Simulator (v2)
+# Technical Documentation — Layered Scenario Model Simulator (v5)
 
 This document explains exactly how every part of the program works,
 component by component, in the order data flows through the system.
 File references: `simulator.py` (core), `run_simulation.py` (runner),
-`config.yaml` (parameters), `test_simulator.py` (tests). Version 2
+`config.yaml` (shared/default semantic parameters),
+`config_semantic_catalog_v5s.yaml` (named semantic profile),
+`config_semantic_catalog_v2.yaml` (fixed source-traceable semantic v2 profile),
+`config_generated_elements_v5g.yaml` (named anonymous generated profile), and
+`test_simulator.py` (tests). Version 2
 implements the change request in `prompt_v2_changes.md`: unknown-EPISODE
 duration measurement (replacing per-tuple encounter counting), a fixed
 real-element street layer, no unknown elements in street/weather,
@@ -13,7 +17,9 @@ research-based element counts, and a studied Dirichlet concentration.
 > active independent transition model emits visible element episodes, a
 > dedicated hidden triggering-condition category, and all-known
 > full-scenario rarity episodes. Conditional mode is available but requires
-> full-scenario rarity to be disabled.
+> full-scenario rarity to be disabled. Version 5 uses semantic catalog v1.0
+> for every non-street layer; catalog probabilities remain engineering
+> assumptions because no real driving dataset is available.
 
 ---
 
@@ -27,7 +33,7 @@ ScenarioSimulator.__init__()
     │  7 independent RNG streams (one per random source)
     │  build_layer() ×6:
     │     street: fixed 12 elements, exact vector (no Dirichlet, no RNG)
-    │     others: element count → rarity counts → shuffle → unknown weight
+    │     v5 semantic layers: fixed IDs/metadata/rarities → unknown weight
     │             → weight vector → ONE Dirichlet draw → cumulative arrays
     ▼
 run() / run_resumable()
@@ -57,9 +63,9 @@ probabilities and reweights them from matching cross-layer rules.
 ## 2. Configuration (`SimConfig`, `LayerParams`)
 
 `SimConfig.from_yaml → from_dict` builds the dataclass, converts each
-`layers:` entry into a `LayerParams` (durations + either
-`element_count_min/max` + `allow_unknown`, or `fixed_elements`), rejects
-unknown keys, then runs `validate()`.
+`layers:` entry into a `LayerParams`. A layer uses exactly one construction
+form: `fixed_elements`, `semantic_catalog`, or legacy
+`element_count_min/max`; unknown keys are rejected before `validate()`.
 
 Validation highlights: the `seeds` mapping must contain exactly the seven
 required integer entries; conditional transition rules must be structurally
@@ -68,8 +74,13 @@ independent-product full-scenario classifier;
 rarity proportions must cover all five categories and sum to 1; base
 weights positive, `base_weights['unknown']` forbidden; per layer —
 durations positive, and either a valid fixed-element list (unique names,
-positive probabilities summing to 1, `allow_unknown: false`) or a valid
-count range. For every sampled layer that allows unknowns, **every n in
+positive probabilities summing to 1, `allow_unknown: false`), a valid
+semantic catalog, or a valid legacy count range. Semantic validation checks
+version, ordered elements, snake-case unique IDs, non-empty metadata, rarity,
+unknown consistency, and unknown-weight feasibility. Catalog version 2.0 also
+requires a taxonomy family and one or more valid source references for every
+element. For every legacy sampled
+layer that allows unknowns, **every n in
 [min, max] is checked**: it must yield ≥1 unknown element by
 largest-remainder rounding AND admit a valid unknown weight (< very_rare
 weight) under the configured mode. This is what caught the ego/RU n=13–14
@@ -117,9 +128,9 @@ ties use `LAYER_DEFINITIONS` order. Conditional initial states use the same
 topological order when `apply_to_initial_state` is true.
 
 Conditional rules consume no random values; categorical sampling still uses
-the existing `initial_state` and `transition_sampling` streams. Exact generated
-element names such as `ego_003` depend on construction seeds, so meaningful
-calibration should use fixed, versioned semantic catalogs.
+the existing `initial_state` and `transition_sampling` streams. The v5 default
+uses stable IDs such as `merge`; generated names such as `ego_003` occur only
+in legacy generated-layer configurations.
 
 The 0.4% unknown-element target remains a baseline used to construct each
 layer. Conditional weighting may change empirical selection and occupancy.
@@ -154,6 +165,11 @@ configured probabilities verbatim — so changing `transition_matrix` or
 `test_seed_streams_isolated`). Same config ⇒ identical results, including
 across checkpoint/resume (`test_chunked_resume_bit_identical`).
 
+Semantic catalogs consume neither the `element_count` nor
+`rarity_assignment` stream. Their identity and rarity assignments therefore
+remain unchanged when either legacy construction seed changes. The
+`transition_matrix` stream still controls their Dirichlet draws.
+
 ---
 
 ## 4. Layer construction (`build_layer`)
@@ -167,7 +183,13 @@ is None. Rarity labels are assigned by probability band (≥10% common,
 effect on dynamics. Durations use the layer's Gamma parameters like any
 other layer.
 
-**Sampled layers.** As in v1: element count uniform in the layer's
+**Semantic catalog layers (v5 default).** Element IDs, labels, descriptions,
+order, and rarities come directly from the versioned catalog. The model builds
+rarity weights, calculates an unknown weight where required, normalizes the
+weight vector, and draws one permanent Dirichlet transition vector. No
+element-count or rarity-assignment randomness is consumed.
+
+**Legacy sampled layers.** As in v1: element count uniform in the layer's
 configured range; largest-remainder integer rarity counts from the
 effective proportions; random shuffle; names `prefix_iii`; rarity-based
 weights with the unknown weight from §5 (only if the layer has unknown
@@ -220,7 +242,7 @@ lifetime = 1/Σₖ(1−sₖ)/μₖ ≈ 17 s.
 
 **Pattern combinations** (`CombinationRule`, `build_combination_rules`).
 A rule is a conjunction of specific elements in ≥2 layers, e.g.
-`street=forced_merge_merging & environmental_conditions=environment_000`;
+`street=forced_merge_merging & environmental_conditions=fog`;
 all other layers are wildcards. A rule is *matched* iff every referenced
 element is simultaneously current; the rule's episode runs from the event
 where it becomes matched to the event where any referenced layer leaves
@@ -319,9 +341,14 @@ that is 144,000,000 simulated seconds ≈ 10M events ≈ 16 s wall time.
 
 ## 10. Output statistics
 
-Per episode (`episodes.csv`): layer, element, start/end mileage, start/end
-time, duration in seconds and miles, truncated flag, plus inter-arrival
-distance/time from the previous episode start. Derived
+Per episode (`episodes.csv`): layer, stable element ID, start/end mileage,
+start/end time, duration in seconds and miles, truncated flag, inter-arrival
+distance/time, plus appended element label, description, and catalog version.
+Per-layer JSON statistics include construction mode, catalog version, and an
+ordered element list with ID, label, description, rarity, visit count, and
+realized selection rate. Version 2.0 elements additionally report taxonomy
+family and source-reference IDs, while the layer reports the corresponding
+source map. Derived
 (`SimulationResult`): inter-arrivals between episode **starts** (first
 entry from t=0), `window_stats()` = episode-start counts per fixed mileage
 window (complete windows only; sample variance ddof=1; dispersion index =
@@ -333,7 +360,7 @@ composition configured vs simulated).
 
 ---
 
-## 11. Test suite (38 tests)
+## 11. Test suite
 
 Episode rules decision table; hash classifier determinism/rate/seed
 dependence (kept although dormant) and rejection of
@@ -352,6 +379,10 @@ flagging, episodes == unknown entries when self-transitions are disabled,
 long episodes surviving other layers' churn); window statistics on known
 inputs; inter-arrival consistency; target/time consistency; bit-identical
 reproducibility and chunked resume.
+
+V5 coverage additionally verifies catalog validation, seed-independent
+identity and order, stable conditional-rule references, metadata outputs,
+designed unknown mass, and legacy generated-layer compatibility.
 
 Run with `pytest test_simulator.py -q`.
 

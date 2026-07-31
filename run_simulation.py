@@ -25,21 +25,36 @@ from simulator import (LAYER_DEFINITIONS, RARITIES, ScenarioSimulator,
 
 
 def write_episodes_csv(path, result, inter_mi, inter_s):
+    metadata = {}
+    versions = {}
+    for layer_stats in result.layer_stats:
+        versions[layer_stats["layer"]] = layer_stats["catalog_version"] or ""
+        for element in layer_stats["elements"]:
+            metadata[(layer_stats["layer"], element["id"])] = (
+                element["label"], element["description"])
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["episode_index", "type", "layer", "element",
                     "start_mileage", "end_mileage",
                     "start_time_seconds", "end_time_seconds",
                     "duration_seconds", "duration_miles", "truncated",
-                    "inter_arrival_miles", "inter_arrival_seconds"])
+                    "inter_arrival_miles", "inter_arrival_seconds",
+                    "element_label", "element_description",
+                    "catalog_version"])
         for e, dmi, ds in zip(result.episodes, inter_mi, inter_s):
+            label, description = metadata.get((e.layer, e.element), ("", ""))
+            if e.type == "hidden_triggering_unknown":
+                label = "Hidden triggering-condition unknown"
+                description = ("A continuous period containing any unknown "
+                               "triggering-condition catalog element.")
             w.writerow([e.index, e.type, e.layer, e.element,
                         f"{e.start_mileage:.3f}", f"{e.end_mileage:.3f}",
                         f"{e.start_time_seconds:.1f}",
                         f"{e.end_time_seconds:.1f}",
                         f"{e.duration_seconds:.1f}",
                         f"{e.duration_miles:.3f}",
-                        int(e.truncated), f"{dmi:.3f}", f"{ds:.1f}"])
+                        int(e.truncated), f"{dmi:.3f}", f"{ds:.1f}",
+                        label, description, versions.get(e.layer, "")])
 
 
 def write_windows_csv(path, ws):
@@ -68,8 +83,10 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     n_trunc = sum(1 for e in eps if e.truncated)
 
     L = []
-    L.append("# Layered Scenario Simulation - Results (episode semantics)\n")
+    L.append(f"# Layered Scenario Simulation - {cfg.profile_name}\n")
     L.append("## Run parameters\n")
+    L.append(f"- simulator profile: `{cfg.profile_name}` "
+             f"(`{cfg.profile_kind}`)")
     L.append(f"- target mileage: {cfg.target_total_miles:,.0f} miles at "
              f"{cfg.average_speed_mph} mph constant average speed")
     L.append(f"- seeds: {json.dumps(cfg.seeds)}")
@@ -202,9 +219,14 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     for st in result.layer_stats:
         c = st["counts"]
         uw = f"{st['unknown_weight']:.5f}" if st["unknown_weight"] else "-"
-        fixed_tag = " (fixed)" if st["is_fixed"] else ""
+        if st["construction_mode"] == "fixed":
+            mode_tag = " (fixed)"
+        elif st["construction_mode"] == "semantic_catalog":
+            mode_tag = f" (catalog v{st['catalog_version']})"
+        else:
+            mode_tag = " (generated)"
         L.append(
-            f"| {st['layer']}{fixed_tag} | {st['n_elements']} | "
+            f"| {st['layer']}{mode_tag} | {st['n_elements']} | "
             f"{c['common']}/{c['medium']}/{c['rare']}/{c['very_rare']}/"
             f"{c['unknown']} | {uw} | {st['designed_unknown_mass']:.4%} | "
             f"{st['realized_unknown_mass']:.4%} | "
@@ -286,6 +308,8 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
 def build_stats_json(result, inter_mi, inter_s, ws, wall_seconds):
     eps = result.episodes
     return {
+        "profile_name": result.config.profile_name,
+        "profile_kind": result.config.profile_kind,
         "total_simulated_mileage": result.total_miles,
         "total_simulated_time_seconds": result.total_time_seconds,
         "total_events": result.total_events,
@@ -316,6 +340,8 @@ def build_stats_json(result, inter_mi, inter_s, ws, wall_seconds):
         "seeds": result.config.seeds,
         "layer_stats": [{k: v for k, v in st.items()
                          if k not in ("visit_counts", "element_names",
+                                      "element_labels",
+                                      "element_descriptions",
                                       "transition_probs")}
                         for st in result.layer_stats],
         "street_composition": {
@@ -482,6 +508,7 @@ def main():
     else:
         cfg = SimConfig.from_yaml(args.config)
         print(f"config: {args.config}")
+        print(f"profile: {cfg.profile_name} ({cfg.profile_kind})")
         print(f"seeds: {cfg.seeds}")
         sim = ScenarioSimulator(cfg)
         state = None
