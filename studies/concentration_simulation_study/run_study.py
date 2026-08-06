@@ -58,7 +58,7 @@ def run_one(concentration, replicate, base_transition_seed):
     wall_seconds = time.monotonic() - started
 
     type_counts = result.episodes_by_type()
-    target = cfg.target_unknown_element_probability
+    target = cfg.selection_class_percentages["unknown"] / 100.0
     layer_masses = {
         stat["layer"]: stat["realized_unknown_mass"]
         for stat in result.layer_stats

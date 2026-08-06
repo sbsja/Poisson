@@ -1,75 +1,30 @@
-"""
-Layered scenario model with event-driven simulation and unknown-episode
-duration measurement.
+"""Event-driven six-layer scenario simulator (configuration v6).
 
-Six layers (street, temporal modifications, ego maneuver, RU maneuver,
-environmental conditions, triggering conditions). Their transition behavior
-is configurable:
+Only ``common``, ``rare``, and ``unknown`` rarity classes exist. Every element
+has its own Gamma sojourn-time distribution, derived reproducibly from its
+layer baseline and rarity profile; configured mean bands are ordered common >
+rare > unknown within every layer.
 
-  - independent (default): the original behavior; each layer samples from its
-    permanent transition vector without considering other layers.
-  - conditional: matching configuration rules reweight a target layer's base
-    probabilities from the current states of parent layers. Dependencies must
-    form a DAG, so simultaneous expiries have a deterministic causal order.
+An unknown *scenario* is no longer a standalone unknown element, hash, or
+stationary-probability threshold. At initialization the simulator selects
+configured numbers of exact C3, C4, C5, and C6 combinations. Every combination
+contains rare elements from distinct layers and must include one rare element
+from ``triggering_conditions``. A rule matches only when the complete active
+rare-element set equals the selected set and every other active element is
+common. Unknown-rarity elements therefore disqualify a match.
 
-  - street: FIXED list of 12 real route-composition elements whose exact
-    probabilities form the permanent transition vector (no Dirichlet, no
-    unknown elements).
-  - default non-street layers: fixed, versioned semantic catalogs with stable
-    IDs, labels, descriptions, and explicit rarity categories. Legacy sampled
-    element-count ranges remain supported.
-  - semantic and legacy generated layers use rarity-based weights with a
-    "calculated" or "fixed" unknown weight (always below very_rare) and ONE
-    permanent transition vector per layer sampled from
-    Dirichlet(concentration_scale * normalized_weights) at initialization.
-
-Durations: Gamma per layer (shape = mean^2/var, scale = var/mean), clamped
-to min_duration_seconds. Event-driven main loop advances to the next layer
-expiry and converts time to mileage with a constant average speed.
-
-UNKNOWN-EPISODE SEMANTICS (replaces per-tuple encounter counting):
-  1. An episode starts when a layer transitions from a known element to an
-     unknown element (also at t=0 if a layer's initial element is unknown).
-  2. It ends when that same layer transitions from that unknown element to
-     a known element.
-  3. A direct hop to a DIFFERENT unknown element closes the episode and
-     opens a new one at the same instant.
-  4. A self-transition onto the SAME unknown element continues the episode.
-  5. Episodes are per layer and may overlap; overlapping episodes are
-     separate counts with independent durations.
-  6. Changes in other layers never start or end an episode.
-  7. Episodes still open at the end of the simulation are closed at final
-     time and flagged truncated.
-
-Unknown combinations are optional and disabled by default:
-  - HASH combinations are optional and disabled by default. When enabled,
-    the SHA-256 classifier may flag an all-known tuple; its episode lasts
-    exactly as long as that tuple persists (any element change ends it;
-    self-transitions continue it).
-  - PATTERN combinations (SOTIF-style interactions): configured rules are
-    conjunctions over >=2 layers, e.g. street=forced_merge_merging AND
-    environmental_conditions=environment_003. A rule's episode starts when
-    all its elements are simultaneously current and ends when any of them
-    leaves - naturally spanning many changes of unrelated layers. Rules
-    are manual (config) and/or generated once from the pattern_rules seed,
-    accumulating rules until a target stationary mass is reached. Rules
-    may only reference known-rarity elements.
-All three episode types (element / pattern / hash_combination) are tracked
-concurrently and independently; the union unknown time merges overlaps.
-
-Reproducibility: one configurable seed per random source (config `seeds`);
-the same config produces identical results, including across
-checkpoint/resume.
+The main loop stops exactly at ``target_total_hours`` (20,000 by default).
+Mileage remains a derived reporting quantity. Independent and conditional
+transition modes and bit-identical checkpoint/resume are retained.
 """
 
 from __future__ import annotations
 
 import bisect
 import copy
-import hashlib
+import itertools
 import math
 import random
-import re
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -77,12 +32,12 @@ from pathlib import Path
 import numpy as np
 import yaml
 
-RARITIES = ("common", "medium", "rare", "very_rare", "unknown")
-KNOWN_RARITIES = ("common", "medium", "rare", "very_rare")
+RARITIES = ("common", "rare", "unknown")
+KNOWN_RARITIES = ("common", "rare")
 
 SEED_KEYS = ("element_count", "rarity_assignment", "transition_matrix",
              "duration", "initial_state", "transition_sampling",
-             "pattern_rules")
+             "combination_selection")
 
 #: (config key, element-name prefix) for the six layers, in fixed tuple order.
 LAYER_DEFINITIONS = (
@@ -107,40 +62,51 @@ class ConfigError(ValueError):
 class LayerParams:
     mean_duration: float                 # seconds
     variance_duration: float             # seconds^2
-    element_count_min: int = None        # sampled layers only
-    element_count_max: int = None
-    allow_unknown: bool = True           # sampled layers only
-    fixed_elements: list = None          # [{name, probability}, ...] -> fixed layer
-    semantic_catalog: dict = None        # {version, elements:[{id,label,...}]}
-
-    @property
-    def is_fixed(self) -> bool:
-        return self.fixed_elements is not None
-
-    @property
-    def is_semantic(self) -> bool:
-        return self.semantic_catalog is not None
-
-    @property
-    def has_generated_range(self) -> bool:
-        return (self.element_count_min is not None
-                or self.element_count_max is not None)
+    element_count_min: int
+    element_count_max: int
 
 
 def _default_seeds():
     return {"element_count": 12345, "rarity_assignment": 23456,
             "transition_matrix": 34567, "duration": 45678,
             "initial_state": 56789, "transition_sampling": 67890,
-            "pattern_rules": 78901}
+            "combination_selection": 78901}
 
 
-def _default_proportions():
-    return {"common": 0.50, "medium": 0.25, "rare": 0.10,
-            "very_rare": 0.05, "unknown": 0.10}
+def _default_element_class_percentages():
+    return {"common": 70.0, "rare": 20.0, "unknown": 10.0}
 
 
-def _default_base_weights():
-    return {"common": 1.0, "medium": 0.4, "rare": 0.1, "very_rare": 0.03}
+def _default_selection_class_percentages():
+    return {"common": 70.0, "rare": 20.0, "unknown": 10.0}
+
+
+def _default_duration_profiles():
+    """Rarity-level defaults used to derive one Gamma law per element.
+
+    The multiplier bands do not overlap, even after applying element_spread,
+    so the configured element means are always ordered common > rare > unknown.
+    """
+    return {
+        "common": {"mean_multiplier": 1.50,
+                   "coefficient_of_variation": 0.45,
+                   "element_spread": 0.10},
+        "rare": {"mean_multiplier": 0.75,
+                 "coefficient_of_variation": 0.60,
+                 "element_spread": 0.10},
+        "unknown": {"mean_multiplier": 0.25,
+                    "coefficient_of_variation": 0.80,
+                    "element_spread": 0.10},
+    }
+
+
+def _default_unknown_scenarios():
+    return {
+        "enabled": True,
+        "combination_counts": {3: 40, 4: 30, 5: 20, 6: 10},
+        "require_triggering_condition": True,
+        "exact_rare_set": True,
+    }
 
 
 def _default_transition_model():
@@ -155,32 +121,30 @@ class SimConfig:
     profile_name: str = "custom"
     profile_kind: str = "custom"
     seeds: dict = field(default_factory=_default_seeds)
-    global_seed: int = 42
-    target_total_miles: float = 2_000_000.0
+    target_total_hours: float = 20_000.0
+    # Compatibility input for old experiments. The event loop is time-based;
+    # when supplied, this is converted to hours before the run begins.
+    target_total_miles: float = None
     average_speed_mph: float = 50.0
     min_duration_seconds: float = 1.0
     mileage_window_miles: float = 10_000.0
-    enable_unknown_combinations: bool = False   # pattern combinations disabled
-    enable_hash_combinations: bool = False      # disabled: do not evaluate hashes
-    # A triggering-condition unknown is a dedicated hidden-scenario route,
-    # rather than a normal visible-layer element episode.
-    enable_hidden_triggering_unknowns: bool = True
-    combination_rules: dict = field(default_factory=lambda: {
-        "manual": [], "generated_max_rules": 0,
-        "generated_layers_per_rule": 2, "generated_target_mass": 0.0})
-    rarity_proportions: dict = field(default_factory=_default_proportions)
-    base_weights: dict = field(default_factory=_default_base_weights)
-    unknown_weight_mode: str = "calculated"
-    target_unknown_element_probability: float = 0.004
-    fixed_unknown_weight: float = 0.001
-    unknown_combination_probability: float = 0.005  # used only when hash is enabled
-    full_scenario_unknowns: dict = field(default_factory=lambda: {
-        "enabled": False, "target_stationary_mass": 0.004,
-        "calibration_samples": 2_000_000, "calibration_seed": 90123})
+    unknown_scenarios: dict = field(default_factory=_default_unknown_scenarios)
+    element_class_percentages: dict = field(
+        default_factory=_default_element_class_percentages)
+    selection_class_percentages: dict = field(
+        default_factory=_default_selection_class_percentages)
+    duration_profiles: dict = field(default_factory=_default_duration_profiles)
     transition_model: dict = field(default_factory=_default_transition_model)
-    concentration_scale: float = 20_000.0   # from concentration_study.md
+    concentration_scale: float = 20_000.0
     allow_self_transition: bool = True
     layers: dict = field(default_factory=dict)   # layer key -> LayerParams
+
+    @property
+    def target_time_seconds(self) -> float:
+        hours = (self.target_total_miles / self.average_speed_mph
+                 if self.target_total_miles is not None
+                 else self.target_total_hours)
+        return float(hours) * 3600.0
 
     # -- construction --------------------------------------------------------
     @classmethod
@@ -246,26 +210,13 @@ class SimConfig:
         return cfg
 
     # -- helpers ---------------------------------------------------------------
-    def effective_proportions(self, lp: LayerParams) -> dict:
-        """Rarity proportions for a sampled layer. Layers with
-        allow_unknown=false use the four known proportions renormalized to
-        sum to 1 (unknown share removed)."""
-        props = dict(self.rarity_proportions)
-        if not lp.allow_unknown:
-            known_total = sum(props[r] for r in KNOWN_RARITIES)
-            return {**{r: props[r] / known_total for r in KNOWN_RARITIES},
-                    "unknown": 0.0}
-        return props
-
     # -- validation -----------------------------------------------------------
     def validate(self) -> None:
         if not isinstance(self.profile_name, str) or not self.profile_name.strip():
             raise ConfigError("profile_name must be a non-empty string.")
-        if self.profile_kind not in (
-                "semantic_catalog", "generated_elements", "custom"):
+        if self.profile_kind not in ("generated_elements", "custom"):
             raise ConfigError(
-                "profile_kind must be 'semantic_catalog', "
-                "'generated_elements', or 'custom'.")
+                "profile_kind must be 'generated_elements' or 'custom'.")
         if not isinstance(self.seeds, dict):
             raise ConfigError("'seeds' must be a mapping.")
         missing = [k for k in SEED_KEYS if k not in self.seeds]
@@ -281,112 +232,117 @@ class SimConfig:
 
         self._validate_transition_model()
 
-        cr = self.combination_rules
-        if not isinstance(cr, dict):
-            raise ConfigError("combination_rules must be a mapping.")
-        allowed = {"manual", "generated_max_rules",
-                   "generated_layers_per_rule", "generated_target_mass"}
-        bad = [k for k in cr if k not in allowed]
+        scenarios = self.unknown_scenarios
+        if not isinstance(scenarios, dict):
+            raise ConfigError("unknown_scenarios must be a mapping.")
+        scenario_allowed = {"enabled", "combination_counts",
+                            "require_triggering_condition", "exact_rare_set"}
+        bad = [key for key in scenarios if key not in scenario_allowed]
         if bad:
-            raise ConfigError(f"combination_rules has unknown keys: {bad}")
-        cr.setdefault("manual", [])
-        cr.setdefault("generated_max_rules", 0)
-        cr.setdefault("generated_layers_per_rule", 2)
-        cr.setdefault("generated_target_mass", 0.0)
-        layer_keys = {key for key, _ in LAYER_DEFINITIONS}
-        for i, rule in enumerate(cr["manual"]):
-            if not isinstance(rule, dict) or len(rule) < 2:
+            raise ConfigError(f"unknown_scenarios has unknown keys: {bad}")
+        scenarios.setdefault("enabled", True)
+        scenarios.setdefault("combination_counts", {3: 40, 4: 30, 5: 20, 6: 10})
+        scenarios.setdefault("require_triggering_condition", True)
+        scenarios.setdefault("exact_rare_set", True)
+        if not isinstance(scenarios["enabled"], bool):
+            raise ConfigError("unknown_scenarios.enabled must be a bool.")
+        if scenarios["require_triggering_condition"] is not True:
+            raise ConfigError(
+                "unknown_scenarios.require_triggering_condition must be true; "
+                "every C3-C6 rule requires a rare triggering condition.")
+        if scenarios["exact_rare_set"] is not True:
+            raise ConfigError(
+                "unknown_scenarios.exact_rare_set must be true; subset matches "
+                "would make C3-C6 categories overlap.")
+        counts = scenarios["combination_counts"]
+        if not isinstance(counts, dict):
+            raise ConfigError(
+                "unknown_scenarios.combination_counts must be a mapping.")
+        normalized_counts = {}
+        for raw_size, raw_count in counts.items():
+            try:
+                size = int(raw_size)
+            except (TypeError, ValueError):
                 raise ConfigError(
-                    f"combination_rules.manual[{i}] must be a mapping of at "
-                    "least TWO layer->element entries (a combination is an "
-                    "interaction between layers).")
-            unknown = [k for k in rule if k not in layer_keys]
-            if unknown:
+                    "unknown_scenarios combination sizes must be 3, 4, 5, or 6."
+                ) from None
+            if size not in (3, 4, 5, 6) or str(raw_size) != str(size):
                 raise ConfigError(
-                    f"combination_rules.manual[{i}] has unknown layers: "
-                    f"{unknown}")
-        if not (2 <= int(cr["generated_layers_per_rule"]) <= N_LAYERS):
+                    "unknown_scenarios combination sizes must be 3, 4, 5, or 6.")
+            if (isinstance(raw_count, bool) or not isinstance(raw_count, int)
+                    or raw_count < 0):
+                raise ConfigError(
+                    f"unknown_scenarios.combination_counts[{size}] must be a "
+                    "non-negative integer.")
+            normalized_counts[size] = raw_count
+        scenarios["combination_counts"] = {
+            size: normalized_counts.get(size, 0) for size in (3, 4, 5, 6)}
+
+
+        for field_name in ("element_class_percentages",
+                           "selection_class_percentages"):
+            percentages = getattr(self, field_name)
+            if not isinstance(percentages, dict):
+                raise ConfigError(f"{field_name} must be a mapping.")
+            if set(percentages) != set(RARITIES):
+                raise ConfigError(
+                    f"{field_name} must contain exactly {RARITIES}.")
+            for rarity in RARITIES:
+                value = percentages[rarity]
+                if (isinstance(value, bool)
+                        or not isinstance(value, (int, float))
+                        or not math.isfinite(float(value))
+                        or float(value) <= 0):
+                    raise ConfigError(
+                        f"{field_name}[{rarity}] must be a positive percentage.")
+            total = sum(float(percentages[r]) for r in RARITIES)
+            if abs(total - 100.0) > 1e-6:
+                raise ConfigError(
+                    f"{field_name} must sum to 100.0 (got {total}).")
+
+        if not isinstance(self.duration_profiles, dict):
+            raise ConfigError("duration_profiles must be a mapping.")
+        if set(self.duration_profiles) != set(RARITIES):
             raise ConfigError(
-                "generated_layers_per_rule must be between 2 and 6.")
-        if cr["generated_target_mass"] < 0 or cr["generated_max_rules"] < 0:
-            raise ConfigError("generated_target_mass and generated_max_rules "
-                              "must be non-negative.")
-
-        if self.unknown_weight_mode not in ("calculated", "fixed"):
-            raise ConfigError("unknown_weight_mode must be 'calculated' or "
-                              f"'fixed', got {self.unknown_weight_mode!r}")
-
-        missing = [r for r in RARITIES if r not in self.rarity_proportions]
-        if missing:
-            raise ConfigError(f"rarity_proportions missing categories: {missing}")
-        if any(self.rarity_proportions[r] < 0 for r in RARITIES):
-            raise ConfigError("rarity_proportions must be non-negative.")
-        total = sum(self.rarity_proportions[r] for r in RARITIES)
-        if abs(total - 1.0) > 1e-6:
-            raise ConfigError(f"rarity_proportions must sum to 1.0 (got {total}).")
-
-        for r in KNOWN_RARITIES:
-            if r not in self.base_weights:
-                raise ConfigError(f"base_weights missing category: {r}")
-            if self.base_weights[r] <= 0:
-                raise ConfigError(f"base_weights[{r}] must be positive.")
-        if "unknown" in self.base_weights:
-            raise ConfigError("Do not set base_weights['unknown'].")
-
-        fs = self.full_scenario_unknowns
-        if not isinstance(fs, dict):
-            raise ConfigError("full_scenario_unknowns must be a mapping.")
-        fs_allowed = {"enabled", "target_stationary_mass",
-                      "calibration_samples", "calibration_seed"}
-        fs_bad = [k for k in fs if k not in fs_allowed]
-        if fs_bad:
-            raise ConfigError(f"full_scenario_unknowns has unknown keys: {fs_bad}")
-        fs.setdefault("enabled", False)
-        fs.setdefault("target_stationary_mass", 0.004)
-        fs.setdefault("calibration_samples", 2_000_000)
-        fs.setdefault("calibration_seed", 90123)
-        if not isinstance(fs["enabled"], bool):
-            raise ConfigError("full_scenario_unknowns.enabled must be a bool.")
-        tsm = fs["target_stationary_mass"]
-        if not (0.0 < float(tsm) < 1.0):
-            raise ConfigError("full_scenario_unknowns.target_stationary_mass "
-                              "must be in (0, 1).")
-        cs = fs["calibration_samples"]
-        if isinstance(cs, bool) or not isinstance(cs, int):
-            raise ConfigError("full_scenario_unknowns.calibration_samples "
-                              "must be an integer.")
-        if cs < max(100_000, int(math.ceil(10.0 / float(tsm)))):
+                f"duration_profiles must contain exactly {RARITIES}.")
+        mean_bands = {}
+        for rarity in RARITIES:
+            profile = self.duration_profiles[rarity]
+            if not isinstance(profile, dict):
+                raise ConfigError(f"duration_profiles[{rarity}] must be a mapping.")
+            expected = {"mean_multiplier", "coefficient_of_variation",
+                        "element_spread"}
+            if set(profile) != expected:
+                raise ConfigError(
+                    f"duration_profiles[{rarity}] must contain exactly "
+                    f"{sorted(expected)}.")
+            multiplier = float(profile["mean_multiplier"])
+            cv = float(profile["coefficient_of_variation"])
+            spread = float(profile["element_spread"])
+            if not math.isfinite(multiplier) or multiplier <= 0:
+                raise ConfigError(f"duration_profiles[{rarity}].mean_multiplier "
+                                  "must be positive.")
+            if not math.isfinite(cv) or cv <= 0:
+                raise ConfigError(
+                    f"duration_profiles[{rarity}].coefficient_of_variation "
+                    "must be positive.")
+            if not math.isfinite(spread) or not (0 <= spread < 1):
+                raise ConfigError(f"duration_profiles[{rarity}].element_spread "
+                                  "must be in [0, 1).")
+            mean_bands[rarity] = (multiplier * (1.0 - spread),
+                                  multiplier * (1.0 + spread))
+        if not (mean_bands["common"][0] > mean_bands["rare"][1]
+                > mean_bands["unknown"][1]):
             raise ConfigError(
-                "full_scenario_unknowns.calibration_samples is too small for "
-                "a reliable threshold: need at least "
-                f"max(100000, 10/target) = "
-                f"{max(100_000, int(math.ceil(10.0 / float(tsm))))}.")
-        csd = fs["calibration_seed"]
-        if isinstance(csd, bool) or not isinstance(csd, int):
-            raise ConfigError("full_scenario_unknowns.calibration_seed must "
-                              "be an integer.")
-        if (self.transition_model["mode"] == "conditional"
-                and fs["enabled"]):
-            raise ConfigError(
-                "full_scenario_unknowns.enabled cannot be true when "
-                "transition_model.mode='conditional': the current "
-                "full-scenario classifier assumes independent stationary "
-                "layer probabilities. Disable full_scenario_unknowns until "
-                "dependency-aware rarity calibration is implemented.")
+                "duration_profiles mean bands must not overlap and must be "
+                "ordered common > rare > unknown.")
 
-        if not isinstance(self.enable_hidden_triggering_unknowns, bool):
-            raise ConfigError("enable_hidden_triggering_unknowns must be a bool.")
-
-        if not (0 < self.target_unknown_element_probability < 1):
-            raise ConfigError("target_unknown_element_probability must be in (0,1).")
-        if not (0 <= self.unknown_combination_probability < 1):
-            raise ConfigError("unknown_combination_probability must be in [0,1).")
-        if self.fixed_unknown_weight <= 0:
-            raise ConfigError("fixed_unknown_weight must be positive.")
         if self.average_speed_mph <= 0:
             raise ConfigError("average_speed_mph must be positive.")
-        if self.target_total_miles <= 0:
-            raise ConfigError("target_total_miles must be positive.")
+        if self.target_total_hours <= 0:
+            raise ConfigError("target_total_hours must be positive.")
+        if self.target_total_miles is not None and self.target_total_miles <= 0:
+            raise ConfigError("target_total_miles must be positive when used.")
         if self.min_duration_seconds <= 0:
             raise ConfigError("min_duration_seconds must be positive.")
         if self.concentration_scale <= 0:
@@ -400,51 +356,20 @@ class SimConfig:
             lp = self.layers[key]
             if lp.mean_duration <= 0 or lp.variance_duration <= 0:
                 raise ConfigError(f"Layer '{key}': durations must be positive.")
-            construction_forms = sum((
-                lp.is_fixed,
-                lp.is_semantic,
-                lp.has_generated_range,
-            ))
-            if construction_forms != 1:
+            if not (0 < lp.element_count_min <= lp.element_count_max):
                 raise ConfigError(
-                    f"Layer '{key}': use exactly one construction form: "
-                    "fixed_elements, semantic_catalog, or "
-                    "element_count_min/element_count_max.")
-            if lp.is_fixed:
-                self._validate_fixed_elements(key, lp)
-            elif lp.is_semantic:
-                self._validate_semantic_catalog(key, lp)
-            else:
-                if lp.element_count_min is None or lp.element_count_max is None:
+                    f"Layer '{key}': require 0 < element_count_min <= "
+                    "element_count_max.")
+            for n in range(lp.element_count_min, lp.element_count_max + 1):
+                counts = assign_rarity_counts(
+                    n, self.element_class_percentages)
+                missing = [rarity for rarity in RARITIES
+                           if counts[rarity] == 0]
+                if missing:
                     raise ConfigError(
-                        f"Layer '{key}': needs element_count_min/max "
-                        "(or fixed_elements).")
-                if not (0 < lp.element_count_min <= lp.element_count_max):
-                    raise ConfigError(
-                        f"Layer '{key}': require 0 < element_count_min <= "
-                        "element_count_max.")
-                if lp.allow_unknown:
-                    # every n in the range must (a) yield >= 1 unknown
-                    # element and (b) admit a valid unknown weight
-                    # (smaller than very_rare) under the configured mode
-                    props = self.effective_proportions(lp)
-                    for n in range(lp.element_count_min,
-                                   lp.element_count_max + 1):
-                        counts = assign_rarity_counts(n, props)
-                        if counts["unknown"] == 0:
-                            raise ConfigError(
-                                f"Layer '{key}': element count n={n} in the "
-                                "configured range yields zero unknown "
-                                "elements; shrink the range, raise the "
-                                "unknown proportion, or set "
-                                "allow_unknown: false.")
-                        try:
-                            compute_unknown_weight(counts, self)
-                        except ConfigError as exc:
-                            raise ConfigError(
-                                f"Layer '{key}': element count n={n} in the "
-                                f"configured range is infeasible: {exc}"
-                            ) from exc
+                        f"Layer '{key}': element count n={n} yields no "
+                        f"elements for {missing}; increase the count or the "
+                        "corresponding element_class_percentages.")
 
         extra = [k for k in self.layers
                  if k not in [key for key, _ in LAYER_DEFINITIONS]]
@@ -618,152 +543,12 @@ class SimConfig:
             raise ConfigError(
                 f"{where} must be a finite non-negative number.")
 
-    @staticmethod
-    def _validate_fixed_elements(key, lp: LayerParams):
-        elems = lp.fixed_elements
-        if not isinstance(elems, list) or not elems:
-            raise ConfigError(f"Layer '{key}': fixed_elements must be a "
-                              "non-empty list.")
-        names, probs = [], []
-        for e in elems:
-            if not isinstance(e, dict) or "name" not in e or "probability" not in e:
-                raise ConfigError(f"Layer '{key}': each fixed element needs "
-                                  "'name' and 'probability'.")
-            names.append(str(e["name"]))
-            probs.append(float(e["probability"]))
-        if len(set(names)) != len(names):
-            raise ConfigError(f"Layer '{key}': fixed element names must be unique.")
-        if any(p <= 0 for p in probs):
-            raise ConfigError(f"Layer '{key}': fixed probabilities must be > 0.")
-        if abs(sum(probs) - 1.0) > 1e-6:
-            raise ConfigError(f"Layer '{key}': fixed probabilities must sum "
-                              f"to 1.0 (got {sum(probs)}).")
-        if lp.allow_unknown:
-            raise ConfigError(f"Layer '{key}': fixed_elements layers contain "
-                              "no unknown elements; set allow_unknown: false.")
-
-    def _validate_semantic_catalog(self, key, lp: LayerParams):
-        if key == "street":
-            raise ConfigError(
-                "Layer 'street': keep the configured fixed_elements route "
-                "catalog; semantic_catalog is for non-street layers.")
-        catalog = lp.semantic_catalog
-        if not isinstance(catalog, dict):
-            raise ConfigError(
-                f"Layer '{key}': semantic_catalog must be a mapping.")
-        bad = [name for name in catalog
-               if name not in {"version", "sources", "elements"}]
-        if bad:
-            raise ConfigError(
-                f"Layer '{key}': semantic_catalog has unknown keys: {bad}")
-        version = catalog.get("version")
-        if not isinstance(version, str) or not version.strip():
-            raise ConfigError(
-                f"Layer '{key}': semantic_catalog.version must be a "
-                "non-empty string.")
-        major_version = version.split(".", 1)[0]
-        requires_traceability = major_version.isdigit() and int(major_version) >= 2
-        sources = catalog.get("sources", {})
-        if not isinstance(sources, dict):
-            raise ConfigError(
-                f"Layer '{key}': semantic_catalog.sources must be a mapping.")
-        if requires_traceability and not sources:
-            raise ConfigError(
-                f"Layer '{key}': semantic catalog v{version} requires sources.")
-        for source_id, source_url in sources.items():
-            if (not isinstance(source_id, str)
-                    or re.fullmatch(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*",
-                                    source_id) is None):
-                raise ConfigError(
-                    f"Layer '{key}': source ID {source_id!r} must be snake_case.")
-            if not isinstance(source_url, str) or not source_url.strip():
-                raise ConfigError(
-                    f"Layer '{key}': source {source_id!r} needs a URL or "
-                    "document reference.")
-        elements = catalog.get("elements")
-        if not isinstance(elements, list) or not elements:
-            raise ConfigError(
-                f"Layer '{key}': semantic_catalog.elements must be a "
-                "non-empty list.")
-        base_fields = {"id", "label", "description", "rarity"}
-        traceability_fields = {"family", "source_refs"}
-        allowed = base_fields | traceability_fields
-        ids = []
-        counts = dict.fromkeys(RARITIES, 0)
-        for index, element in enumerate(elements):
-            where = f"Layer '{key}': semantic_catalog.elements[{index}]"
-            if not isinstance(element, dict):
-                raise ConfigError(f"{where} must be a mapping.")
-            required = allowed if requires_traceability else base_fields
-            missing = [name for name in required if name not in element]
-            if missing:
-                raise ConfigError(f"{where} is missing keys: {missing}")
-            extra = [name for name in element if name not in allowed]
-            if extra:
-                raise ConfigError(f"{where} has unknown keys: {extra}")
-            element_id = element["id"]
-            if (not isinstance(element_id, str)
-                    or re.fullmatch(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*",
-                                    element_id) is None):
-                raise ConfigError(
-                    f"{where}.id must be a stable snake_case identifier, "
-                    f"got {element_id!r}.")
-            for field_name in ("label", "description"):
-                value = element[field_name]
-                if not isinstance(value, str) or not value.strip():
-                    raise ConfigError(
-                        f"{where}.{field_name} must be a non-empty string.")
-            rarity = element["rarity"]
-            if rarity not in RARITIES:
-                raise ConfigError(
-                    f"{where}.rarity must be one of {RARITIES}, got "
-                    f"{rarity!r}.")
-            family = element.get("family", "")
-            if not isinstance(family, str) or (requires_traceability
-                                                and not family.strip()):
-                raise ConfigError(f"{where}.family must be a non-empty string.")
-            source_refs = element.get("source_refs", [])
-            if (not isinstance(source_refs, list)
-                    or any(not isinstance(ref, str) or not ref
-                           for ref in source_refs)
-                    or len(source_refs) != len(set(source_refs))):
-                raise ConfigError(
-                    f"{where}.source_refs must be a unique list of source IDs.")
-            if requires_traceability and not source_refs:
-                raise ConfigError(f"{where}.source_refs cannot be empty in v2.")
-            unknown_refs = [ref for ref in source_refs if ref not in sources]
-            if unknown_refs:
-                raise ConfigError(
-                    f"{where}.source_refs contains unknown IDs: {unknown_refs}")
-            ids.append(element_id)
-            counts[rarity] += 1
-        if len(set(ids)) != len(ids):
-            duplicates = sorted({value for value in ids if ids.count(value) > 1})
-            raise ConfigError(
-                f"Layer '{key}': semantic catalog IDs must be unique; "
-                f"duplicates: {duplicates}")
-        if not lp.allow_unknown and counts["unknown"]:
-            raise ConfigError(
-                f"Layer '{key}': allow_unknown is false but its semantic "
-                "catalog contains unknown-rarity elements.")
-        if lp.allow_unknown and counts["unknown"] == 0:
-            raise ConfigError(
-                f"Layer '{key}': allow_unknown is true but its semantic "
-                "catalog contains no unknown-rarity element.")
-        if counts["unknown"]:
-            try:
-                compute_unknown_weight(counts, self)
-            except ConfigError as exc:
-                raise ConfigError(
-                    f"Layer '{key}': semantic catalog is infeasible: {exc}"
-                ) from exc
-
 
 # ------------------------------------------------------- rarity / weight helpers
 
-def assign_rarity_counts(n_elements: int, proportions: dict) -> dict:
-    """Largest-remainder integer counts per rarity category (sum == n)."""
-    exact = {r: n_elements * proportions[r] for r in RARITIES}
+def assign_rarity_counts(n_elements: int, percentages: dict) -> dict:
+    """Largest-remainder integer counts from percentages summing to 100."""
+    exact = {r: n_elements * percentages[r] / 100.0 for r in RARITIES}
     counts = {r: math.floor(exact[r]) for r in RARITIES}
     remainder = n_elements - sum(counts.values())
     by_fraction = sorted(RARITIES, key=lambda r: -(exact[r] - counts[r]))
@@ -771,37 +556,6 @@ def assign_rarity_counts(n_elements: int, proportions: dict) -> dict:
         counts[r] += 1
     return counts
 
-
-def compute_unknown_weight(counts: dict, cfg: SimConfig) -> float:
-    """Unknown-element transition weight for one layer (see README).
-    Only called for layers that actually contain unknown elements."""
-    very_rare_w = cfg.base_weights["very_rare"]
-
-    if cfg.unknown_weight_mode == "fixed":
-        w = cfg.fixed_unknown_weight
-        if not (w < very_rare_w):
-            raise ConfigError(
-                f"fixed_unknown_weight ({w}) must be smaller than the "
-                f"very_rare weight ({very_rare_w}).")
-        return w
-
-    n_unknown = counts["unknown"]
-    if n_unknown == 0:
-        raise ConfigError(
-            "unknown_weight_mode='calculated' requires at least one unknown "
-            "element in the layer. Increase rarity_proportions['unknown'] or "
-            "use unknown_weight_mode='fixed'.")
-    p = cfg.target_unknown_element_probability
-    known_mass = sum(counts[r] * cfg.base_weights[r] for r in KNOWN_RARITIES)
-    w = p * known_mass / (n_unknown * (1.0 - p))
-    if not (w < very_rare_w):
-        raise ConfigError(
-            f"Calculated unknown weight ({w:.6g}) is not smaller than the "
-            f"very_rare weight ({very_rare_w}). Fix this by one of: "
-            "(1) increase the proportion of unknown elements, "
-            "(2) lower target_unknown_element_probability, or "
-            "(3) use unknown_weight_mode='fixed'.")
-    return w
 
 
 # ------------------------------------------------------------- sampling helpers
@@ -877,22 +631,18 @@ class Layer:
     names: list
     labels: list
     descriptions: list
-    families: list
-    source_refs: list
     rarities: list
     is_unknown: list
     counts: dict
-    unknown_weight: float            # None for layers without unknown elements
     initial_probs: np.ndarray        # initial-state distribution
     initial_cum: list
     transition_probs: np.ndarray     # permanent transition vector
     transition_cum: list
-    gamma_shape: float
-    gamma_scale: float
-    is_fixed: bool                   # fixed element list (street)
-    construction_mode: str           # fixed | semantic_catalog | generated
-    catalog_version: str = None
-    catalog_sources: dict = field(default_factory=dict)
+    duration_means: list             # one configured mean per element
+    duration_variances: list         # one configured variance per element
+    gamma_shapes: list               # one Gamma shape per element
+    gamma_scales: list               # one Gamma scale per element
+    construction_mode: str           # generated
 
     @property
     def n_elements(self) -> int:
@@ -914,102 +664,89 @@ class Layer:
         return sample_next_index(self.transition_cum, self.n_elements,
                                  rng, current, allow_self)
 
-    def sample_duration(self, rng, min_duration) -> float:
-        return sample_gamma_duration(rng, self.gamma_shape, self.gamma_scale,
+    def sample_duration(self, rng, element_index, min_duration) -> float:
+        return sample_gamma_duration(rng, self.gamma_shapes[element_index],
+                                     self.gamma_scales[element_index],
                                      min_duration)
 
 
-def _cosmetic_rarity(probability: float) -> str:
-    """Reporting-only rarity label for fixed-list elements (no unknowns)."""
-    if probability >= 0.10:
-        return "common"
-    if probability >= 0.03:
-        return "medium"
-    if probability >= 0.01:
-        return "rare"
-    return "very_rare"
+def build_element_duration_parameters(lp: LayerParams, rarities: list,
+                                      profiles: dict):
+    """Build a distinct Gamma distribution for every element.
+
+    A rarity profile selects the non-overlapping mean band and coefficient of
+    variation. Elements are placed deterministically across their band in
+    element order, so no additional RNG stream is needed and identities keep
+    the same duration law across runs.
+    """
+    positions = {}
+    for rarity in RARITIES:
+        members = [i for i, value in enumerate(rarities) if value == rarity]
+        for rank, index in enumerate(members):
+            unit = 0.0 if len(members) == 1 else 2.0 * rank / (len(members) - 1) - 1.0
+            positions[index] = unit
+
+    means, variances, shapes, scales = [], [], [], []
+    for index, rarity in enumerate(rarities):
+        profile = profiles[rarity]
+        mean = (lp.mean_duration * float(profile["mean_multiplier"])
+                * (1.0 + float(profile["element_spread"]) * positions[index]))
+        cv = float(profile["coefficient_of_variation"])
+        variance = (mean * cv) ** 2
+        means.append(mean)
+        variances.append(variance)
+        shapes.append(mean ** 2 / variance)
+        scales.append(variance / mean)
+    return means, variances, shapes, scales
 
 
 def build_layer(key, prefix, cfg: SimConfig, rng_element_count, rng_rarity,
                 np_rng_transition) -> Layer:
     lp = cfg.layers[key]
-    shape = lp.mean_duration ** 2 / lp.variance_duration
-    scale = lp.variance_duration / lp.mean_duration
 
-    if lp.is_fixed:
-        # Fixed real elements: the given probabilities ARE the permanent
-        # transition vector (no Dirichlet draw, no RNG consumption) and the
-        # initial-state distribution. All elements are known.
-        names = [str(e["name"]) for e in lp.fixed_elements]
-        probs = np.array([float(e["probability"]) for e in lp.fixed_elements])
-        probs = probs / probs.sum()   # exact within float tolerance
-        rarities = [_cosmetic_rarity(p) for p in probs]
-        counts = {r: rarities.count(r) for r in RARITIES}
-        return Layer(key=key, prefix=prefix, names=names, labels=list(names),
-                     descriptions=[""] * len(names),
-                     families=[""] * len(names),
-                     source_refs=[[] for _ in names], rarities=rarities,
-                     is_unknown=[False] * len(names), counts=counts,
-                     unknown_weight=None,
-                     initial_probs=probs, initial_cum=list(np.cumsum(probs)),
-                     transition_probs=probs,
-                     transition_cum=list(np.cumsum(probs)),
-                     gamma_shape=shape, gamma_scale=scale, is_fixed=True,
-                     construction_mode="fixed")
+    n = rng_element_count.randint(lp.element_count_min, lp.element_count_max)
+    counts = assign_rarity_counts(n, cfg.element_class_percentages)
+    rarity_list = []
+    for rarity in RARITIES:
+        rarity_list.extend([rarity] * counts[rarity])
+    rng_rarity.shuffle(rarity_list)
 
-    if lp.is_semantic:
-        catalog = lp.semantic_catalog
-        elements = catalog["elements"]
-        names = [element["id"] for element in elements]
-        labels = [element["label"] for element in elements]
-        descriptions = [element["description"] for element in elements]
-        families = [element.get("family", "") for element in elements]
-        source_refs = [list(element.get("source_refs", []))
-                       for element in elements]
-        rarity_list = [element["rarity"] for element in elements]
-        counts = {rarity: rarity_list.count(rarity) for rarity in RARITIES}
-    else:
-        n = rng_element_count.randint(lp.element_count_min, lp.element_count_max)
-        props = cfg.effective_proportions(lp)
-        counts = assign_rarity_counts(n, props)
-        rarity_list = []
-        for rarity in RARITIES:
-            rarity_list.extend([rarity] * counts[rarity])
-        rng_rarity.shuffle(rarity_list)
+    names = [f"{prefix}_{i:03d}" for i in range(n)]
+    labels = list(names)
+    descriptions = [""] * n
 
-        names = [f"{prefix}_{i:03d}" for i in range(n)]
-        labels = list(names)
-        descriptions = [""] * n
-        families = [""] * n
-        source_refs = [[] for _ in range(n)]
-    weight_of = dict(cfg.base_weights)
-    unknown_w = None
-    if counts["unknown"] > 0:
-        unknown_w = compute_unknown_weight(counts, cfg)
-        weight_of["unknown"] = unknown_w
+    initial_probs = np.zeros(n, dtype=np.float64)
+    class_indices = {}
+    for rarity in RARITIES:
+        indices = np.array(
+            [i for i, value in enumerate(rarity_list) if value == rarity],
+            dtype=np.int64)
+        class_indices[rarity] = indices
+        class_mass = cfg.selection_class_percentages[rarity] / 100.0
+        initial_probs[indices] = class_mass / len(indices)
 
-    w = np.array([weight_of[r] for r in rarity_list], dtype=float)
-    initial_probs = w / w.sum()
     alpha = cfg.concentration_scale * initial_probs
-    transition_probs = np_rng_transition.dirichlet(alpha)
-    transition_probs = transition_probs / transition_probs.sum()
+    raw_transition = np_rng_transition.dirichlet(alpha)
+    transition_probs = np.zeros(n, dtype=np.float64)
+    for rarity, indices in class_indices.items():
+        class_mass = cfg.selection_class_percentages[rarity] / 100.0
+        within_class = raw_transition[indices]
+        transition_probs[indices] = (
+            class_mass * within_class / within_class.sum())
+    means, variances, shapes, scales = build_element_duration_parameters(
+        lp, rarity_list, cfg.duration_profiles)
 
     return Layer(key=key, prefix=prefix, names=names, labels=labels,
-                 descriptions=descriptions, families=families,
-                 source_refs=source_refs, rarities=rarity_list,
+                 descriptions=descriptions, rarities=rarity_list,
                  is_unknown=[r == "unknown" for r in rarity_list],
-                 counts=counts, unknown_weight=unknown_w,
+                 counts=counts,
                  initial_probs=initial_probs,
                  initial_cum=list(np.cumsum(initial_probs)),
                  transition_probs=transition_probs,
                  transition_cum=list(np.cumsum(transition_probs)),
-                 gamma_shape=shape, gamma_scale=scale, is_fixed=False,
-                 construction_mode=("semantic_catalog"
-                                    if lp.is_semantic else "generated"),
-                 catalog_version=(str(lp.semantic_catalog["version"])
-                                  if lp.is_semantic else None),
-                 catalog_sources=(dict(lp.semantic_catalog.get("sources", {}))
-                                  if lp.is_semantic else {}))
+                 duration_means=means, duration_variances=variances,
+                 gamma_shapes=shapes, gamma_scales=scales,
+                 construction_mode="generated")
 
 
 # ------------------------------------------------ conditional transition model
@@ -1091,8 +828,8 @@ class ConditionalTransitionModel:
                         raise ConfigError(
                             f"Conditional rule {raw['id']!r} references "
                             f"unknown element {name!r} in layer "
-                            f"{layer_key!r}. Use a stable semantic catalog ID "
-                            "or a valid legacy generated element name.") from exc
+                            f"{layer_key!r}. Use a valid generated element "
+                            "name.") from exc
                 selectors.append(ConditionSelector(
                     layer_index=layer_index,
                     element_indices=frozenset(element_indices),
@@ -1109,8 +846,7 @@ class ConditionalTransitionModel:
                     raise ConfigError(
                         f"Conditional rule {raw['id']!r} targets unknown "
                         f"element {name!r} in layer {target.key!r}. "
-                        "Use a stable semantic catalog ID or a valid legacy "
-                        "generated element name.") from exc
+                        "Use a valid generated element name.") from exc
                 vector[element_index] *= float(multiplier)
             for rarity, multiplier in raw["multipliers"].get(
                     "rarities", {}).items():
@@ -1232,198 +968,74 @@ class ConditionalTransitionModel:
         }
 
 
-# ------------------------------------------------- unknown-combination classifier
-# NOTE: temporarily unused (enable_unknown_combinations=false). Kept intact,
-# with its global_seed semantics, for later reintroduction within the episode
-# framework (open question: a combination-episode would be the lifetime of
-# that exact tuple).
-
-class UnknownCombinationClassifier:
-    """Deterministic SHA-256 unknown-combination membership test.
-
-    hash_value = int(sha256("<global_seed>|<name1>|...|<name6>")) / 2**256;
-    unknown iff hash_value < unknown_combination_probability. Stable across
-    runs (unlike Python's built-in hash()), seeded, O(1), nothing stored."""
-
-    _TWO_256 = 2 ** 256
-
-    def __init__(self, global_seed: int, unknown_combination_probability: float):
-        self.global_seed = global_seed
-        self.threshold = float(unknown_combination_probability)
-        self.prefix = f"{global_seed}|".encode("utf-8")
-
-    def hash_value(self, element_names) -> float:
-        payload = self.prefix + "|".join(element_names).encode("utf-8")
-        digest = hashlib.sha256(payload).digest()
-        return int.from_bytes(digest, "big") / self._TWO_256
-
-    def is_unknown_combination(self, element_names) -> bool:
-        return self.hash_value(element_names) < self.threshold
-
-
-# ------------------------------------------------ full-scenario rarity classifier
-
-class FullScenarioClassifier:
-    """Rare-tuple classifier over COMPLETE six-layer scenarios.
-
-    The stationary probability of the current tuple S is the product of the
-    six realized permanent transition-vector probabilities (layers are
-    independent with i.i.d. transitions, so the stationary tuple
-    distribution is exactly the product measure):
-
-        P(S) = q_street(s1) * q_temporal(s2) * ... * q_trigger(s6)
-
-    S is an unknown (rare) scenario iff every layer is on a known element and
-    P(S) <= calibrated_rarity_threshold.  A triggering-condition unknown is
-    intentionally handled by its separate hidden-triggering route.
-
-    Calibration (deterministic Monte Carlo, dedicated seed): draw N tuples
-    from the stationary product distribution itself. Because samples come
-    from P, the stationary mass of the eligible set {S: all elements known,
-    P(S) <= t} equals the probability that a sampled tuple is eligible and
-    satisfies P <= t. The threshold is therefore chosen from the eligible
-    sampled P(S) values: with k = round(target * N), threshold = k-th
-    smallest eligible sampled P(S), and the achieved (in-sample) mass is
-    count(eligible and P <= threshold)/N ~= k/N.
-
-    Approximation note: the in-sample mass matches the target up to 1/N and
-    float ties; the TRUE stationary mass of {P <= threshold} deviates from
-    the target by the Monte Carlo quantile error, of order
-    sqrt(target*(1-target)/N) (~1.1% relative at target=0.004, N=2e6).
-    No hashing and no per-layer patterns are involved; every classification
-    uses all six current layers via the product above.
-    """
-
-    def __init__(self, cfg: SimConfig, layers):
-        fs = cfg.full_scenario_unknowns
-        self.target_stationary_mass = float(fs["target_stationary_mass"])
-        self.calibration_samples = int(fs["calibration_samples"])
-        self.calibration_seed = int(fs["calibration_seed"])
-        rng = np.random.default_rng(self.calibration_seed)
-        n = self.calibration_samples
-        p_prod = np.ones(n, dtype=np.float64)
-        eligible = np.ones(n, dtype=bool)
-        for layer in layers:
-            q = np.asarray(layer.transition_probs, dtype=np.float64)
-            cum = np.cumsum(q)
-            idx = np.searchsorted(cum, rng.random(n), side="right")
-            np.clip(idx, 0, len(q) - 1, out=idx)
-            p_prod *= q[idx]
-            eligible &= ~np.asarray(layer.is_unknown, dtype=bool)[idx]
-        p_sorted = np.sort(p_prod[eligible])
-        k = max(int(round(self.target_stationary_mass * n)), 1)
-        if k > len(p_sorted):
-            raise ConfigError(
-                "full_scenario_unknowns.target_stationary_mass exceeds the "
-                "sampled all-known stationary mass; lower the target.")
-        self.calibrated_rarity_threshold = float(p_sorted[k - 1])
-        self.eligible_sampled_mass = float(np.mean(eligible))
-        self.achieved_sampled_mass = float(
-            np.mean(eligible & (p_prod <= self.calibrated_rarity_threshold)))
-
-    def is_rare(self, p_tuple: float) -> bool:
-        return p_tuple <= self.calibrated_rarity_threshold
-
-    def stats(self) -> dict:
-        return {
-            "target_stationary_mass": self.target_stationary_mass,
-            "calibration_samples": self.calibration_samples,
-            "calibration_seed": self.calibration_seed,
-            "calibrated_rarity_threshold": self.calibrated_rarity_threshold,
-            "eligible_sampled_mass": self.eligible_sampled_mass,
-            "achieved_sampled_mass": self.achieved_sampled_mass,
-        }
-
-
-# ----------------------------------------------------- pattern combination rules
+# -------------------------------------------- exact rare-combination rules (v6)
 
 @dataclass
 class CombinationRule:
-    """A pattern-based unknown combination: a conjunction of specific
-    known-rarity elements in >=2 layers (wildcards everywhere else).
-    Matched <=> every (layer, element) pair is simultaneously current."""
+    """One selected C3-C6 exact combination of rare, known elements."""
     index: int
     items: tuple            # ((layer_idx, element_idx), ...) sorted by layer
     description: str        # "street=constant_lane & ego_maneuver=ego_004"
-    source: str             # "manual" | "generated"
+    source: str             # "selected"
     mass: float             # stationary probability of being matched
 
-    def matched(self, current) -> bool:
-        return all(current[k] == e for k, e in self.items)
+    @property
+    def size(self) -> int:
+        return len(self.items)
 
 
-def build_combination_rules(cfg: SimConfig, layers, rng_rules) -> list:
-    """Manual rules from the config plus rules generated once from the
-    pattern_rules seed: random distinct layers, one KNOWN element each
-    (uniform), accumulated until generated_target_mass stationary mass is
-    reached or generated_max_rules is hit. Duplicate rules are skipped;
-    unknown-rarity elements are rejected (combinations are interactions of
-    known elements)."""
-    cr = cfg.combination_rules
-    key_to_idx = {key: k for k, (key, _) in enumerate(LAYER_DEFINITIONS)}
-    rules, seen = [], set()
+def build_exact_rare_combination_rules(cfg: SimConfig, layers, rng_rules) -> list:
+    """Select configured numbers of C3-C6 rules uniformly without replacement.
 
-    def add(items, source):
-        items = tuple(sorted(items))
-        if items in seen:
-            return False
-        for k, e in items:
-            if layers[k].is_unknown[e]:
-                raise ConfigError(
-                    f"Combination rule references the unknown-rarity element "
-                    f"'{layers[k].names[e]}' in layer "
-                    f"'{LAYER_DEFINITIONS[k][0]}'; rules must use known "
-                    "elements (pick a different element).")
-        mass = 1.0
-        for k, e in items:
-            mass *= float(layers[k].transition_probs[e])
-        desc = " & ".join(f"{LAYER_DEFINITIONS[k][0]}={layers[k].names[e]}"
-                          for k, e in items)
-        rules.append(CombinationRule(index=len(rules), items=items,
-                                     description=desc, source=source,
-                                     mass=mass))
-        seen.add(items)
-        return True
+    A rule uses distinct layers, contains one rare element from each selected
+    layer, and always contains triggering_conditions. Candidate ordinals are
+    sampled from ranges and unranked, so even very large Cartesian products do
+    not need to be materialized in memory.
+    """
+    rare = [[i for i, rarity in enumerate(layer.rarities) if rarity == "rare"]
+            for layer in layers]
+    missing = [LAYER_DEFINITIONS[k][0] for k, values in enumerate(rare)
+               if not values]
+    if missing:
+        raise ConfigError(
+            "Every layer must contain at least one rare element for C3-C6 "
+            f"unknown scenarios; missing rare elements in: {missing}.")
 
-    for rule in cr["manual"]:
-        items = []
-        for layer_key, element_name in rule.items():
-            k = key_to_idx[layer_key]
-            try:
-                e = layers[k].names.index(str(element_name))
-            except ValueError:
-                raise ConfigError(
-                    f"Combination rule element '{element_name}' does not "
-                    f"exist in layer '{layer_key}' "
-                    f"(valid: {layers[k].names[:5]}...).") from None
-            items.append((k, e))
-        add(items, "manual")
+    rules = []
+    counts = cfg.unknown_scenarios["combination_counts"]
+    non_trigger_layers = tuple(range(TRIGGERING_LAYER_INDEX))
+    for size in (3, 4, 5, 6):
+        groups = []
+        population = 0
+        for parents in itertools.combinations(non_trigger_layers, size - 1):
+            layer_indices = tuple(parents) + (TRIGGERING_LAYER_INDEX,)
+            group_count = math.prod(len(rare[k]) for k in layer_indices)
+            groups.append((population, population + group_count, layer_indices))
+            population += group_count
+        requested = counts[size]
+        if requested > population:
+            raise ConfigError(
+                f"unknown_scenarios requests {requested} C{size} rules but "
+                f"only {population} eligible rare-element combinations exist.")
 
-    target = float(cr["generated_target_mass"])
-    max_rules = int(cr["generated_max_rules"])
-    per_rule = int(cr["generated_layers_per_rule"])
-    generated_mass = 0.0
-    attempts = 0
-    while (generated_mass < target and
-           sum(1 for r in rules if r.source == "generated") < max_rules and
-           attempts < 10000):
-        attempts += 1
-        ks = rng_rules.sample(range(N_LAYERS), per_rule)
-        items = []
-        ok = True
-        for k in ks:
-            known = [i for i in range(layers[k].n_elements)
-                     if not layers[k].is_unknown[i]]
-            if not known:
-                ok = False
-                break
-            items.append((k, rng_rules.choice(known)))
-        if not ok:
-            continue
-        before = len(rules)
-        add(items, "generated")
-        if len(rules) > before:
-            generated_mass += rules[-1].mass
+        for ordinal in sorted(rng_rules.sample(range(population), requested)):
+            start, _end, layer_indices = next(
+                group for group in groups if group[0] <= ordinal < group[1])
+            local = ordinal - start
+            chosen = []
+            for k in reversed(layer_indices):
+                values = rare[k]
+                chosen.append((k, values[local % len(values)]))
+                local //= len(values)
+            items = tuple(sorted(chosen))
+            mass = math.prod(float(layers[k].transition_probs[e])
+                             for k, e in items)
+            details = " & ".join(
+                f"{LAYER_DEFINITIONS[k][0]}={layers[k].names[e]}"
+                for k, e in items)
+            rules.append(CombinationRule(
+                index=len(rules), items=items,
+                description=f"C{size}: {details}", source="selected", mass=mass))
     return rules
 
 
@@ -1432,10 +1044,7 @@ def build_combination_rules(cfg: SimConfig, layers, rng_rules) -> list:
 @dataclass
 class Episode:
     """One unknown episode. Types:
-      element          - a layer occupies an unknown element (rules 1-4)
-      pattern          - a combination rule is continuously matched
-      hash_combination - an all-known tuple flagged by the SHA-256
-                         classifier persists (any element change ends it)
+      rare_combination - one selected exact C3-C6 rare-element rule persists
     """
     index: int
     layer: str               # layer key | "combination"
@@ -1445,7 +1054,7 @@ class Episode:
     end_time_seconds: float = None
     end_mileage: float = None
     truncated: bool = False
-    type: str = "element"    # element | hidden_triggering_unknown | pattern | hash_combination | full_scenario
+    type: str = "rare_combination"
 
     @property
     def duration_seconds(self) -> float:
@@ -1464,18 +1073,12 @@ class SimulationResult:
     episodes: list                    # list[Episode], ordered by start
     total_unknown_time_seconds: float  # union of ALL episode intervals
     layer_stats: list
-    combination_stats: dict           # rules, masses, per-rule/hash counts
-    full_scenario_stats: dict         # calibration info + episode count
-    hidden_triggering_stats: dict     # dedicated triggering-condition route
+    combination_stats: dict           # v6 exact-rule metadata and counts
     transition_model_stats: dict      # independent/conditional diagnostics
     config: SimConfig
 
     def episodes_by_type(self) -> dict:
-        out = {"element": 0, "hidden_triggering_unknown": 0,
-               "pattern": 0, "hash_combination": 0, "full_scenario": 0}
-        for e in self.episodes:
-            out[e.type] += 1
-        return out
+        return {"rare_combination": len(self.episodes)}
 
     # -- derived outputs -------------------------------------------------------
     def episode_start_miles(self):
@@ -1525,7 +1128,8 @@ class ScenarioSimulator:
         self.rng_duration = random.Random(seeds["duration"])
         self.rng_initial = random.Random(seeds["initial_state"])
         self.rng_transition = random.Random(seeds["transition_sampling"])
-        self.rng_pattern_rules = random.Random(seeds["pattern_rules"])
+        self.rng_combination_selection = random.Random(
+            seeds["combination_selection"])
         self.layers = [build_layer(key, prefix, cfg,
                                    self.rng_element_count,
                                    self.rng_rarity,
@@ -1535,50 +1139,29 @@ class ScenarioSimulator:
         self.conditional_model = (
             ConditionalTransitionModel(cfg, self.layers)
             if self.transition_mode == "conditional" else None)
-        self.classifier = (
-            UnknownCombinationClassifier(
-                cfg.global_seed, cfg.unknown_combination_probability)
-            if cfg.enable_hash_combinations else None)
-        if cfg.enable_unknown_combinations:
-            self.rules = build_combination_rules(cfg, self.layers,
-                                                 self.rng_pattern_rules)
+        self.unknown_scenarios_enabled = cfg.unknown_scenarios["enabled"]
+        if self.unknown_scenarios_enabled:
+            self.rules = build_exact_rare_combination_rules(
+                cfg, self.layers, self.rng_combination_selection)
         else:
             self.rules = []
-        # layer index -> rules referencing it (for incremental re-evaluation)
-        self.rules_by_layer = [[] for _ in range(N_LAYERS)]
-        for rule in self.rules:
-            for k, _e in rule.items:
-                self.rules_by_layer[k].append(rule.index)
-        # full-scenario rarity classifier (dedicated calibration seed; does
-        # not consume any of the existing RNG streams)
-        if cfg.full_scenario_unknowns.get("enabled", False):
-            self.full_scenario = FullScenarioClassifier(cfg, self.layers)
-        else:
-            self.full_scenario = None
-        self._layer_probs = [[float(p) for p in l.transition_probs]
-                             for l in self.layers]
+        self.rule_index_by_items = {rule.items: rule.index for rule in self.rules}
 
-    def tuple_probability(self, idx_tuple) -> float:
-        """Stationary probability of a complete six-layer tuple: the product
-        of all six layers' realized transition-vector probabilities."""
-        p = 1.0
-        for k in range(N_LAYERS):
-            p *= self._layer_probs[k][idx_tuple[k]]
-        return p
+    def matched_combination_rule(self, current):
+        """Return the exact C3-C6 rule matching the current rare set, if any.
 
-    def is_rare_tuple(self, idx_tuple) -> bool:
-        if self.full_scenario is None:
-            return False
-        if any(self.layers[k].is_unknown[idx_tuple[k]]
-               for k in range(N_LAYERS)):
-            return False
-        return self.full_scenario.is_rare(self.tuple_probability(idx_tuple))
-
-    def scenario_names(self, idx_tuple):
-        return tuple(self.layers[k].names[idx_tuple[k]] for k in range(N_LAYERS))
-
-    def scenario_string(self, idx_tuple) -> str:
-        return "|".join(self.scenario_names(idx_tuple))
+        Unknown-rarity elements disqualify a scenario: the new unknown-scenario
+        mechanism is deliberately built only from known (common/rare) elements.
+        """
+        items = []
+        for k, element_index in enumerate(current):
+            rarity = self.layers[k].rarities[element_index]
+            if rarity == "unknown":
+                return None
+            if rarity == "rare":
+                items.append((k, element_index))
+        rule_index = self.rule_index_by_items.get(tuple(items))
+        return None if rule_index is None else self.rules[rule_index]
 
     # -- state management -------------------------------------------------------
     def _new_state(self) -> dict:
@@ -1612,7 +1195,7 @@ class ScenarioSimulator:
             visit_counts[k][i] += 1
         remaining = []
         for k in range(N_LAYERS):
-            d = layers[k].sample_duration(self.rng_duration,
+            d = layers[k].sample_duration(self.rng_duration, current[k],
                                           self.cfg.min_duration_seconds)
             duration_sum[k] += d
             duration_n[k] += 1
@@ -1625,24 +1208,16 @@ class ScenarioSimulator:
             "miles": 0.0,
             "events": 0,
             "episodes": [],                    # closed AND open Episode objects
-            "open_element": [None] * N_LAYERS,   # per-layer episode index
-            "open_pattern": [None] * len(self.rules),   # per-rule
-            "open_hash": None,
-            "open_full": None,
-            "open_hidden_trigger": None,
+            "open_combination": None,
+            "active_rule_index": None,
             "episodes_opened": 0,
-            "full_episode_count": 0,
-            "hidden_trigger_episode_count": 0,
-            "episodes_active": 0,              # all types (union tracking)
-            "element_unknown_active": 0,       # element episodes only (hash gate)
+            "episodes_active": 0,
             "union_started_t": 0.0,
             "union_time": 0.0,
             "transitions": [0] * N_LAYERS,
             "unknown_selected": [0] * N_LAYERS,
             "unknown_occupancy_time": [0.0] * N_LAYERS,
-            "episodes_by_layer": [0] * N_LAYERS,       # element episodes
-            "episodes_by_rule": [0] * len(self.rules),  # pattern episodes
-            "hash_episode_count": 0,
+            "episodes_by_rule": [0] * len(self.rules),
             "selected_by_rarity": selected_by_rarity,
             "visit_counts": visit_counts,
             "conditional_rule_match_counts": {
@@ -1666,88 +1241,35 @@ class ScenarioSimulator:
             "duration_n": duration_n,
             "wall_seconds": 0.0,
         }
-        # t=0 starts: element episodes for layers on unknown elements, then
-        # pattern episodes for initially matched rules. Hash episodes are only
-        # considered when the optional hash mechanism is explicitly enabled.
-        for k in range(N_LAYERS):
-            if layers[k].is_unknown[current[k]]:
-                if (k == TRIGGERING_LAYER_INDEX
-                        and self.cfg.enable_hidden_triggering_unknowns):
-                    self._open(state, ("hidden_trigger",),
-                               "triggering_conditions",
-                               "hidden_triggering_unknown",
-                               "hidden_triggering_unknown", 0.0, 0.0)
-                    state["hidden_trigger_episode_count"] += 1
-                else:
-                    self._open(state, ("element", k),
-                               LAYER_DEFINITIONS[k][0],
-                               layers[k].names[current[k]], "element", 0.0, 0.0)
-                    state["episodes_by_layer"][k] += 1
-                state["element_unknown_active"] += 1
-        for rule in self.rules:
-            if rule.matched(current):
-                self._open(state, ("pattern", rule.index), "combination",
-                           rule.description, "pattern", 0.0, 0.0)
-                state["episodes_by_rule"][rule.index] += 1
-        if (self.cfg.enable_unknown_combinations
-                and self.cfg.enable_hash_combinations
-                and state["element_unknown_active"] == 0
-                and self.classifier is not None
-                and self.classifier.is_unknown_combination(
-                    self.scenario_names(tuple(current)))):
-            self._open(state, ("hash",), "combination",
-                       self.scenario_string(tuple(current)),
-                       "hash_combination", 0.0, 0.0)
-            state["hash_episode_count"] += 1
-        # full-scenario rarity of the initial complete tuple
-        if self.is_rare_tuple(tuple(current)):
-            self._open(state, ("full",), "scenario",
-                       self.scenario_string(tuple(current)),
-                       "full_scenario", 0.0, 0.0)
-            state["full_episode_count"] += 1
+        # The v6 route opens only exact C3-C6 rare-element combinations.
+        # Unknown-rarity elements are duration/selection classes, not episodes.
+        initial_rule = self.matched_combination_rule(current)
+        if initial_rule is not None:
+            self._open(state, "combination",
+                       initial_rule.description, "rare_combination", 0.0, 0.0)
+            state["active_rule_index"] = initial_rule.index
+            state["episodes_by_rule"][initial_rule.index] += 1
         return state
 
     # -- generic episode slot management ---------------------------------------
-    def _slot_get(self, state, slot):
-        if slot[0] == "element":
-            return state["open_element"][slot[1]]
-        if slot[0] == "pattern":
-            return state["open_pattern"][slot[1]]
-        if slot[0] == "full":
-            return state["open_full"]
-        if slot[0] == "hidden_trigger":
-            return state["open_hidden_trigger"]
-        return state["open_hash"]
-
-    def _slot_set(self, state, slot, value):
-        if slot[0] == "element":
-            state["open_element"][slot[1]] = value
-        elif slot[0] == "pattern":
-            state["open_pattern"][slot[1]] = value
-        elif slot[0] == "full":
-            state["open_full"] = value
-        elif slot[0] == "hidden_trigger":
-            state["open_hidden_trigger"] = value
-        else:
-            state["open_hash"] = value
-
-    def _open(self, state, slot, layer_str, element_str, type_str, t, miles):
+    def _open(self, state, layer_str, element_str, type_str, t, miles):
         ep = Episode(index=state["episodes_opened"], layer=layer_str,
                      element=element_str, start_time_seconds=t,
                      start_mileage=miles, type=type_str)
         state["episodes"].append(ep)
-        self._slot_set(state, slot, len(state["episodes"]) - 1)
+        state["open_combination"] = len(state["episodes"]) - 1
         state["episodes_opened"] += 1
         if state["episodes_active"] == 0:
             state["union_started_t"] = t
         state["episodes_active"] += 1
 
-    def _close(self, state, slot, t, miles, truncated=False):
-        ep = state["episodes"][self._slot_get(state, slot)]
+    def _close(self, state, t, miles, truncated=False):
+        ep = state["episodes"][state["open_combination"]]
         ep.end_time_seconds = t
         ep.end_mileage = miles
         ep.truncated = truncated
-        self._slot_set(state, slot, None)
+        state["open_combination"] = None
+        state["active_rule_index"] = None
         state["episodes_active"] -= 1
         if state["episodes_active"] == 0:
             state["union_time"] += t - state["union_started_t"]
@@ -1761,7 +1283,7 @@ class ScenarioSimulator:
 
     def run_resumable(self, state=None, wall_limit_seconds=None,
                       progress_every_miles=None, log=None):
-        """Event-driven loop; returns (result, state) at target mileage or
+        """Event-driven loop; returns (result, state) at target time or
         (None, state) when the wall limit is hit (checkpoint + resume is
         bit-identical to an uninterrupted run)."""
         wall_start = time.monotonic()
@@ -1774,32 +1296,18 @@ class ScenarioSimulator:
         layers = self.layers
         min_dur = cfg.min_duration_seconds
         mph = cfg.average_speed_mph
-        target = cfg.target_total_miles
+        target_time = cfg.target_time_seconds
         allow_self = cfg.allow_self_transition
 
         unk_l = [l.is_unknown for l in layers]
         rar_l = [l.rarities for l in layers]
         cum_l = [l.transition_cum for l in layers]
         n_l = [l.n_elements for l in layers]
-        shape_l = [l.gamma_shape for l in layers]
-        scale_l = [l.gamma_scale for l in layers]
+        shape_l = [l.gamma_shapes for l in layers]
+        scale_l = [l.gamma_scales for l in layers]
         trans_rng = self.rng_transition
         gamma = self.rng_duration.gammavariate
         layer_range = tuple(range(N_LAYERS))
-        names_l = [l.names for l in layers]
-        layer_keys = [key for key, _ in LAYER_DEFINITIONS]
-        combos_enabled = cfg.enable_unknown_combinations
-        hash_enabled = combos_enabled and cfg.enable_hash_combinations
-        rules = self.rules
-        rules_by_layer = self.rules_by_layer
-        sha256 = hashlib.sha256 if hash_enabled else None
-        hash_prefix = self.classifier.prefix if hash_enabled else None
-        threshold = self.classifier.threshold if hash_enabled else None
-        two256 = 2 ** 256
-        changed_layers = []
-        affected = set()
-        full_enabled = self.full_scenario is not None
-        hidden_trigger_enabled = self.cfg.enable_hidden_triggering_unknowns
         conditional_model = self.conditional_model
         conditional_enabled = conditional_model is not None
         conditional_order = (
@@ -1833,8 +1341,8 @@ class ScenarioSimulator:
         conditional_unmatched_selections = state[
             "conditional_unmatched_selections"]
 
-        def sample_dur(k):
-            d = gamma(shape_l[k], scale_l[k])
+        def sample_dur(k, element_index):
+            d = gamma(shape_l[k][element_index], scale_l[k][element_index])
             if d < min_dur:
                 d = min_dur
             duration_sum[k] += d
@@ -1847,12 +1355,12 @@ class ScenarioSimulator:
         else:
             next_progress = math.inf
 
-        while miles < target:
+        while t < target_time:
             if deadline is not None and (events & 0xFFF) == 0 \
                     and time.monotonic() >= deadline:
                 break
             # jump to the next layer expiry
-            dt = min(remaining)
+            dt = min(min(remaining), target_time - t)
             t += dt
             miles += mph * dt / 3600.0
             expired = []
@@ -1863,6 +1371,10 @@ class ScenarioSimulator:
                 remaining[k] = r
                 if r <= 1e-12:
                     expired.append(k)
+            # Stop exactly at the configured time, truncating the current
+            # sojourns rather than overshooting to the next event boundary.
+            if t >= target_time - 1e-9:
+                break
             changed = False
             if conditional_enabled:
                 expired_set = set(expired)
@@ -1897,44 +1409,11 @@ class ScenarioSimulator:
                 else:
                     nxt = sample_next_index(cum_l[k], n_l[k], trans_rng, cur,
                                             allow_self)
-                cur_u = unk_l[k][cur]
                 nxt_u = unk_l[k][nxt]
-                # Triggering conditions are a hidden category: any unknown
-                # triggering element keeps the same episode open.  Other
-                # unknown-bearing layers retain element-level semantics.
-                if k == TRIGGERING_LAYER_INDEX and hidden_trigger_enabled:
-                    if cur_u:
-                        if not nxt_u:
-                            self._close(state, ("hidden_trigger",), t, miles)
-                            state["element_unknown_active"] -= 1
-                    elif nxt_u:
-                        self._open(state, ("hidden_trigger",),
-                                   "triggering_conditions",
-                                   "hidden_triggering_unknown",
-                                   "hidden_triggering_unknown", t, miles)
-                        state["hidden_trigger_episode_count"] += 1
-                        state["element_unknown_active"] += 1
-                elif cur_u:
-                    if nxt != cur:
-                        if nxt_u:                       # rule 3: restart
-                            self._close(state, ("element", k), t, miles)
-                            self._open(state, ("element", k), layer_keys[k],
-                                       names_l[k][nxt], "element", t, miles)
-                            state["episodes_by_layer"][k] += 1
-                        else:                           # rule 2: end
-                            self._close(state, ("element", k), t, miles)
-                            state["element_unknown_active"] -= 1
-                    # else rule 4: same unknown element continues
-                elif nxt_u:                             # rule 1: start
-                    self._open(state, ("element", k), layer_keys[k],
-                               names_l[k][nxt], "element", t, miles)
-                    state["element_unknown_active"] += 1
-                    state["episodes_by_layer"][k] += 1
                 if nxt != cur:
                     changed = True
-                    changed_layers.append(k)
                 current[k] = nxt
-                remaining[k] = sample_dur(k)
+                remaining[k] = sample_dur(k, nxt)
                 transitions[k] += 1
                 selected_by_rarity[k][rar_l[k][nxt]] += 1
                 visit_counts[k][nxt] += 1
@@ -1946,58 +1425,27 @@ class ScenarioSimulator:
                     selection_counts[k][nxt] += 1
                 if nxt_u:
                     unknown_selected[k] += 1
-            # ---- combination episodes: evaluated once per event, after all
-            # expired layers were updated (self-transitions change nothing) --
-            if changed and combos_enabled:
-                # pattern rules referencing a changed layer
-                affected.clear()
-                for k in changed_layers:
-                    affected.update(rules_by_layer[k])
-                for ri in sorted(affected):
-                    rule = rules[ri]
-                    now = rule.matched(current)
-                    is_open = state["open_pattern"][ri] is not None
-                    if now and not is_open:
-                        self._open(state, ("pattern", ri), "combination",
-                                   rule.description, "pattern", t, miles)
-                        state["episodes_by_rule"][ri] += 1
-                    elif is_open and not now:
-                        self._close(state, ("pattern", ri), t, miles)
-                # Hash episodes are fully skipped while the optional hash
-                # mechanism is disabled.
-                if hash_enabled and state["open_hash"] is not None:
-                    self._close(state, ("hash",), t, miles)
-                if hash_enabled and state["element_unknown_active"] == 0:
-                    names_str = "|".join([names_l[k][current[k]]
-                                          for k in layer_range])
-                    payload = hash_prefix + names_str.encode()
-                    hv = int.from_bytes(sha256(payload).digest(), "big") / two256
-                    if hv < threshold:
-                        self._open(state, ("hash",), "combination",
-                                   names_str, "hash_combination", t, miles)
-                        state["hash_episode_count"] += 1
-            # ---- full-scenario rarity: evaluated once per event on the
-            # complete six-layer tuple, only when the tuple genuinely
-            # changed (self-transitions leave it - and any episode - intact)
-            if changed and full_enabled:
-                if state["open_full"] is not None:
-                    # the previous exact scenario no longer exists: close it
-                    # (rare A -> rare B reopens below at the same timestamp)
-                    self._close(state, ("full",), t, miles)
-                if self.is_rare_tuple(tuple(current)):
-                    self._open(state, ("full",), "scenario",
-                               "|".join([names_l[k][current[k]]
-                                         for k in layer_range]),
-                               "full_scenario", t, miles)
-                    state["full_episode_count"] += 1
-            changed_layers.clear()
+            # ---- exact C3-C6 rare-combination episode -----------------------
+            if changed and self.unknown_scenarios_enabled:
+                open_index = state["active_rule_index"]
+                matched_rule = self.matched_combination_rule(current)
+                matched_index = (None if matched_rule is None
+                                 else matched_rule.index)
+                if open_index is not None and open_index != matched_index:
+                    self._close(state, t, miles)
+                if matched_index is not None and open_index != matched_index:
+                    self._open(state, "combination",
+                               matched_rule.description, "rare_combination",
+                               t, miles)
+                    state["active_rule_index"] = matched_index
+                    state["episodes_by_rule"][matched_index] += 1
             events += 1
 
             if miles >= next_progress:
                 if log:
                     log(f"progress: {miles:12,.0f} mi | {t:14,.0f} s | "
                         f"{events:12,} events | "
-                        f"{state['episodes_opened']:9,} episodes (all types)")
+                          f"{state['episodes_opened']:9,} rare-combination episodes")
                 next_progress += progress_every_miles
 
         state["t"] = t
@@ -2005,22 +1453,11 @@ class ScenarioSimulator:
         state["events"] = events
         state["wall_seconds"] += time.monotonic() - wall_start
 
-        if miles < target:
+        if t < target_time - 1e-9:
             return None, state
 
-        # rule 7: close still-open episodes (all types) at final time
-        for k in layer_range:
-            if state["open_element"][k] is not None:
-                self._close(state, ("element", k), t, miles, truncated=True)
-        if state["open_hidden_trigger"] is not None:
-            self._close(state, ("hidden_trigger",), t, miles, truncated=True)
-        for ri in range(len(self.rules)):
-            if state["open_pattern"][ri] is not None:
-                self._close(state, ("pattern", ri), t, miles, truncated=True)
-        if hash_enabled and state["open_hash"] is not None:
-            self._close(state, ("hash",), t, miles, truncated=True)
-        if state["open_full"] is not None:
-            self._close(state, ("full",), t, miles, truncated=True)
+        if state["open_combination"] is not None:
+            self._close(state, t, miles, truncated=True)
 
         return self._build_result(state), state
 
@@ -2037,9 +1474,12 @@ class ScenarioSimulator:
                 "id": element_id,
                 "label": layer.labels[index],
                 "description": layer.descriptions[index],
-                "family": layer.families[index],
-                "source_refs": list(layer.source_refs[index]),
                 "rarity": layer.rarities[index],
+                "duration_distribution": "gamma",
+                "duration_mean_seconds": layer.duration_means[index],
+                "duration_variance_seconds2": layer.duration_variances[index],
+                "duration_gamma_shape": layer.gamma_shapes[index],
+                "duration_gamma_scale": layer.gamma_scales[index],
                 "visit_count": visit_counts[index],
                 "realized_selection_rate":
                     (visit_counts[index] / total_visits) if total_visits else 0.0,
@@ -2047,13 +1487,24 @@ class ScenarioSimulator:
             layer_stats.append({
                 "layer": key,
                 "n_elements": layer.n_elements,
-                "is_fixed": layer.is_fixed,
                 "construction_mode": layer.construction_mode,
-                "catalog_version": layer.catalog_version,
-                "catalog_sources": dict(layer.catalog_sources),
                 "has_unknown": layer.has_unknown(),
                 "counts": dict(layer.counts),
-                "unknown_weight": layer.unknown_weight,
+                "element_proportions": {
+                    rarity: layer.counts[rarity] / layer.n_elements
+                    for rarity in RARITIES
+                },
+                "configured_selection_class_percentages": {
+                    rarity: float(cfg.selection_class_percentages[rarity])
+                    for rarity in RARITIES
+                },
+                "transition_class_proportions": {
+                    rarity: float(sum(
+                        probability for probability, element_rarity
+                        in zip(layer.transition_probs, layer.rarities)
+                        if element_rarity == rarity))
+                    for rarity in RARITIES
+                },
                 "designed_unknown_mass": layer.designed_unknown_mass(),
                 "realized_unknown_mass": layer.realized_unknown_mass(),
                 "baseline_unknown_mass": layer.realized_unknown_mass(),
@@ -2067,7 +1518,7 @@ class ScenarioSimulator:
                 "conditional_selection_rate":
                     (state["unknown_selected"][k] / n_trans)
                     if n_trans else 0.0,
-                "episodes": state["episodes_by_layer"][k],
+                "episodes": 0,
                 "selected_by_rarity": dict(state["selected_by_rarity"][k]),
                 "visit_counts": visit_counts,
                 "element_names": list(layer.names),
@@ -2075,27 +1526,36 @@ class ScenarioSimulator:
                 "element_descriptions": list(layer.descriptions),
                 "elements": element_metadata,
                 "transition_probs": [float(p) for p in layer.transition_probs],
-                "mean_duration_config": cfg.layers[key].mean_duration,
+                "mean_duration_config": (
+                    sum(layer.duration_means) / len(layer.duration_means)),
+                "duration_profiles": dict(cfg.duration_profiles),
                 "mean_duration_empirical":
                     (state["duration_sum"][k] / n_dur) if n_dur else 0.0,
             })
 
         combination_stats = {
-            "enabled": cfg.enable_unknown_combinations,
-            "hash_enabled": cfg.enable_hash_combinations,
-            "hash_threshold": cfg.unknown_combination_probability,
-            "hash_episodes": state["hash_episode_count"],
-            "pattern_episodes": sum(state["episodes_by_rule"]),
+            "enabled": self.unknown_scenarios_enabled,
+            "mechanism": "exact_rare_element_combinations",
+            "require_triggering_condition": True,
+            "exact_rare_set": True,
+            "combination_counts": dict(
+                cfg.unknown_scenarios["combination_counts"]),
+            "episodes": sum(state["episodes_by_rule"]),
+            "episodes_by_size": {
+                size: sum(state["episodes_by_rule"][r.index]
+                          for r in self.rules if r.size == size)
+                for size in (3, 4, 5, 6)
+            },
             "rules": [{
                 "index": r.index, "description": r.description,
+                "size": r.size, "items": [
+                    {"layer": LAYER_DEFINITIONS[k][0],
+                     "element": self.layers[k].names[e]}
+                    for k, e in r.items],
                 "source": r.source, "mass": r.mass,
                 "episodes": state["episodes_by_rule"][r.index],
             } for r in self.rules],
         }
-        full_stats = {"enabled": self.full_scenario is not None,
-                      "episodes": state["full_episode_count"]}
-        if self.full_scenario is not None:
-            full_stats.update(self.full_scenario.stats())
         transition_stats = self._build_transition_model_stats(state)
         return SimulationResult(
             total_miles=state["miles"],
@@ -2105,13 +1565,6 @@ class ScenarioSimulator:
             total_unknown_time_seconds=state["union_time"],
             layer_stats=layer_stats,
             combination_stats=combination_stats,
-            full_scenario_stats=full_stats,
-            hidden_triggering_stats={
-                "enabled": cfg.enable_hidden_triggering_unknowns,
-                "layer": "triggering_conditions",
-                "category": "hidden_triggering_unknown",
-                "episodes": state["hidden_trigger_episode_count"],
-            },
             transition_model_stats=transition_stats,
             config=cfg,
         )

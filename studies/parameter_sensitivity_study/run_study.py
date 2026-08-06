@@ -216,55 +216,30 @@ def build_variants(cfg: SimConfig) -> list:
         add("min_duration_seconds", f"{v:g}", v,
             {"kind": "attr", "name": "min_duration_seconds", "value": v})
 
-    # --- Unknown-element weighting ---------------------------------------
-    for v in (0.001, 0.002, 0.008, 0.016):              # baseline 0.004
-        add("target_unknown_element_probability", f"{v:g}", v,
-            {"kind": "attr",
-             "name": "target_unknown_element_probability", "value": v})
-
-    for v in (0.0005, 0.001, 0.005):                    # only active in fixed mode
-        add("fixed_unknown_weight", f"fixed_{v:g}", v,
-            {"kind": "multi", "ops": [
-                {"kind": "attr", "name": "unknown_weight_mode", "value": "fixed"},
-                {"kind": "attr", "name": "fixed_unknown_weight", "value": v},
-            ]})
-
     for v in (1000.0, 5000.0, 100000.0):                # baseline 20000
         add("concentration_scale", f"{v:g}", v,
             {"kind": "attr", "name": "concentration_scale", "value": v})
 
     # --- Rarity structure -------------------------------------------------
-    # Alternative known-mass shapes (unknown share held at 0.10 for comparability).
-    proportion_presets = {
-        "common_heavy": {"common": 0.70, "medium": 0.13, "rare": 0.05,
-                         "very_rare": 0.02, "unknown": 0.10},
-        "tail_heavy":   {"common": 0.30, "medium": 0.25, "rare": 0.20,
-                         "very_rare": 0.15, "unknown": 0.10},
-        "flat_known":   {"common": 0.225, "medium": 0.225, "rare": 0.225,
-                         "very_rare": 0.225, "unknown": 0.10},
+    element_percentage_presets = {
+        "common_heavy": {"common": 80.0, "rare": 15.0, "unknown": 5.0},
+        "rare_heavy": {"common": 60.0, "rare": 30.0, "unknown": 10.0},
+        "balanced": {"common": 34.0, "rare": 33.0, "unknown": 33.0},
     }
-    for label, props in proportion_presets.items():
-        add("rarity_proportions_shape", label, None,
-            {"kind": "replace_attr", "name": "rarity_proportions",
-             "value": props})
+    for label, percentages in element_percentage_presets.items():
+        add("element_class_percentages", label, None,
+            {"kind": "replace_attr", "name": "element_class_percentages",
+             "value": percentages})
 
-    # Unknown share swept (known mass renormalised to keep the sum at 1).
-    for u in (0.05, 0.20):                              # baseline 0.10
-        known = {"common": 0.50, "medium": 0.25, "rare": 0.10, "very_rare": 0.05}
-        scale = (1.0 - u) / sum(known.values())
-        props = {k: v * scale for k, v in known.items()}
-        props["unknown"] = u
-        add("unknown_proportion", f"{u:g}", u,
-            {"kind": "replace_attr", "name": "rarity_proportions",
-             "value": props})
-
-    base_weight_presets = {
-        "flatter": {"common": 1.0, "medium": 0.6, "rare": 0.3, "very_rare": 0.15},
-        "steeper": {"common": 1.0, "medium": 0.2, "rare": 0.03, "very_rare": 0.008},
+    selection_percentage_presets = {
+        "common_heavy": {"common": 85.0, "rare": 10.0, "unknown": 5.0},
+        "rare_heavy": {"common": 60.0, "rare": 30.0, "unknown": 10.0},
+        "unknown_heavy": {"common": 60.0, "rare": 20.0, "unknown": 20.0},
     }
-    for label, weights in base_weight_presets.items():
-        add("base_weights_shape", label, None,
-            {"kind": "replace_attr", "name": "base_weights", "value": weights})
+    for label, percentages in selection_percentage_presets.items():
+        add("selection_class_percentages", label, None,
+            {"kind": "replace_attr", "name": "selection_class_percentages",
+             "value": percentages})
 
     # --- Full-scenario & hidden-triggering routes ------------------------
     for v in (0.002, 0.008):                            # baseline 0.004
@@ -292,8 +267,8 @@ def build_variants(cfg: SimConfig) -> list:
                  "field": "variance_duration", "value": base_var * mult})
 
     # --- Per-layer element counts (pinned min==max) ----------------------
-    # Infeasible pins (e.g. unknown-weight feasibility) are caught per-run and
-    # reported, never silently dropped.
+    # Pins that cannot represent all three positive classes are caught per-run
+    # and reported, never silently dropped.
     element_count_levels = {
         "temporal_modifications": (30, 46),
         "ego_maneuver": (7, 12),
@@ -648,7 +623,7 @@ def write_report(summary, ranking, baseline, meta):
         "- **SNR at or below ~1** -> the sweep stayed inside the seed-noise "
         "band; no effect distinguishable from randomness at this mileage and "
         "replicate count.",
-        "- Categorical factors (rarity/base-weight shapes, toggles, conditional "
+        "- Categorical factors (element/selection percentages, toggles, conditional "
         "mode) report SNR and percent effect but no numeric trend.",
         "- `transition_mode_conditional` is a **structural** variant: turning on "
         "conditional mode also requires disabling full-scenario unknowns. "
@@ -714,9 +689,8 @@ def write_report(summary, ranking, baseline, meta):
         "- Per-layer durations were swept multiplicatively around each layer's "
         "own baseline (mean x0.5/x2, variance x0.25/x4). Element counts were "
         "pinned (min==max) at values in/around the researched ranges.",
-        "- Infeasible configurations (e.g. an unknown weight that would exceed "
-        "the very-rare weight) are caught per run and reported, never silently "
-        "dropped.",
+        "- Infeasible configurations (for example, an element count too small "
+        "to represent all three classes) are reported, never silently dropped.",
         "- Signal-to-noise = effect range across a factor's levels divided by "
         "the baseline seed standard deviation. No significance threshold is "
         "imposed; choose one from the tables and the noise band.",

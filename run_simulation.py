@@ -8,11 +8,14 @@ Outputs (in --outdir):
   stats.json       machine-readable statistics
   plots/*.png      cumulative episodes, duration histogram, inter-arrival
                    histogram, window counts, per-layer stats, street mix
+  duration_distributions/
+                   one Gamma PDF/CDF comparison per layer + manifest.json
 """
 
 import argparse
 import csv
 import json
+import math
 import os
 import pickle
 import sys
@@ -26,9 +29,7 @@ from simulator import (LAYER_DEFINITIONS, RARITIES, ScenarioSimulator,
 
 def write_episodes_csv(path, result, inter_mi, inter_s):
     metadata = {}
-    versions = {}
     for layer_stats in result.layer_stats:
-        versions[layer_stats["layer"]] = layer_stats["catalog_version"] or ""
         for element in layer_stats["elements"]:
             metadata[(layer_stats["layer"], element["id"])] = (
                 element["label"], element["description"])
@@ -39,14 +40,9 @@ def write_episodes_csv(path, result, inter_mi, inter_s):
                     "start_time_seconds", "end_time_seconds",
                     "duration_seconds", "duration_miles", "truncated",
                     "inter_arrival_miles", "inter_arrival_seconds",
-                    "element_label", "element_description",
-                    "catalog_version"])
+                    "element_label", "element_description"])
         for e, dmi, ds in zip(result.episodes, inter_mi, inter_s):
             label, description = metadata.get((e.layer, e.element), ("", ""))
-            if e.type == "hidden_triggering_unknown":
-                label = "Hidden triggering-condition unknown"
-                description = ("A continuous period containing any unknown "
-                               "triggering-condition catalog element.")
             w.writerow([e.index, e.type, e.layer, e.element,
                         f"{e.start_mileage:.3f}", f"{e.end_mileage:.3f}",
                         f"{e.start_time_seconds:.1f}",
@@ -54,7 +50,7 @@ def write_episodes_csv(path, result, inter_mi, inter_s):
                         f"{e.duration_seconds:.1f}",
                         f"{e.duration_miles:.3f}",
                         int(e.truncated), f"{dmi:.3f}", f"{ds:.1f}",
-                        label, description, versions.get(e.layer, "")])
+                        label, description])
 
 
 def write_windows_csv(path, ws):
@@ -74,6 +70,52 @@ def _dist_stats(arr):
             "min": float(arr.min()), "max": float(arr.max())}
 
 
+def build_element_rarity_composition(result):
+    """Exact element counts and achieved rarity proportions for one run."""
+    layers = []
+    for stats in result.layer_stats:
+        total = stats["n_elements"]
+        counts = {rarity: int(stats["counts"][rarity]) for rarity in RARITIES}
+        layers.append({
+            "layer": stats["layer"],
+            "construction_mode": stats["construction_mode"],
+            "total_elements": total,
+            "counts": counts,
+            "proportions": {
+                rarity: counts[rarity] / total for rarity in RARITIES
+            },
+        })
+
+    def aggregate(rows):
+        counts = {
+            rarity: sum(row["counts"][rarity] for row in rows)
+            for rarity in RARITIES
+        }
+        total = sum(counts.values())
+        return {
+            "total_elements": total,
+            "counts": counts,
+            "proportions": {
+                rarity: counts[rarity] / total if total else 0.0
+                for rarity in RARITIES
+            },
+        }
+
+    return {
+        "configured_element_class_percentages": {
+            rarity: float(result.config.element_class_percentages[rarity])
+            for rarity in RARITIES
+        },
+        "configured_selection_class_percentages": {
+            rarity: float(result.config.selection_class_percentages[rarity])
+            for rarity in RARITIES
+        },
+        "allocation_method": "largest_remainder",
+        "layers": layers,
+        "all_layers_total": aggregate(layers),
+    }
+
+
 def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     cfg = result.config
     eps = result.episodes
@@ -87,8 +129,10 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     L.append("## Run parameters\n")
     L.append(f"- simulator profile: `{cfg.profile_name}` "
              f"(`{cfg.profile_kind}`)")
-    L.append(f"- target mileage: {cfg.target_total_miles:,.0f} miles at "
-             f"{cfg.average_speed_mph} mph constant average speed")
+    L.append(f"- target simulated time: {cfg.target_time_seconds / 3600:,.0f} "
+             f"hours (default v6 target: 20,000 h)")
+    L.append(f"- mileage is derived at {cfg.average_speed_mph} mph constant "
+             "average speed; it is not the stopping criterion")
     L.append(f"- seeds: {json.dumps(cfg.seeds)}")
     tms = result.transition_model_stats
     L.append(f"- transition model: {tms['mode']}")
@@ -97,30 +141,45 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
                  f"{'ENABLED' if tms['conditional_initialization'] else 'disabled'}")
         L.append("- conditional dependency order: "
                  + " -> ".join(tms["dependency_order"]))
-    L.append(f"- unknown combinations: "
-             f"patterns {'ENABLED' if cfg.enable_unknown_combinations else 'disabled'}; "
-             f"hash combinations {'ENABLED' if cfg.enable_hash_combinations else 'disabled'} "
-             f"(pattern rules from config + seeds.pattern_rules)")
-    fss = result.full_scenario_stats
-    hts = result.hidden_triggering_stats
-    L.append("- hidden triggering-condition unknowns: "
-             f"{'ENABLED' if hts.get('enabled') else 'disabled'}")
-    if fss.get("enabled"):
-        L.append(f"- full-scenario rarity unknowns: ENABLED - "
-                 f"target stationary mass {fss['target_stationary_mass']:.4%}, "
-                 f"calibrated threshold {fss['calibrated_rarity_threshold']:.3e}, "
-                 f"calibration samples {fss['calibration_samples']:,} "
-                 f"(seed {fss['calibration_seed']}), achieved sampled mass "
-                 f"{fss['achieved_sampled_mass']:.4%}; all-known sampled "
-                 f"mass {fss['eligible_sampled_mass']:.4%}")
-    else:
-        L.append("- full-scenario rarity unknowns: disabled")
-    L.append(f"- unknown_weight_mode: {cfg.unknown_weight_mode} "
-             f"(target_unknown_element_probability = "
-             f"{cfg.target_unknown_element_probability})")
-    L.append(f"- concentration_scale: {cfg.concentration_scale:,.0f} "
-             "(see concentration_study.md), "
+    counts = cfg.unknown_scenarios["combination_counts"]
+    L.append("- unknown scenarios: exact rare-element combinations; "
+             + ", ".join(f"C{k}={counts[k]}" for k in (3, 4, 5, 6))
+             + "; every rule includes triggering_conditions")
+    L.append("- direct selection-class percentages: "
+             + ", ".join(
+                 f"{rarity}={cfg.selection_class_percentages[rarity]:g}%"
+                 for rarity in RARITIES))
+    L.append(f"- concentration_scale: {cfg.concentration_scale:,.0f}, "
              f"allow_self_transition: {cfg.allow_self_transition}\n")
+
+    composition = build_element_rarity_composition(result)
+    target = composition["configured_element_class_percentages"]
+    L.append("## Element rarity composition\n")
+    L.append("The configured target for every generated layer is "
+             f"common {target['common']:g}%, rare {target['rare']:g}%, "
+             f"unknown {target['unknown']:g}%. Integer counts use the "
+             "largest-remainder method.\n")
+    L.append("| layer | mode | total | common | rare | unknown | achieved "
+             "common / rare / unknown |")
+    L.append("|---|---|---:|---:|---:|---:|---|")
+    for row in composition["layers"]:
+        counts = row["counts"]
+        props = row["proportions"]
+        L.append(
+            f"| {row['layer']} | {row['construction_mode']} | "
+            f"{row['total_elements']} | {counts['common']} | "
+            f"{counts['rare']} | {counts['unknown']} | "
+            f"{props['common']:.2%} / {props['rare']:.2%} / "
+            f"{props['unknown']:.2%} |")
+    row = composition["all_layers_total"]
+    counts = row["counts"]
+    props = row["proportions"]
+    L.append(
+        f"| **All layers total** | aggregate | **{row['total_elements']}** | "
+        f"**{counts['common']}** | **{counts['rare']}** | "
+        f"**{counts['unknown']}** | **{props['common']:.2%} / "
+        f"{props['rare']:.2%} / {props['unknown']:.2%}** |")
+    L.append("")
 
     if tms["mode"] == "conditional":
         L.append("## Conditional-transition diagnostics\n")
@@ -137,7 +196,8 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
             L.append("- no conditional rules configured")
         if any(rule["modifies_unknown"] for rule in tms["rules"]):
             L.append("- WARNING: conditional rules modify unknown-rarity "
-                     "probabilities; 0.4% is a baseline construction target, "
+                     "probabilities; the configured class percentage is a "
+                     "baseline construction target, "
                      "not a guaranteed conditional or overall rate.")
         L.append("")
 
@@ -152,11 +212,7 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     L.append("## Unknown episodes\n")
     L.append(f"- total unknown episodes: {n:,} "
              f"(of which truncated at simulation end: {n_trunc})")
-    types = ("element",) + (
-        ("hidden_triggering_unknown",) if hts.get("enabled") else ()) + (
-        ("pattern",) if cfg.enable_unknown_combinations else ()) + (
-        ("hash_combination",) if cfg.enable_hash_combinations else ()) + (
-        ("full_scenario",) if fss.get("enabled") else ())
+    types = ("rare_combination",)
     L.append("- by type: " + ", ".join(
         f"{typ.replace('_', ' ')} {bt[typ]:,}" for typ in types))
     for typ in types:
@@ -168,13 +224,9 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
                      f"max {s['max']:,.1f}")
     L.append(f"- episodes per 1,000,000 miles: "
              f"{result.episodes_per_million_miles():,.2f}")
-    by_layer = {st["layer"]: st["episodes"] for st in result.layer_stats}
-    L.append("- episodes by layer: " + ", ".join(
-        f"{k}: {v:,}" for k, v in by_layer.items() if v))
-    if hts.get("enabled"):
-        L.append("- hidden triggering-condition episodes: "
-                 f"{hts['episodes']:,} (one episode per continuous period "
-                 "with any unknown triggering element)")
+    L.append("- episodes by C-size: " + ", ".join(
+        f"C{k}: {result.combination_stats['episodes_by_size'][k]:,}"
+        for k in (3, 4, 5, 6)))
     L.append(f"- total time in unknown scenario (union of episodes): "
              f"{result.total_unknown_time_seconds:,.1f} s = "
              f"{result.unknown_time_fraction():.4%} of simulated time")
@@ -212,23 +264,16 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
              "per-tuple encounter counting)\n")
 
     L.append("## Per-layer statistics\n")
-    L.append("| layer | elements | c/m/r/vr/unknown | unknown_weight | "
-             "designed unk. mass | realized unk. mass | empirical unk. "
+    L.append("| layer | elements | common/rare/unknown | configured unk. mass | "
+             "transition unk. mass | empirical unk. "
              "selection | episodes | transitions | mean duration cfg/emp (s) |")
-    L.append("|---|---|---|---|---|---|---|---|---|---|")
+    L.append("|---|---|---|---|---|---|---|---|---|")
     for st in result.layer_stats:
         c = st["counts"]
-        uw = f"{st['unknown_weight']:.5f}" if st["unknown_weight"] else "-"
-        if st["construction_mode"] == "fixed":
-            mode_tag = " (fixed)"
-        elif st["construction_mode"] == "semantic_catalog":
-            mode_tag = f" (catalog v{st['catalog_version']})"
-        else:
-            mode_tag = " (generated)"
         L.append(
-            f"| {st['layer']}{mode_tag} | {st['n_elements']} | "
-            f"{c['common']}/{c['medium']}/{c['rare']}/{c['very_rare']}/"
-            f"{c['unknown']} | {uw} | {st['designed_unknown_mass']:.4%} | "
+            f"| {st['layer']} (generated) | {st['n_elements']} | "
+            f"{c['common']}/{c['rare']}/{c['unknown']} | "
+            f"{st['designed_unknown_mass']:.4%} | "
             f"{st['realized_unknown_mass']:.4%} | "
             f"{st['empirical_unknown_rate']:.4%} | {st['episodes']:,} | "
             f"{st['transitions']:,} | "
@@ -255,34 +300,21 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
     tot_trans = sum(st["transitions"] for st in unk_layers)
     tot_unk = sum(st["unknown_selected"] for st in unk_layers)
     overall = tot_unk / tot_trans if tot_trans else 0.0
+    target_unknown = cfg.selection_class_percentages["unknown"] / 100.0
     if tms["mode"] == "conditional":
         L.append(f"- unknown-element selection rate across unknown-bearing "
-                 f"layers: {overall:.4%} (baseline construction target "
-                 f"{cfg.target_unknown_element_probability:.2%}; conditional "
-                 "rules may legitimately move the empirical rate)")
+                  f"layers: {overall:.4%} (baseline construction target "
+                  f"{target_unknown:.2%}; conditional "
+                  "rules may legitimately move the empirical rate)")
     else:
         L.append(f"- unknown-element selection rate across unknown-bearing "
-                 f"layers: {overall:.4%} (design target "
-                 f"{cfg.target_unknown_element_probability:.2%}; per-layer "
-                 f"adherence is tight at concentration_scale="
-                 f"{cfg.concentration_scale:,.0f})")
+                  f"layers: {overall:.4%} (design target "
+                  f"{target_unknown:.2%}; permanent class mass is exact)")
     cs = result.combination_stats
     if cs["enabled"] and cs["rules"]:
-        L.append("- pattern rules (episodes vs mass*T*hazard expectation in "
-                 "analytical_model.md): " + "; ".join(
-                     f"[{r['source']}] {r['description']} "
-                     f"(mass {r['mass']:.4%}, episodes {r['episodes']:,})"
-                     for r in cs["rules"]))
-    if fss.get("enabled"):
-        full_time = sum(e.duration_seconds for e in eps
-                        if e.type == "full_scenario")
-        realized = (full_time / result.total_time_seconds
-                    if result.total_time_seconds else 0.0)
-        L.append(f"- realized full-scenario unknown mass (time fraction): "
-                 f"{realized:.4%} vs configured target "
-                 f"{fss['target_stationary_mass']:.4%} (calibration is exact "
-                 "in expectation; single-run deviation is dominated by slow-"
-                 "layer correlation of rare periods)")
+        L.append("- selected exact combination rules: " + "; ".join(
+                     f"{r['description']} (mass {r['mass']:.4%}, "
+                     f"episodes {r['episodes']:,})" for r in cs["rules"]))
     street = result.layer_stats[0]
     tot_v = sum(street["visit_counts"])
     rows = sorted(zip(street["element_names"], street["visit_counts"],
@@ -292,12 +324,8 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
              "probability (top 5): " + "; ".join(
                  f"{nm} {v / tot_v:.3%} vs {p:.1%}"
                  for nm, v, p in rows[:5]))
-    L.append("- street and environmental_conditions contain no unknown "
-             "elements (normal element episodes: "
-             f"{result.layer_stats[0]['episodes']} and "
-             f"{result.layer_stats[4]['episodes']}); normal element episodes "
-             "originate in the three visible unknown-bearing layers, while "
-             "triggering_conditions uses its hidden category")
+    L.append("- unknown-rarity elements do not independently create unknown "
+             "episodes; they are excluded from exact rare-combination matches")
     exp_h = result.total_miles / cfg.average_speed_mph
     L.append(f"- time/mileage consistency: {result.total_miles:,.1f} mi / "
              f"{cfg.average_speed_mph} mph = {exp_h:,.1f} h expected, "
@@ -333,10 +361,9 @@ def build_stats_json(result, inter_mi, inter_s, ws, wall_seconds):
             "dispersion_index": ws["dispersion_index"],
         },
         "episodes_by_type": result.episodes_by_type(),
-        "full_scenario_unknowns": result.full_scenario_stats,
-        "hidden_triggering_unknowns": result.hidden_triggering_stats,
         "combination_stats": result.combination_stats,
         "transition_model": result.transition_model_stats,
+        "element_rarity_composition": build_element_rarity_composition(result),
         "seeds": result.config.seeds,
         "layer_stats": [{k: v for k, v in st.items()
                          if k not in ("visit_counts", "element_names",
@@ -377,18 +404,11 @@ def make_plots(result, inter_mi, ws, plots_dir):
     fig.savefig(os.path.join(plots_dir, "cumulative_episodes.png"), dpi=150)
     plt.close(fig)
 
+
     # 2. episode duration histogram, overlaid by type
     fig, ax = plt.subplots(figsize=(9, 5))
     if eps:
-        colors = {"element": "tab:blue"}
-        if cfg.enable_unknown_combinations:
-            colors["pattern"] = "tab:green"
-        if cfg.enable_hash_combinations:
-            colors["hash_combination"] = "tab:orange"
-        if result.full_scenario_stats.get("enabled"):
-            colors["full_scenario"] = "tab:red"
-        if result.hidden_triggering_stats.get("enabled"):
-            colors["hidden_triggering_unknown"] = "tab:purple"
+        colors = {"rare_combination": "tab:green"}
         all_d = np.asarray([e.duration_seconds for e in eps])
         bins = np.linspace(0.0, float(np.percentile(all_d, 99.5)), 80)
         for typ, col in colors.items():
@@ -452,11 +472,12 @@ def make_plots(result, inter_mi, ws, plots_dir):
     ax1.set_title("Episodes by layer")
     ax1.grid(alpha=0.3, axis="y")
     ax2.bar(x - 0.15, [st["realized_unknown_mass"] for st in result.layer_stats],
-            0.3, label="realized Dirichlet mass")
+            0.3, label="configured transition mass")
     ax2.bar(x + 0.15, [st["empirical_unknown_rate"] for st in result.layer_stats],
             0.3, label="empirical selection rate")
-    ax2.axhline(cfg.target_unknown_element_probability, color="tab:red",
-                ls="--", label="target 0.4%")
+    unknown_target = cfg.selection_class_percentages["unknown"] / 100.0
+    ax2.axhline(unknown_target, color="tab:red", ls="--",
+                label=f"target {unknown_target:.1%}")
     ax2.set_xticks(x)
     ax2.set_xticklabels(labels, fontsize=8)
     ax2.set_ylabel("unknown-element probability / rate")
@@ -487,6 +508,166 @@ def make_plots(result, inter_mi, ws, plots_dir):
     plt.close(fig)
 
 
+def _gamma_pdf_grid(shape, scale, x):
+    """Gamma PDF without requiring SciPy."""
+    log_pdf = ((shape - 1.0) * np.log(x) - x / scale
+               - math.lgamma(shape) - shape * math.log(scale))
+    return np.exp(log_pdf)
+
+
+def _regularized_gamma_p(shape, value):
+    """Regularized lower incomplete Gamma P(shape, value), SciPy-free."""
+    if value <= 0.0:
+        return 0.0
+    epsilon = 1e-12
+    tiny = 1e-300
+    if value < shape + 1.0:
+        total = term = 1.0 / shape
+        augmented_shape = shape
+        for _ in range(1, 300):
+            augmented_shape += 1.0
+            term *= value / augmented_shape
+            total += term
+            if abs(term) < abs(total) * epsilon:
+                break
+        result = total * math.exp(
+            -value + shape * math.log(value) - math.lgamma(shape))
+        return min(1.0, result)
+
+    b = value + 1.0 - shape
+    c = 1.0 / tiny
+    d = 1.0 / b
+    h = d
+    for index in range(1, 300):
+        coefficient = -index * (index - shape)
+        b += 2.0
+        d = coefficient * d + b
+        if abs(d) < tiny:
+            d = tiny
+        c = b + coefficient / c
+        if abs(c) < tiny:
+            c = tiny
+        d = 1.0 / d
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.0) < epsilon:
+            break
+    upper = math.exp(
+        -value + shape * math.log(value) - math.lgamma(shape)) * h
+    return max(0.0, min(1.0, 1.0 - upper))
+
+
+def _gamma_cdf_grid(shape, scale, x):
+    return np.asarray([
+        _regularized_gamma_p(shape, value / scale) for value in x])
+
+
+def make_duration_distribution_plots(result, output_dir):
+    """Write one representative element-duration PDF/CDF figure per layer.
+
+    Each figure contains the central common, rare, and unknown element when
+    those rarities exist in the layer. Curves show the theoretical Gamma law
+    before the configured minimum-duration clamp is applied.
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    os.makedirs(output_dir, exist_ok=True)
+    colors = {"common": "tab:blue", "rare": "tab:orange",
+              "unknown": "tab:green"}
+    line_styles = {"common": "-", "rare": "--", "unknown": ":"}
+    manifest = {
+        "description": (
+            "Representative per-layer Gamma duration distributions. Curves "
+            "are theoretical before min_duration_seconds clamping."),
+        "min_duration_seconds": result.config.min_duration_seconds,
+        "selection": "element nearest the median configured mean per rarity",
+        "layers": [],
+    }
+
+    for layer in result.layer_stats:
+        selected = []
+        for rarity in RARITIES:
+            candidates = [element for element in layer["elements"]
+                          if element["rarity"] == rarity]
+            if not candidates:
+                continue
+            band_center = float(np.median(
+                [element["duration_mean_seconds"] for element in candidates]))
+            element = min(
+                candidates,
+                key=lambda value: (
+                    abs(value["duration_mean_seconds"] - band_center),
+                    value["id"]))
+            selected.append(element)
+
+        max_seconds = max(
+            element["duration_mean_seconds"]
+            + 6.0 * math.sqrt(element["duration_variance_seconds2"])
+            for element in selected)
+        x = np.linspace(max(1e-6, max_seconds / 10_000.0),
+                        max_seconds, 1_200)
+        fig, (ax_pdf, ax_cdf) = plt.subplots(1, 2, figsize=(13, 5))
+
+        manifest_elements = []
+        for element in selected:
+            rarity = element["rarity"]
+            mean = element["duration_mean_seconds"]
+            shape = element["duration_gamma_shape"]
+            scale = element["duration_gamma_scale"]
+            pdf = _gamma_pdf_grid(shape, scale, x)
+            cdf = _gamma_cdf_grid(shape, scale, x)
+            label = f"{element['label']} ({rarity}, mean {mean:.2f} s)"
+            style = dict(color=colors[rarity], linestyle=line_styles[rarity],
+                         linewidth=2.0, label=label)
+            ax_pdf.plot(x, pdf, **style)
+            ax_cdf.plot(x, cdf, **style)
+            ax_pdf.axvline(mean, color=colors[rarity], alpha=0.25,
+                           linewidth=1.0)
+            ax_cdf.axvline(mean, color=colors[rarity], alpha=0.25,
+                           linewidth=1.0)
+            manifest_elements.append({
+                "id": element["id"],
+                "label": element["label"],
+                "rarity": rarity,
+                "mean_seconds": mean,
+                "variance_seconds2": element["duration_variance_seconds2"],
+                "gamma_shape": shape,
+                "gamma_scale": scale,
+            })
+
+        clamp = result.config.min_duration_seconds
+        for axis in (ax_pdf, ax_cdf):
+            axis.axvline(clamp, color="0.4", linestyle="-.", linewidth=1.0,
+                        label=f"minimum clamp ({clamp:g} s)")
+            axis.set_xlabel("duration (seconds)")
+            axis.grid(alpha=0.25)
+        ax_pdf.set_ylabel("probability density")
+        ax_pdf.set_title("Gamma probability density")
+        ax_cdf.set_ylabel("cumulative probability")
+        ax_cdf.set_ylim(0.0, 1.02)
+        ax_cdf.set_title("Gamma cumulative distribution")
+        ax_pdf.legend(fontsize=8)
+        ax_cdf.legend(fontsize=8)
+        layer_title = layer["layer"].replace("_", " ").title()
+        fig.suptitle(f"{layer_title}: representative element durations")
+        fig.tight_layout()
+        filename = f"{layer['layer']}.png"
+        fig.savefig(os.path.join(output_dir, filename), dpi=150)
+        plt.close(fig)
+        manifest["layers"].append({
+            "layer": layer["layer"],
+            "file": filename,
+            "elements": manifest_elements,
+        })
+
+    with open(os.path.join(output_dir, "manifest.json"), "w",
+              encoding="utf-8") as file:
+        json.dump(manifest, file, indent=2)
+    return manifest
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--config", default="config.yaml")
@@ -502,7 +683,8 @@ def main():
         with open(args.checkpoint, "rb") as f:
             sim, state = pickle.load(f)
         cfg = sim.cfg
-        print(f"resumed checkpoint: {state['miles']:,.0f} miles, "
+        print(f"resumed checkpoint: {state['t'] / 3600:,.1f} / "
+              f"{cfg.target_time_seconds / 3600:,.1f} simulated hours, "
               f"{state['events']:,} events, "
               f"{state['episodes_opened']:,} episodes so far")
     else:
@@ -512,17 +694,10 @@ def main():
         print(f"seeds: {cfg.seeds}")
         sim = ScenarioSimulator(cfg)
         state = None
-        if sim.full_scenario is not None:
-            st = sim.full_scenario.stats()
-            print(f"full-scenario rarity: threshold "
-                  f"{st['calibrated_rarity_threshold']:.3e} "
-                  f"(target mass {st['target_stationary_mass']:.4%}, "
-                  f"achieved sampled {st['achieved_sampled_mass']:.4%}, "
-                  f"N={st['calibration_samples']:,})")
         for layer in sim.layers:
             unk = sum(layer.is_unknown)
             print(f"layer {layer.key:26s} n={layer.n_elements:3d} "
-                  f"fixed={layer.is_fixed} unknown_elements={unk} "
+                  f"generated=true unknown_elements={unk} "
                   f"realized_unknown_mass={layer.realized_unknown_mass():.4%}")
 
     result, state = sim.run_resumable(
@@ -532,15 +707,16 @@ def main():
     if result is None:
         with open(args.checkpoint, "wb") as f:
             pickle.dump((sim, state), f, protocol=pickle.HIGHEST_PROTOCOL)
-        print(f"checkpoint saved: {state['miles']:,.0f} / "
-              f"{cfg.target_total_miles:,.0f} miles "
-              f"({state['miles'] / cfg.target_total_miles:.1%})")
+        print(f"checkpoint saved: {state['t'] / 3600:,.1f} / "
+              f"{cfg.target_time_seconds / 3600:,.1f} simulated hours "
+              f"({state['t'] / cfg.target_time_seconds:.1%})")
         sys.exit(3)
 
     if args.checkpoint and os.path.exists(args.checkpoint):
         os.remove(args.checkpoint)
     wall = state["wall_seconds"]
-    print(f"simulation finished: {result.total_miles:,.1f} miles, "
+    print(f"simulation finished: {result.total_time_seconds / 3600:,.1f} "
+          f"simulated hours ({result.total_miles:,.1f} derived miles), "
           f"{result.total_events:,} events, {len(result.episodes):,} "
           f"unknown episodes, {wall:,.1f} s wall time")
 
@@ -557,6 +733,8 @@ def main():
                   f, indent=2)
     if not args.no_plots:
         make_plots(result, inter_mi, ws, os.path.join(args.outdir, "plots"))
+        make_duration_distribution_plots(
+            result, os.path.join(args.outdir, "duration_distributions"))
     print(f"results written to {args.outdir}/")
 
 

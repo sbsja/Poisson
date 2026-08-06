@@ -1,9 +1,0 @@
-# Semantic Catalog Simulator (v5-S)
-#
-# Inherits the complete default semantic configuration. Element identities
-# are stable, meaningful IDs such as lane_follow, cut_in, fog, and
-# sensor_occlusion.
-extends: config.yaml
-
-profile_name: semantic_catalog_v5s
-profile_kind: semantic_catalog
