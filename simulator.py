@@ -136,6 +136,7 @@ class SimConfig:
     duration_profiles: dict = field(default_factory=_default_duration_profiles)
     transition_model: dict = field(default_factory=_default_transition_model)
     concentration_scale: float = 20_000.0
+    rescale_transition_class_masses: bool = True
     allow_self_transition: bool = True
     layers: dict = field(default_factory=dict)   # layer key -> LayerParams
 
@@ -347,6 +348,9 @@ class SimConfig:
             raise ConfigError("min_duration_seconds must be positive.")
         if self.concentration_scale <= 0:
             raise ConfigError("concentration_scale must be positive.")
+        if not isinstance(self.rescale_transition_class_masses, bool):
+            raise ConfigError(
+                "rescale_transition_class_masses must be a bool.")
         if self.mileage_window_miles <= 0:
             raise ConfigError("mileage_window_miles must be positive.")
 
@@ -727,12 +731,15 @@ def build_layer(key, prefix, cfg: SimConfig, rng_element_count, rng_rarity,
 
     alpha = cfg.concentration_scale * initial_probs
     raw_transition = np_rng_transition.dirichlet(alpha)
-    transition_probs = np.zeros(n, dtype=np.float64)
-    for rarity, indices in class_indices.items():
-        class_mass = cfg.selection_class_percentages[rarity] / 100.0
-        within_class = raw_transition[indices]
-        transition_probs[indices] = (
-            class_mass * within_class / within_class.sum())
+    if cfg.rescale_transition_class_masses:
+        transition_probs = np.zeros(n, dtype=np.float64)
+        for rarity, indices in class_indices.items():
+            class_mass = cfg.selection_class_percentages[rarity] / 100.0
+            within_class = raw_transition[indices]
+            transition_probs[indices] = (
+                class_mass * within_class / within_class.sum())
+    else:
+        transition_probs = raw_transition
     means, variances, shapes, scales = build_element_duration_parameters(
         lp, rarity_list, cfg.duration_profiles)
 

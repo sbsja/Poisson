@@ -1,0 +1,112 @@
+{
+  "study": "seed_variability_study",
+  "description": "Quantifies natural run-to-run variability with no behavioral parameter change.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "seed_set_01",
+      "value": 0,
+      "offset": 0
+    },
+    {
+      "label": "seed_set_02",
+      "value": 1,
+      "offset": 1000003
+    },
+    {
+      "label": "seed_set_03",
+      "value": 2,
+      "offset": 2000006
+    },
+    {
+      "label": "seed_set_04",
+      "value": 3,
+      "offset": 3000009
+    },
+    {
+      "label": "seed_set_05",
+      "value": 4,
+      "offset": 4000012
+    },
+    {
+      "label": "seed_set_06",
+      "value": 5,
+      "offset": 5000015
+    },
+    {
+      "label": "seed_set_07",
+      "value": 6,
+      "offset": 6000018
+    },
+    {
+      "label": "seed_set_08",
+      "value": 7,
+      "offset": 7000021
+    },
+    {
+      "label": "seed_set_09",
+      "value": 8,
+      "offset": 8000024
+    },
+    {
+      "label": "seed_set_10",
+      "value": 9,
+      "offset": 9000027
+    },
+    {
+      "label": "seed_set_11",
+      "value": 10,
+      "offset": 10000030
+    },
+    {
+      "label": "seed_set_12",
+      "value": 11,
+      "offset": 11000033
+    },
+    {
+      "label": "seed_set_13",
+      "value": 12,
+      "offset": 12000036
+    },
+    {
+      "label": "seed_set_14",
+      "value": 13,
+      "offset": 13000039
+    },
+    {
+      "label": "seed_set_15",
+      "value": 14,
+      "offset": 14000042
+    },
+    {
+      "label": "seed_set_16",
+      "value": 15,
+      "offset": 15000045
+    },
+    {
+      "label": "seed_set_17",
+      "value": 16,
+      "offset": 16000048
+    },
+    {
+      "label": "seed_set_18",
+      "value": 17,
+      "offset": 17000051
+    },
+    {
+      "label": "seed_set_19",
+      "value": 18,
+      "offset": 18000054
+    },
+    {
+      "label": "seed_set_20",
+      "value": 19,
+      "offset": 19000057
+    }
+  ],
+  "replicates": 1,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

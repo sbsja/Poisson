@@ -1,0 +1,52 @@
+{
+  "study": "average_speed_study",
+  "description": "Verifies that speed changes mileage-domain metrics but not time-domain dynamics.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "5_mph",
+      "value": 5
+    },
+    {
+      "label": "10_mph",
+      "value": 10
+    },
+    {
+      "label": "20_mph",
+      "value": 20
+    },
+    {
+      "label": "30_mph",
+      "value": 30
+    },
+    {
+      "label": "40_mph",
+      "value": 40
+    },
+    {
+      "label": "50_mph",
+      "value": 50
+    },
+    {
+      "label": "60_mph",
+      "value": 60
+    },
+    {
+      "label": "75_mph",
+      "value": 75
+    },
+    {
+      "label": "100_mph",
+      "value": 100
+    },
+    {
+      "label": "150_mph",
+      "value": 150
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

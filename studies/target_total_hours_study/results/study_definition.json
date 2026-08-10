@@ -1,0 +1,52 @@
+{
+  "study": "target_total_hours_study",
+  "description": "Measures convergence and uncertainty as simulated observation time increases.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "50_hours",
+      "value": 50
+    },
+    {
+      "label": "100_hours",
+      "value": 100
+    },
+    {
+      "label": "250_hours",
+      "value": 250
+    },
+    {
+      "label": "500_hours",
+      "value": 500
+    },
+    {
+      "label": "1000_hours",
+      "value": 1000
+    },
+    {
+      "label": "2000_hours",
+      "value": 2000
+    },
+    {
+      "label": "5000_hours",
+      "value": 5000
+    },
+    {
+      "label": "10000_hours",
+      "value": 10000
+    },
+    {
+      "label": "15000_hours",
+      "value": 15000
+    },
+    {
+      "label": "20000_hours",
+      "value": 20000
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": null,
+  "quick": false
+}

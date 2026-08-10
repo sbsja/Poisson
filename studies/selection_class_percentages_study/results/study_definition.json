@@ -1,0 +1,212 @@
+{
+  "study": "selection_class_percentages_study",
+  "description": "Tests how direct common/rare/unknown transition-selection mass changes exact rare-combination episodes.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "rare_05pct",
+      "value": 5,
+      "sweep": "rare",
+      "percentages": {
+        "common": 85.0,
+        "rare": 5.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_10pct",
+      "value": 10,
+      "sweep": "rare",
+      "percentages": {
+        "common": 80.0,
+        "rare": 10.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_15pct",
+      "value": 15,
+      "sweep": "rare",
+      "percentages": {
+        "common": 75.0,
+        "rare": 15.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_20pct",
+      "value": 20,
+      "sweep": "rare",
+      "percentages": {
+        "common": 70.0,
+        "rare": 20.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_25pct",
+      "value": 25,
+      "sweep": "rare",
+      "percentages": {
+        "common": 65.0,
+        "rare": 25.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_30pct",
+      "value": 30,
+      "sweep": "rare",
+      "percentages": {
+        "common": 60.0,
+        "rare": 30.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_35pct",
+      "value": 35,
+      "sweep": "rare",
+      "percentages": {
+        "common": 55.0,
+        "rare": 35.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_40pct",
+      "value": 40,
+      "sweep": "rare",
+      "percentages": {
+        "common": 50.0,
+        "rare": 40.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_45pct",
+      "value": 45,
+      "sweep": "rare",
+      "percentages": {
+        "common": 45.0,
+        "rare": 45.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_50pct",
+      "value": 50,
+      "sweep": "rare",
+      "percentages": {
+        "common": 40.0,
+        "rare": 50.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "unknown_1pct",
+      "value": 1,
+      "sweep": "unknown",
+      "percentages": {
+        "common": 79.0,
+        "rare": 20.0,
+        "unknown": 1.0
+      }
+    },
+    {
+      "label": "unknown_3pct",
+      "value": 3,
+      "sweep": "unknown",
+      "percentages": {
+        "common": 77.0,
+        "rare": 20.0,
+        "unknown": 3.0
+      }
+    },
+    {
+      "label": "unknown_5pct",
+      "value": 5,
+      "sweep": "unknown",
+      "percentages": {
+        "common": 75.0,
+        "rare": 20.0,
+        "unknown": 5.0
+      }
+    },
+    {
+      "label": "unknown_7.5pct",
+      "value": 7.5,
+      "sweep": "unknown",
+      "percentages": {
+        "common": 72.5,
+        "rare": 20.0,
+        "unknown": 7.5
+      }
+    },
+    {
+      "label": "unknown_10pct",
+      "value": 10,
+      "sweep": "unknown",
+      "percentages": {
+        "common": 70.0,
+        "rare": 20.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "unknown_12.5pct",
+      "value": 12.5,
+      "sweep": "unknown",
+      "percentages": {
+        "common": 67.5,
+        "rare": 20.0,
+        "unknown": 12.5
+      }
+    },
+    {
+      "label": "unknown_15pct",
+      "value": 15,
+      "sweep": "unknown",
+      "percentages": {
+        "common": 65.0,
+        "rare": 20.0,
+        "unknown": 15.0
+      }
+    },
+    {
+      "label": "unknown_20pct",
+      "value": 20,
+      "sweep": "unknown",
+      "percentages": {
+        "common": 60.0,
+        "rare": 20.0,
+        "unknown": 20.0
+      }
+    },
+    {
+      "label": "unknown_25pct",
+      "value": 25,
+      "sweep": "unknown",
+      "percentages": {
+        "common": 55.0,
+        "rare": 20.0,
+        "unknown": 25.0
+      }
+    },
+    {
+      "label": "unknown_30pct",
+      "value": 30,
+      "sweep": "unknown",
+      "percentages": {
+        "common": 50.0,
+        "rare": 20.0,
+        "unknown": 30.0
+      }
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

@@ -59,14 +59,17 @@ The initial probability vector therefore has exact class totals:
 \sum_{i \in r} p_i = P_r
 \]
 
-To create different probabilities for elements inside a class, the simulator
-first draws one raw Dirichlet vector:
+To create different probabilities for elements, the simulator first draws one
+raw Dirichlet vector:
 
 \[
 z \sim \operatorname{Dirichlet}(c p)
 \]
 
-where \(c\) is `concentration_scale`. It then rescales each class:
+where \(c\) is `concentration_scale`.
+
+When `rescale_transition_class_masses` is `true` (the default), it then
+rescales each class:
 
 \[
 q_i =
@@ -80,8 +83,25 @@ Consequently:
 \sum_{i \in r} q_i = P_r
 \]
 
-The Dirichlet draw changes only the distribution between elements inside the
-same class. It cannot change the configured class percentages.
+In this mode, the Dirichlet draw changes only the distribution between elements
+inside the same class. It cannot change the configured class percentages.
+
+When `rescale_transition_class_masses` is `false`, the transition vector is
+instead kept directly as:
+
+\[
+q_i = z_i
+\]
+
+The complete vector still sums to one, but the realized class mass is:
+
+\[
+\sum_{i \in r} q_i = \sum_{i \in r} z_i
+\]
+
+and therefore varies reproducibly around \(P_r\). The initial-state vector is
+not affected by this switch and always retains the exact configured class
+totals.
 
 There are no rarity weights, no unknown-weight mode, and no analytical
 unknown-weight equation.

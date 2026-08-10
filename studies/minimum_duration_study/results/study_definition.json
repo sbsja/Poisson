@@ -1,0 +1,52 @@
+{
+  "study": "minimum_duration_study",
+  "description": "Tests clamp-induced duration bias, transition suppression, and episode persistence.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "0.001_seconds",
+      "value": 0.001
+    },
+    {
+      "label": "0.01_seconds",
+      "value": 0.01
+    },
+    {
+      "label": "0.1_seconds",
+      "value": 0.1
+    },
+    {
+      "label": "0.5_seconds",
+      "value": 0.5
+    },
+    {
+      "label": "1_seconds",
+      "value": 1
+    },
+    {
+      "label": "2_seconds",
+      "value": 2
+    },
+    {
+      "label": "5_seconds",
+      "value": 5
+    },
+    {
+      "label": "10_seconds",
+      "value": 10
+    },
+    {
+      "label": "20_seconds",
+      "value": 20
+    },
+    {
+      "label": "30_seconds",
+      "value": 30
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

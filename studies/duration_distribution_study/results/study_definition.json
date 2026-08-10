@@ -1,0 +1,62 @@
+{
+  "study": "duration_distribution_study",
+  "description": "Compares ten positive sojourn families. Nine alternatives match every element's configured mean and variance to the production Gamma law.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "gamma",
+      "value": 0,
+      "distribution": "gamma"
+    },
+    {
+      "label": "weibull",
+      "value": 1,
+      "distribution": "weibull"
+    },
+    {
+      "label": "lognormal",
+      "value": 2,
+      "distribution": "lognormal"
+    },
+    {
+      "label": "inverse_gaussian",
+      "value": 3,
+      "distribution": "inverse_gaussian"
+    },
+    {
+      "label": "shifted_exponential",
+      "value": 4,
+      "distribution": "shifted_exponential"
+    },
+    {
+      "label": "inverse_gamma",
+      "value": 5,
+      "distribution": "inverse_gamma"
+    },
+    {
+      "label": "symmetric_two_point",
+      "value": 6,
+      "distribution": "symmetric_two_point"
+    },
+    {
+      "label": "three_point",
+      "value": 7,
+      "distribution": "three_point"
+    },
+    {
+      "label": "pareto",
+      "value": 8,
+      "distribution": "pareto"
+    },
+    {
+      "label": "scaled_beta",
+      "value": 9,
+      "distribution": "scaled_beta"
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

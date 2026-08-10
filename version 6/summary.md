@@ -9,7 +9,7 @@
 - transition model: independent
 - unknown scenarios: exact rare-element combinations; C3=40, C4=30, C5=20, C6=10; every rule includes triggering_conditions
 - direct selection-class percentages: common=70%, rare=20%, unknown=10%
-- concentration_scale: 20,000, allow_self_transition: True
+- concentration_scale: 20,000, rescale_transition_class_masses: True, allow_self_transition: True
 
 ## Element rarity composition
 
@@ -30,7 +30,7 @@ The configured target for every generated layer is common 70%, rare 20%, unknown
 - total simulated mileage: 1,000,000.0 miles
 - total simulated time: 72,000,000.0 s (20,000.0 h)
 - event-driven steps: 4,079,575
-- wall-clock runtime: 9.4 s
+- wall-clock runtime: 11.7 s
 
 ## Unknown episodes
 

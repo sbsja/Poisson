@@ -1,0 +1,52 @@
+{
+  "study": "duration_profile_element_spread_study",
+  "description": "Tests sensitivity to heterogeneity between elements in the same rarity class.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "spread_0",
+      "value": 0
+    },
+    {
+      "label": "spread_0.025",
+      "value": 0.025
+    },
+    {
+      "label": "spread_0.05",
+      "value": 0.05
+    },
+    {
+      "label": "spread_0.075",
+      "value": 0.075
+    },
+    {
+      "label": "spread_0.1",
+      "value": 0.1
+    },
+    {
+      "label": "spread_0.125",
+      "value": 0.125
+    },
+    {
+      "label": "spread_0.15",
+      "value": 0.15
+    },
+    {
+      "label": "spread_0.2",
+      "value": 0.2
+    },
+    {
+      "label": "spread_0.25",
+      "value": 0.25
+    },
+    {
+      "label": "spread_0.3",
+      "value": 0.3
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

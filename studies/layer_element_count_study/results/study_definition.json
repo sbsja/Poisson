@@ -1,0 +1,312 @@
+{
+  "study": "layer_element_count_study",
+  "description": "Measures per-element probability dilution as each layer catalogue changes size.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "street_n6",
+      "value": 6,
+      "layer": "street"
+    },
+    {
+      "label": "street_n8",
+      "value": 8,
+      "layer": "street"
+    },
+    {
+      "label": "street_n9",
+      "value": 9,
+      "layer": "street"
+    },
+    {
+      "label": "street_n10",
+      "value": 10,
+      "layer": "street"
+    },
+    {
+      "label": "street_n12",
+      "value": 12,
+      "layer": "street"
+    },
+    {
+      "label": "street_n14",
+      "value": 14,
+      "layer": "street"
+    },
+    {
+      "label": "street_n15",
+      "value": 15,
+      "layer": "street"
+    },
+    {
+      "label": "street_n16",
+      "value": 16,
+      "layer": "street"
+    },
+    {
+      "label": "street_n18",
+      "value": 18,
+      "layer": "street"
+    },
+    {
+      "label": "street_n20",
+      "value": 20,
+      "layer": "street"
+    },
+    {
+      "label": "temporal_modifications_n21",
+      "value": 21,
+      "layer": "temporal_modifications"
+    },
+    {
+      "label": "temporal_modifications_n27",
+      "value": 27,
+      "layer": "temporal_modifications"
+    },
+    {
+      "label": "temporal_modifications_n32",
+      "value": 32,
+      "layer": "temporal_modifications"
+    },
+    {
+      "label": "temporal_modifications_n37",
+      "value": 37,
+      "layer": "temporal_modifications"
+    },
+    {
+      "label": "temporal_modifications_n42",
+      "value": 42,
+      "layer": "temporal_modifications"
+    },
+    {
+      "label": "temporal_modifications_n48",
+      "value": 48,
+      "layer": "temporal_modifications"
+    },
+    {
+      "label": "temporal_modifications_n53",
+      "value": 53,
+      "layer": "temporal_modifications"
+    },
+    {
+      "label": "temporal_modifications_n58",
+      "value": 58,
+      "layer": "temporal_modifications"
+    },
+    {
+      "label": "temporal_modifications_n64",
+      "value": 64,
+      "layer": "temporal_modifications"
+    },
+    {
+      "label": "temporal_modifications_n69",
+      "value": 69,
+      "layer": "temporal_modifications"
+    },
+    {
+      "label": "ego_maneuver_n11",
+      "value": 11,
+      "layer": "ego_maneuver"
+    },
+    {
+      "label": "ego_maneuver_n14",
+      "value": 14,
+      "layer": "ego_maneuver"
+    },
+    {
+      "label": "ego_maneuver_n16",
+      "value": 16,
+      "layer": "ego_maneuver"
+    },
+    {
+      "label": "ego_maneuver_n19",
+      "value": 19,
+      "layer": "ego_maneuver"
+    },
+    {
+      "label": "ego_maneuver_n22",
+      "value": 22,
+      "layer": "ego_maneuver"
+    },
+    {
+      "label": "ego_maneuver_n25",
+      "value": 25,
+      "layer": "ego_maneuver"
+    },
+    {
+      "label": "ego_maneuver_n28",
+      "value": 28,
+      "layer": "ego_maneuver"
+    },
+    {
+      "label": "ego_maneuver_n30",
+      "value": 30,
+      "layer": "ego_maneuver"
+    },
+    {
+      "label": "ego_maneuver_n33",
+      "value": 33,
+      "layer": "ego_maneuver"
+    },
+    {
+      "label": "ego_maneuver_n36",
+      "value": 36,
+      "layer": "ego_maneuver"
+    },
+    {
+      "label": "ru_maneuver_n11",
+      "value": 11,
+      "layer": "ru_maneuver"
+    },
+    {
+      "label": "ru_maneuver_n14",
+      "value": 14,
+      "layer": "ru_maneuver"
+    },
+    {
+      "label": "ru_maneuver_n16",
+      "value": 16,
+      "layer": "ru_maneuver"
+    },
+    {
+      "label": "ru_maneuver_n19",
+      "value": 19,
+      "layer": "ru_maneuver"
+    },
+    {
+      "label": "ru_maneuver_n22",
+      "value": 22,
+      "layer": "ru_maneuver"
+    },
+    {
+      "label": "ru_maneuver_n25",
+      "value": 25,
+      "layer": "ru_maneuver"
+    },
+    {
+      "label": "ru_maneuver_n28",
+      "value": 28,
+      "layer": "ru_maneuver"
+    },
+    {
+      "label": "ru_maneuver_n30",
+      "value": 30,
+      "layer": "ru_maneuver"
+    },
+    {
+      "label": "ru_maneuver_n33",
+      "value": 33,
+      "layer": "ru_maneuver"
+    },
+    {
+      "label": "ru_maneuver_n36",
+      "value": 36,
+      "layer": "ru_maneuver"
+    },
+    {
+      "label": "environmental_conditions_n11",
+      "value": 11,
+      "layer": "environmental_conditions"
+    },
+    {
+      "label": "environmental_conditions_n14",
+      "value": 14,
+      "layer": "environmental_conditions"
+    },
+    {
+      "label": "environmental_conditions_n16",
+      "value": 16,
+      "layer": "environmental_conditions"
+    },
+    {
+      "label": "environmental_conditions_n19",
+      "value": 19,
+      "layer": "environmental_conditions"
+    },
+    {
+      "label": "environmental_conditions_n22",
+      "value": 22,
+      "layer": "environmental_conditions"
+    },
+    {
+      "label": "environmental_conditions_n25",
+      "value": 25,
+      "layer": "environmental_conditions"
+    },
+    {
+      "label": "environmental_conditions_n28",
+      "value": 28,
+      "layer": "environmental_conditions"
+    },
+    {
+      "label": "environmental_conditions_n30",
+      "value": 30,
+      "layer": "environmental_conditions"
+    },
+    {
+      "label": "environmental_conditions_n33",
+      "value": 33,
+      "layer": "environmental_conditions"
+    },
+    {
+      "label": "environmental_conditions_n36",
+      "value": 36,
+      "layer": "environmental_conditions"
+    },
+    {
+      "label": "triggering_conditions_n42",
+      "value": 42,
+      "layer": "triggering_conditions"
+    },
+    {
+      "label": "triggering_conditions_n53",
+      "value": 53,
+      "layer": "triggering_conditions"
+    },
+    {
+      "label": "triggering_conditions_n64",
+      "value": 64,
+      "layer": "triggering_conditions"
+    },
+    {
+      "label": "triggering_conditions_n74",
+      "value": 74,
+      "layer": "triggering_conditions"
+    },
+    {
+      "label": "triggering_conditions_n85",
+      "value": 85,
+      "layer": "triggering_conditions"
+    },
+    {
+      "label": "triggering_conditions_n96",
+      "value": 96,
+      "layer": "triggering_conditions"
+    },
+    {
+      "label": "triggering_conditions_n106",
+      "value": 106,
+      "layer": "triggering_conditions"
+    },
+    {
+      "label": "triggering_conditions_n117",
+      "value": 117,
+      "layer": "triggering_conditions"
+    },
+    {
+      "label": "triggering_conditions_n128",
+      "value": 128,
+      "layer": "triggering_conditions"
+    },
+    {
+      "label": "triggering_conditions_n138",
+      "value": 138,
+      "layer": "triggering_conditions"
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

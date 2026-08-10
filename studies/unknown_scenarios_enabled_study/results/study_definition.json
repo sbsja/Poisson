@@ -1,0 +1,20 @@
+{
+  "study": "unknown_scenarios_enabled_study",
+  "description": "Two-level control study for the boolean v6 unknown-scenario switch.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "disabled",
+      "value": false
+    },
+    {
+      "label": "enabled",
+      "value": true
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

@@ -1,10 +1,11 @@
 {
   "profile_name": "generated_elements_v6",
   "profile_kind": "generated_elements",
+  "rescale_transition_class_masses": true,
   "total_simulated_mileage": 999999.999999826,
   "total_simulated_time_seconds": 72000000.0,
   "total_events": 4079575,
-  "wall_seconds": 9.382776799844578,
+  "wall_seconds": 11.717999999999847,
   "total_unknown_episodes": 495,
   "episodes_truncated": 0,
   "episodes_per_million_miles": 495.0000000000862,

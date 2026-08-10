@@ -80,9 +80,12 @@ unknown_scenarios:
   exact_rare_set: true
 
 # --- Transition probability vectors ----------------------------------------
-# A single Dirichlet draw varies probabilities between elements inside each
-# class. Each class is then rescaled to its exact configured percentage.
+# A single Dirichlet draw varies probabilities between elements. When true,
+# each class is rescaled to its exact selection_class_percentages mass. When
+# false, the raw Dirichlet vector is kept: class masses vary reproducibly around
+# those percentages, while the complete vector still sums to one.
 concentration_scale: 20000.0
+rescale_transition_class_masses: true
 allow_self_transition: true
 
 # --- Per-layer configuration ------------------------------------------------

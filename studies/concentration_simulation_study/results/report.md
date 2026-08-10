@@ -1,44 +1,49 @@
-# Concentration sensitivity — full simulation study
+# Concentration Scale Study
 
-## Result
+Measures within-class probability concentration and seed sensitivity under the v6 direct-class-mass model.
 
-Increasing `concentration_scale` does not change the designed unknown mass (0.4% per unknown-bearing layer); it reduces how far each one-time Dirichlet draw can wander from that target. That initialization effect propagates to episode counts and the fraction of simulated time classified as unknown.
+## Design
 
-In this empirical sweep, **c = 20,000** was the smallest tested value for which every unknown-bearing layer in all 3 runs stayed within ±25% of its target.
-
-The current `c = 20,000` remains a sensible production setting: it materially suppresses seed-to-seed initialization error without requiring a near-deterministic transition vector. The three-run sample is a sensitivity demonstration, not a replacement for the larger Monte Carlo calibration in the project's original `concentration_study.md`.
+- Levels: 10
+- Paired independent seed sets per level: 3
+- All seven simulator seeds are shifted together between replicates.
+- All levels within a replicate use the same seed set.
+- Default screening duration: 1000 simulated hours.
+- Total wall time: 28.9 seconds.
 
 ## Aggregate results
 
-Each cell is the mean across three runs; `±` is the sample standard deviation.
+| level | episodes/hour | unknown-time fraction | duration p90 (s) | dispersion | C3/C4/C5/C6 |
+|---|---:|---:|---:|---:|---:|
+| c_100 | 0.024 | 0.0001288 | 38.3385 | 2.5639 | 24/0/0/0 |
+| c_300 | 0.032 | 0.0002005 | 49.9379 | 0.928 | 31.3333/0.6667/0/0 |
+| c_1000 | 0.0247 | 0.0001299 | 36.7647 | 1.0278 | 24/0.6667/0/0 |
+| c_3000 | 0.03 | 0.0001994 | 51.6214 | 0.5038 | 28/2/0/0 |
+| c_10000 | 0.023 | 0.0001257 | 38.3747 | 1.9056 | 22.6667/0.3333/0/0 |
+| c_20000 | 0.02 | 0.0001333 | 47.6747 | 0.5402 | 19.3333/0.6667/0/0 |
+| c_50000 | 0.0267 | 0.0001673 | 42.8274 | 1.0313 | 26/0.6667/0/0 |
+| c_100000 | 0.0287 | 0.0001393 | 34.3034 | 0.7207 | 28.6667/0/0/0 |
+| c_300000 | 0.027 | 0.0001657 | 42.679 | 1.4975 | 25.3333/1.6667/0/0 |
+| c_1000000 | 0.0223 | 0.0001157 | 34.1077 | 0.5242 | 22/0.3333/0/0 |
 
-| concentration | worst layer error | element-route episodes | full-scenario episodes | total episodes | unknown-time fraction | runs within ±25% |
-|---:|---:|---:|---:|---:|---:|---:|
-| 100 | 144.7% ± 77.4% | 12,533 ± 1,231 | 36,432 ± 584 | 48,964 ± 1,093 | 1.392% ± 0.604% | 0/3 |
-| 1,000 | 51.9% ± 13.7% | 34,732 ± 8,919 | 36,030 ± 534 | 70,762 ± 9,045 | 1.757% ± 0.232% | 0/3 |
-| 5,000 | 24.2% ± 8.0% | 34,901 ± 6,773 | 36,321 ± 711 | 71,222 ± 7,482 | 1.857% ± 0.258% | 2/3 |
-| 20,000 | 12.4% ± 4.3% | 36,289 ± 3,484 | 36,787 ± 632 | 73,075 ± 3,746 | 1.935% ± 0.145% | 3/3 |
-| 100,000 | 6.4% ± 1.6% | 36,329 ± 1,113 | 37,080 ± 850 | 73,409 ± 1,963 | 1.942% ± 0.062% | 3/3 |
+## Interpretation note
 
-## What changed
-
-- At `c = 100`, the worst layer's mass error ranged from 99.0%–234.0% across the three transition-vector draws.
-- At the current `c = 20,000`, that range narrowed to 9.2%–17.3%.
-- At `c = 100,000`, it narrowed further to 4.7%–7.9%, showing diminishing returns once the vector is already tightly centered on the designed weights.
-- Full-scenario rarity is recalibrated to 0.4% stationary mass for each constructed model, so its episode count is less directly tied to the unknown-element mass than the element-route count is.
-
-## Method
-
-- 15 end-to-end simulations: five concentrations × 3 transition-vector seeds.
-- Every run used the full configured 2,000,000-mile target and all features enabled in the root `config.yaml`.
-- Element counts, rarity assignment, durations, initial-state, and transition-sampling seeds were held fixed. Only the Dirichlet `transition_matrix` seed varied by replicate.
-- Error means `abs(realized_mass - 0.004) / 0.004`; the reported worst error is the maximum across the four unknown-bearing layers.
-- Total study wall time: 9.1 minutes.
+These are screening simulations, not causal claims from a single run. Compare the level-to-level change with the replicate standard deviations in `summary.csv`; confirm influential settings with longer runs and more seeds.
 
 ## Files
 
+- `baseline_config.json`: immutable source configuration snapshot.
+- `study_definition.json`: levels and execution settings.
 - `runs.csv`: one row per simulation.
-- `summary.csv`: concentration-level means, standard deviations, minima, and maxima.
-- `summary.json`: machine-readable manifest plus all per-run and aggregate data.
-- `runs/.../stats.json`: compact result for each individual simulation.
-- `concentration_effects.png`: visual comparison of the principal outcomes.
+- `summary.csv` and `summary.json`: aggregate and machine-readable results.
+- `runs/<level>/replicate_<n>/config.json`: exact configuration for each run.
+- `runs/<level>/replicate_<n>/stats.json`: compact per-run metrics.
+- `concentration_scale_study_effects.png`: principal outcomes by level.
+
+## Additional study-specific charts
+
+- `paired_replicate_responses.png`
+- `c_size_composition.png`
+- `mechanism_relationships.png`
+- `normalized_response_heatmap.png`
+- `numeric_response_curves.png`

@@ -43,6 +43,7 @@ def test_default_config_has_only_requested_rarities():
         "common": 70.0, "rare": 20.0, "unknown": 10.0}
     assert cfg.selection_class_percentages == {
         "common": 70.0, "rare": 20.0, "unknown": 10.0}
+    assert cfg.rescale_transition_class_masses is True
     assert all(set(layer.counts) == set(RARITIES) for layer in sim.layers)
 
 
@@ -106,6 +107,38 @@ def test_selection_class_percentages_are_exact_in_every_layer():
                              if value == rarity)
             assert math.isclose(initial, expected, abs_tol=1e-12)
             assert math.isclose(transition, expected, abs_tol=1e-12)
+
+
+def test_raw_dirichlet_mode_keeps_draw_without_class_rescaling():
+    rescaled = ScenarioSimulator(config())
+    raw = ScenarioSimulator(config(rescale_transition_class_masses=False))
+
+    for rescaled_layer, raw_layer in zip(rescaled.layers, raw.layers):
+        assert rescaled_layer.rarities == raw_layer.rarities
+        assert math.isclose(sum(raw_layer.transition_probs), 1.0,
+                            abs_tol=1e-12)
+
+        raw_differs_from_target = False
+        for rarity in RARITIES:
+            target = raw.cfg.selection_class_percentages[rarity] / 100.0
+            mask = np.array([value == rarity
+                             for value in raw_layer.rarities])
+            raw_values = raw_layer.transition_probs[mask]
+            rescaled_values = rescaled_layer.transition_probs[mask]
+            raw_mass = float(raw_values.sum())
+            if not math.isclose(raw_mass, target, abs_tol=1e-10):
+                raw_differs_from_target = True
+            assert np.allclose(raw_values / raw_mass,
+                               rescaled_values / rescaled_values.sum())
+
+        assert raw_differs_from_target
+
+
+def test_transition_class_mass_rescaling_switch_must_be_boolean():
+    cfg = config()
+    cfg.rescale_transition_class_masses = "false"
+    with pytest.raises(ConfigError, match="must be a bool"):
+        cfg.validate()
 
 
 def test_class_percentage_mappings_must_sum_to_100():
@@ -331,6 +364,7 @@ def test_output_builders_describe_v6_without_legacy_keys():
         "common": 70.0, "rare": 20.0, "unknown": 10.0}
     assert composition["configured_selection_class_percentages"] == {
         "common": 70.0, "rare": 20.0, "unknown": 10.0}
+    assert stats["rescale_transition_class_masses"] is True
     assert sum(composition["all_layers_total"]["counts"].values()) == \
         composition["all_layers_total"]["total_elements"]
     for row in composition["layers"]:

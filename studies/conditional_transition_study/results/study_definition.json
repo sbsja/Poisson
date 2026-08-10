@@ -1,0 +1,72 @@
+{
+  "study": "conditional_transition_study",
+  "description": "Tests concentration of ego rare behavior when the street layer is rare.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "independent",
+      "value": null,
+      "mode": "independent"
+    },
+    {
+      "label": "conditional_x0",
+      "value": 0,
+      "mode": "conditional"
+    },
+    {
+      "label": "conditional_x0.1",
+      "value": 0.1,
+      "mode": "conditional"
+    },
+    {
+      "label": "conditional_x0.25",
+      "value": 0.25,
+      "mode": "conditional"
+    },
+    {
+      "label": "conditional_x0.5",
+      "value": 0.5,
+      "mode": "conditional"
+    },
+    {
+      "label": "conditional_x0.75",
+      "value": 0.75,
+      "mode": "conditional"
+    },
+    {
+      "label": "conditional_x1",
+      "value": 1,
+      "mode": "conditional"
+    },
+    {
+      "label": "conditional_x1.5",
+      "value": 1.5,
+      "mode": "conditional"
+    },
+    {
+      "label": "conditional_x2",
+      "value": 2,
+      "mode": "conditional"
+    },
+    {
+      "label": "conditional_x4",
+      "value": 4,
+      "mode": "conditional"
+    },
+    {
+      "label": "conditional_x10",
+      "value": 10,
+      "mode": "conditional"
+    },
+    {
+      "label": "conditional_x100",
+      "value": 100,
+      "mode": "conditional"
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

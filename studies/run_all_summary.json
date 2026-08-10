@@ -1,0 +1,197 @@
+{
+  "completed": true,
+  "component_studies": 21,
+  "total_simulations": 1160,
+  "studies": [
+    {
+      "study": "selection_class_percentages_study",
+      "script": "selection_class_percentages_study/selection_class_percentages_study.py",
+      "levels": 20,
+      "replicates": 3,
+      "simulations": 60,
+      "total_wall_seconds": 78.51500000000033,
+      "artifacts_complete": true
+    },
+    {
+      "study": "unknown_scenarios_enabled_study",
+      "script": "unknown_scenarios_enabled_study/unknown_scenarios_enabled_study.py",
+      "levels": 2,
+      "replicates": 3,
+      "simulations": 6,
+      "total_wall_seconds": 5.688000000000102,
+      "artifacts_complete": true
+    },
+    {
+      "study": "combination_counts_study",
+      "script": "combination_counts_study/combination_counts_study.py",
+      "levels": 10,
+      "replicates": 3,
+      "simulations": 30,
+      "total_wall_seconds": 37.98399999999947,
+      "artifacts_complete": true
+    },
+    {
+      "study": "combination_size_study",
+      "script": "combination_size_study/combination_size_study.py",
+      "levels": 12,
+      "replicates": 3,
+      "simulations": 36,
+      "total_wall_seconds": 46.42100000000028,
+      "artifacts_complete": true
+    },
+    {
+      "study": "layer_mean_duration_study",
+      "script": "layer_mean_duration_study/layer_mean_duration_study.py",
+      "levels": 60,
+      "replicates": 3,
+      "simulations": 180,
+      "total_wall_seconds": 197.45300000000043,
+      "artifacts_complete": true
+    },
+    {
+      "study": "layer_variance_duration_study",
+      "script": "layer_variance_duration_study/layer_variance_duration_study.py",
+      "levels": 60,
+      "replicates": 3,
+      "simulations": 180,
+      "total_wall_seconds": 184.35900000000038,
+      "artifacts_complete": true
+    },
+    {
+      "study": "duration_profile_mean_multiplier_study",
+      "script": "duration_profile_mean_multiplier_study/duration_profile_mean_multiplier_study.py",
+      "levels": 30,
+      "replicates": 3,
+      "simulations": 90,
+      "total_wall_seconds": 88.42199999999957,
+      "artifacts_complete": true
+    },
+    {
+      "study": "duration_profile_coefficient_of_variation_study",
+      "script": "duration_profile_coefficient_of_variation_study/duration_profile_coefficient_of_variation_study.py",
+      "levels": 30,
+      "replicates": 3,
+      "simulations": 90,
+      "total_wall_seconds": 91.65700000000015,
+      "artifacts_complete": true
+    },
+    {
+      "study": "duration_profile_element_spread_study",
+      "script": "duration_profile_element_spread_study/duration_profile_element_spread_study.py",
+      "levels": 10,
+      "replicates": 3,
+      "simulations": 30,
+      "total_wall_seconds": 29.64100000000053,
+      "artifacts_complete": true
+    },
+    {
+      "study": "allow_self_transition_study",
+      "script": "allow_self_transition_study/allow_self_transition_study.py",
+      "levels": 2,
+      "replicates": 3,
+      "simulations": 6,
+      "total_wall_seconds": 6.313000000000102,
+      "artifacts_complete": true
+    },
+    {
+      "study": "concentration_scale_study",
+      "script": "concentration_simulation_study/concentration_scale_study.py",
+      "levels": 10,
+      "replicates": 3,
+      "simulations": 30,
+      "total_wall_seconds": 28.90599999999995,
+      "artifacts_complete": true
+    },
+    {
+      "study": "rescale_transition_class_masses_study",
+      "script": "rescale_transition_class_masses_study/rescale_transition_class_masses_study.py",
+      "levels": 2,
+      "replicates": 3,
+      "simulations": 6,
+      "total_wall_seconds": 5.766000000000531,
+      "artifacts_complete": true
+    },
+    {
+      "study": "element_class_percentages_study",
+      "script": "element_class_percentages_study/element_class_percentages_study.py",
+      "levels": 10,
+      "replicates": 3,
+      "simulations": 30,
+      "total_wall_seconds": 28.54699999999957,
+      "artifacts_complete": true
+    },
+    {
+      "study": "layer_element_count_study",
+      "script": "layer_element_count_study/layer_element_count_study.py",
+      "levels": 60,
+      "replicates": 3,
+      "simulations": 180,
+      "total_wall_seconds": 190.01599999999962,
+      "artifacts_complete": true
+    },
+    {
+      "study": "conditional_transition_study",
+      "script": "conditional_transition_study/conditional_transition_study.py",
+      "levels": 12,
+      "replicates": 3,
+      "simulations": 36,
+      "total_wall_seconds": 450.42199999999957,
+      "artifacts_complete": true
+    },
+    {
+      "study": "target_total_hours_study",
+      "script": "target_total_hours_study/target_total_hours_study.py",
+      "levels": 10,
+      "replicates": 3,
+      "simulations": 30,
+      "total_wall_seconds": 175.9380000000001,
+      "artifacts_complete": true
+    },
+    {
+      "study": "average_speed_study",
+      "script": "average_speed_study/average_speed_study.py",
+      "levels": 10,
+      "replicates": 3,
+      "simulations": 30,
+      "total_wall_seconds": 37.79699999999957,
+      "artifacts_complete": true
+    },
+    {
+      "study": "mileage_window_study",
+      "script": "window_mileage_study/mileage_window_study.py",
+      "levels": 10,
+      "replicates": 3,
+      "simulations": 30,
+      "total_wall_seconds": 77.125,
+      "artifacts_complete": true
+    },
+    {
+      "study": "minimum_duration_study",
+      "script": "minimum_duration_study/minimum_duration_study.py",
+      "levels": 10,
+      "replicates": 3,
+      "simulations": 30,
+      "total_wall_seconds": 38.125,
+      "artifacts_complete": true
+    },
+    {
+      "study": "duration_distribution_study",
+      "script": "duration_distribution_study/duration_distribution_study.py",
+      "levels": 10,
+      "replicates": 3,
+      "simulations": 30,
+      "total_wall_seconds": 73.17200000000048,
+      "artifacts_complete": true
+    },
+    {
+      "study": "seed_variability_study",
+      "script": "seed_variability_study/seed_variability_study.py",
+      "levels": 20,
+      "replicates": 1,
+      "simulations": 20,
+      "total_wall_seconds": 25.25,
+      "artifacts_complete": true
+    }
+  ],
+  "failures": []
+}

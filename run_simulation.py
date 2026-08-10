@@ -6,8 +6,8 @@ Outputs (in --outdir):
   windows.csv      episode-start count per fixed mileage window
   summary.md       results summary + verification
   stats.json       machine-readable statistics
-  plots/*.png      cumulative episodes, duration histogram, inter-arrival
-                   histogram, window counts, per-layer stats, street mix
+  plots/*.png      core diagnostics plus survival, occupancy, combination-size,
+                   rule-contribution, class-mass, and timeline charts
   duration_distributions/
                    one Gamma PDF/CDF comparison per layer + manifest.json
 """
@@ -150,6 +150,8 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
                  f"{rarity}={cfg.selection_class_percentages[rarity]:g}%"
                  for rarity in RARITIES))
     L.append(f"- concentration_scale: {cfg.concentration_scale:,.0f}, "
+             "rescale_transition_class_masses: "
+             f"{cfg.rescale_transition_class_masses}, "
              f"allow_self_transition: {cfg.allow_self_transition}\n")
 
     composition = build_element_rarity_composition(result)
@@ -307,9 +309,14 @@ def build_summary(result, inter_mi, inter_s, ws, wall_seconds):
                   f"{target_unknown:.2%}; conditional "
                   "rules may legitimately move the empirical rate)")
     else:
+        target_description = (
+            "permanent class mass is exact"
+            if cfg.rescale_transition_class_masses
+            else "realized permanent mass varies by layer"
+        )
         L.append(f"- unknown-element selection rate across unknown-bearing "
                   f"layers: {overall:.4%} (design target "
-                  f"{target_unknown:.2%}; permanent class mass is exact)")
+                  f"{target_unknown:.2%}; {target_description})")
     cs = result.combination_stats
     if cs["enabled"] and cs["rules"]:
         L.append("- selected exact combination rules: " + "; ".join(
@@ -338,6 +345,8 @@ def build_stats_json(result, inter_mi, inter_s, ws, wall_seconds):
     return {
         "profile_name": result.config.profile_name,
         "profile_kind": result.config.profile_kind,
+        "rescale_transition_class_masses":
+            result.config.rescale_transition_class_masses,
         "total_simulated_mileage": result.total_miles,
         "total_simulated_time_seconds": result.total_time_seconds,
         "total_events": result.total_events,
@@ -461,18 +470,18 @@ def make_plots(result, inter_mi, ws, plots_dir):
     fig.savefig(os.path.join(plots_dir, "window_counts.png"), dpi=150)
     plt.close(fig)
 
-    # 5. per-layer: episodes and unknown selection rate vs target
+    # 5. per-layer: transitions and unknown selection rate vs target
     labels = [st["layer"].replace("_", "\n") for st in result.layer_stats]
     x = np.arange(len(labels))
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-    ax1.bar(x, [st["episodes"] for st in result.layer_stats], color="tab:blue")
+    ax1.bar(x, [st["transitions"] for st in result.layer_stats], color="tab:blue")
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels, fontsize=8)
-    ax1.set_ylabel("unknown episodes")
-    ax1.set_title("Episodes by layer")
+    ax1.set_ylabel("transitions")
+    ax1.set_title("Layer transition counts")
     ax1.grid(alpha=0.3, axis="y")
     ax2.bar(x - 0.15, [st["realized_unknown_mass"] for st in result.layer_stats],
-            0.3, label="configured transition mass")
+            0.3, label="realized transition mass")
     ax2.bar(x + 0.15, [st["empirical_unknown_rate"] for st in result.layer_stats],
             0.3, label="empirical selection rate")
     unknown_target = cfg.selection_class_percentages["unknown"] / 100.0
@@ -505,6 +514,199 @@ def make_plots(result, inter_mi, ws, plots_dir):
     ax.grid(alpha=0.3, axis="y")
     fig.tight_layout()
     fig.savefig(os.path.join(plots_dir, "street_composition.png"), dpi=150)
+    plt.close(fig)
+
+    def episode_size(episode):
+        text = str(episode.element)
+        if len(text) >= 2 and text[0] == "C" and text[1].isdigit():
+            return int(text[1])
+        return None
+
+    size_colors = {3: "tab:blue", 4: "tab:orange", 5: "tab:green",
+                   6: "tab:red"}
+
+    # 7. convergence of time spent in unknown scenarios.
+    fig, ax = plt.subplots(figsize=(9, 5))
+    if eps:
+        checkpoints = np.linspace(
+            max(result.total_time_seconds / 300.0, 1.0),
+            result.total_time_seconds, 300)
+        occupancy = []
+        for checkpoint in checkpoints:
+            occupied = sum(
+                max(0.0, min(e.end_time_seconds, checkpoint)
+                    - e.start_time_seconds)
+                for e in eps if e.start_time_seconds < checkpoint)
+            occupancy.append(occupied / checkpoint)
+        ax.plot(checkpoints / 3600.0, occupancy, lw=1.5,
+                label="cumulative occupancy")
+        ax.axhline(result.unknown_time_fraction(), color="tab:red", ls="--",
+                   label=f"final = {result.unknown_time_fraction():.4%}")
+        ax.legend()
+    ax.set_xlabel("simulated time (hours)")
+    ax.set_ylabel("cumulative unknown-time fraction")
+    ax.set_title("Convergence of unknown-scenario occupancy")
+    ax.grid(alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "unknown_occupancy_convergence.png"), dpi=150)
+    plt.close(fig)
+
+    # 8. episode-duration survival curves, overall and by combination size.
+    fig, ax = plt.subplots(figsize=(9, 5))
+    series = [("all episodes", [e.duration_seconds for e in eps], "0.2")]
+    series.extend((f"C{size}", [e.duration_seconds for e in eps
+                                if episode_size(e) == size], size_colors[size])
+                  for size in (3, 4, 5, 6))
+    for label, values, color in series:
+        if not values:
+            continue
+        ordered = np.sort(np.asarray(values, dtype=float))
+        survival = np.arange(len(ordered), 0, -1) / len(ordered)
+        ax.step(ordered, survival, where="post", label=f"{label} (n={len(ordered)})",
+                color=color, lw=1.5)
+    if eps:
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.legend(fontsize=8)
+    ax.set_xlabel("episode duration (seconds, log scale)")
+    ax.set_ylabel("survival probability (log scale)")
+    ax.set_title("Episode-duration survival")
+    ax.grid(alpha=0.3, which="both")
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "episode_duration_survival.png"), dpi=150)
+    plt.close(fig)
+
+    # 9. inter-arrival survival and exponential Q-Q diagnostic.
+    inter_seconds = np.asarray(result.inter_arrival_seconds(), dtype=float)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    if len(inter_seconds):
+        ordered = np.sort(inter_seconds)
+        survival = np.arange(len(ordered), 0, -1) / len(ordered)
+        ax1.step(ordered, survival, where="post", label="empirical", lw=1.5)
+        mean_inter = float(np.mean(inter_seconds))
+        grid = np.linspace(0.0, max(ordered), 500)
+        ax1.plot(grid, np.exp(-grid / mean_inter), ls="--",
+                 label=f"exponential, mean={mean_inter:.0f}s")
+        ax1.set_yscale("log")
+        probabilities = (np.arange(1, len(ordered) + 1) - 0.5) / len(ordered)
+        theoretical = -mean_inter * np.log1p(-probabilities)
+        ax2.scatter(theoretical, ordered, s=12, alpha=0.6)
+        limit = max(float(theoretical[-1]), float(ordered[-1]))
+        ax2.plot([0, limit], [0, limit], color="tab:red", ls="--")
+        ax1.legend(fontsize=8)
+    ax1.set_xlabel("inter-arrival time (seconds)")
+    ax1.set_ylabel("survival probability (log scale)")
+    ax1.set_title("Empirical versus exponential survival")
+    ax2.set_xlabel("theoretical exponential quantile (seconds)")
+    ax2.set_ylabel("empirical quantile (seconds)")
+    ax2.set_title("Exponential Q-Q diagnostic")
+    for axis in (ax1, ax2):
+        axis.grid(alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "inter_arrival_diagnostics.png"), dpi=150)
+    plt.close(fig)
+
+    # 10. combination-size contributions to starts and occupied time.
+    sizes = np.asarray([3, 4, 5, 6])
+    counts = np.asarray([sum(episode_size(e) == size for e in eps)
+                         for size in sizes])
+    occupied_seconds = np.asarray([
+        sum(e.duration_seconds for e in eps if episode_size(e) == size)
+        for size in sizes])
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 5))
+    colors = [size_colors[int(size)] for size in sizes]
+    ax1.bar([f"C{size}" for size in sizes], counts, color=colors)
+    ax2.bar([f"C{size}" for size in sizes], occupied_seconds, color=colors)
+    ax1.set_ylabel("episode starts")
+    ax2.set_ylabel("occupied time (seconds)")
+    ax1.set_title("Episode starts by combination size")
+    ax2.set_title("Unknown time by combination size")
+    for axis in (ax1, ax2):
+        axis.grid(alpha=0.3, axis="y")
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "combination_size_contribution.png"), dpi=150)
+    plt.close(fig)
+
+    # 11. rule-level Pareto chart.
+    rules = sorted(result.combination_stats.get("rules", []),
+                   key=lambda item: item["episodes"], reverse=True)
+    fig, ax1 = plt.subplots(figsize=(11, 5))
+    if rules:
+        shown = rules[:min(40, len(rules))]
+        values = np.asarray([rule["episodes"] for rule in shown], dtype=float)
+        positions = np.arange(len(shown))
+        ax1.bar(positions, values, color="tab:blue", alpha=0.8)
+        ax1.set_xticks(positions)
+        ax1.set_xticklabels([f"R{rule['index']}" for rule in shown],
+                            rotation=60, ha="right", fontsize=7)
+        ax2 = ax1.twinx()
+        denominator = max(sum(rule["episodes"] for rule in rules), 1)
+        cumulative = np.cumsum(values) / denominator
+        ax2.plot(positions, cumulative, color="tab:red", marker="o", ms=3)
+        ax2.set_ylim(0.0, 1.05)
+        ax2.set_ylabel("cumulative share of all episodes")
+    ax1.set_xlabel("selected rule, ordered by observed episode count")
+    ax1.set_ylabel("episodes")
+    ax1.set_title("Rule contribution Pareto chart")
+    ax1.grid(alpha=0.3, axis="y")
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "rule_contributions.png"), dpi=150)
+    plt.close(fig)
+
+    # 12. configured, realized, and empirical class-mass verification.
+    layers = [st["layer"].replace("_", " ") for st in result.layer_stats]
+    configured = np.asarray([
+        [st["configured_selection_class_percentages"][rarity] / 100.0
+         for rarity in RARITIES] for st in result.layer_stats])
+    realized = np.asarray([
+        [st["transition_class_proportions"][rarity] for rarity in RARITIES]
+        for st in result.layer_stats])
+    empirical = np.asarray([
+        [st["selected_by_rarity"][rarity] / max(st["transitions"], 1)
+         for rarity in RARITIES] for st in result.layer_stats])
+    matrices = (("configured", configured), ("realized", realized),
+                ("empirical", empirical))
+    vmax = max(float(np.max(matrix)) for _title, matrix in matrices)
+    fig, axes = plt.subplots(1, 3, figsize=(13, 6), sharey=True)
+    for axis, (title, matrix) in zip(axes, matrices):
+        image = axis.imshow(matrix, aspect="auto", vmin=0.0, vmax=vmax,
+                            cmap="Blues")
+        axis.set_xticks(range(len(RARITIES)))
+        axis.set_xticklabels(RARITIES, rotation=30, ha="right")
+        axis.set_yticks(range(len(layers)))
+        axis.set_yticklabels(layers, fontsize=8)
+        axis.set_title(title.title())
+        for row in range(matrix.shape[0]):
+            for column in range(matrix.shape[1]):
+                axis.text(column, row, f"{matrix[row, column]:.1%}",
+                          ha="center", va="center", fontsize=7,
+                          color="white" if matrix[row, column] > vmax * 0.55 else "black")
+    fig.suptitle("Configured versus realized class behavior")
+    fig.subplots_adjust(left=0.18, right=0.88, bottom=0.16, top=0.84, wspace=0.28)
+    color_axis = fig.add_axes([0.91, 0.22, 0.015, 0.56])
+    fig.colorbar(image, cax=color_axis,
+                 label="class probability / selection share")
+    fig.savefig(os.path.join(plots_dir, "class_mass_verification.png"), dpi=150)
+    plt.close(fig)
+
+    # 13. compact episode timeline by combination size.
+    fig, ax = plt.subplots(figsize=(11, 4.5))
+    if eps:
+        for size in (3, 4, 5, 6):
+            intervals = [(e.start_time_seconds / 3600.0,
+                          e.duration_seconds / 3600.0)
+                         for e in eps if episode_size(e) == size]
+            if intervals:
+                ax.broken_barh(intervals, (size - 0.35, 0.7),
+                               facecolors=size_colors[size], alpha=0.8)
+        ax.set_yticks([3, 4, 5, 6])
+        ax.set_yticklabels(["C3", "C4", "C5", "C6"])
+    ax.set_xlabel("simulated time (hours)")
+    ax.set_ylabel("matched rule size")
+    ax.set_title("Unknown-episode timeline")
+    ax.grid(alpha=0.25, axis="x")
+    fig.tight_layout()
+    fig.savefig(os.path.join(plots_dir, "episode_timeline.png"), dpi=150)
     plt.close(fig)
 
 

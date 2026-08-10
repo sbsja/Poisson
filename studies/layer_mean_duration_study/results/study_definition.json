@@ -1,0 +1,372 @@
+{
+  "study": "layer_mean_duration_study",
+  "description": "Measures transition-rate and persistence sensitivity to every layer time scale.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "street_x0.25",
+      "value": 0.25,
+      "layer": "street",
+      "duration": 75.0
+    },
+    {
+      "label": "street_x0.4",
+      "value": 0.4,
+      "layer": "street",
+      "duration": 120.0
+    },
+    {
+      "label": "street_x0.55",
+      "value": 0.55,
+      "layer": "street",
+      "duration": 165.0
+    },
+    {
+      "label": "street_x0.7",
+      "value": 0.7,
+      "layer": "street",
+      "duration": 210.0
+    },
+    {
+      "label": "street_x0.85",
+      "value": 0.85,
+      "layer": "street",
+      "duration": 255.0
+    },
+    {
+      "label": "street_x1",
+      "value": 1,
+      "layer": "street",
+      "duration": 300.0
+    },
+    {
+      "label": "street_x1.25",
+      "value": 1.25,
+      "layer": "street",
+      "duration": 375.0
+    },
+    {
+      "label": "street_x1.5",
+      "value": 1.5,
+      "layer": "street",
+      "duration": 450.0
+    },
+    {
+      "label": "street_x2",
+      "value": 2,
+      "layer": "street",
+      "duration": 600.0
+    },
+    {
+      "label": "street_x3",
+      "value": 3,
+      "layer": "street",
+      "duration": 900.0
+    },
+    {
+      "label": "temporal_modifications_x0.25",
+      "value": 0.25,
+      "layer": "temporal_modifications",
+      "duration": 150.0
+    },
+    {
+      "label": "temporal_modifications_x0.4",
+      "value": 0.4,
+      "layer": "temporal_modifications",
+      "duration": 240.0
+    },
+    {
+      "label": "temporal_modifications_x0.55",
+      "value": 0.55,
+      "layer": "temporal_modifications",
+      "duration": 330.0
+    },
+    {
+      "label": "temporal_modifications_x0.7",
+      "value": 0.7,
+      "layer": "temporal_modifications",
+      "duration": 420.0
+    },
+    {
+      "label": "temporal_modifications_x0.85",
+      "value": 0.85,
+      "layer": "temporal_modifications",
+      "duration": 510.0
+    },
+    {
+      "label": "temporal_modifications_x1",
+      "value": 1,
+      "layer": "temporal_modifications",
+      "duration": 600.0
+    },
+    {
+      "label": "temporal_modifications_x1.25",
+      "value": 1.25,
+      "layer": "temporal_modifications",
+      "duration": 750.0
+    },
+    {
+      "label": "temporal_modifications_x1.5",
+      "value": 1.5,
+      "layer": "temporal_modifications",
+      "duration": 900.0
+    },
+    {
+      "label": "temporal_modifications_x2",
+      "value": 2,
+      "layer": "temporal_modifications",
+      "duration": 1200.0
+    },
+    {
+      "label": "temporal_modifications_x3",
+      "value": 3,
+      "layer": "temporal_modifications",
+      "duration": 1800.0
+    },
+    {
+      "label": "ego_maneuver_x0.25",
+      "value": 0.25,
+      "layer": "ego_maneuver",
+      "duration": 7.5
+    },
+    {
+      "label": "ego_maneuver_x0.4",
+      "value": 0.4,
+      "layer": "ego_maneuver",
+      "duration": 12.0
+    },
+    {
+      "label": "ego_maneuver_x0.55",
+      "value": 0.55,
+      "layer": "ego_maneuver",
+      "duration": 16.5
+    },
+    {
+      "label": "ego_maneuver_x0.7",
+      "value": 0.7,
+      "layer": "ego_maneuver",
+      "duration": 21.0
+    },
+    {
+      "label": "ego_maneuver_x0.85",
+      "value": 0.85,
+      "layer": "ego_maneuver",
+      "duration": 25.5
+    },
+    {
+      "label": "ego_maneuver_x1",
+      "value": 1,
+      "layer": "ego_maneuver",
+      "duration": 30.0
+    },
+    {
+      "label": "ego_maneuver_x1.25",
+      "value": 1.25,
+      "layer": "ego_maneuver",
+      "duration": 37.5
+    },
+    {
+      "label": "ego_maneuver_x1.5",
+      "value": 1.5,
+      "layer": "ego_maneuver",
+      "duration": 45.0
+    },
+    {
+      "label": "ego_maneuver_x2",
+      "value": 2,
+      "layer": "ego_maneuver",
+      "duration": 60.0
+    },
+    {
+      "label": "ego_maneuver_x3",
+      "value": 3,
+      "layer": "ego_maneuver",
+      "duration": 90.0
+    },
+    {
+      "label": "ru_maneuver_x0.25",
+      "value": 0.25,
+      "layer": "ru_maneuver",
+      "duration": 11.25
+    },
+    {
+      "label": "ru_maneuver_x0.4",
+      "value": 0.4,
+      "layer": "ru_maneuver",
+      "duration": 18.0
+    },
+    {
+      "label": "ru_maneuver_x0.55",
+      "value": 0.55,
+      "layer": "ru_maneuver",
+      "duration": 24.750000000000004
+    },
+    {
+      "label": "ru_maneuver_x0.7",
+      "value": 0.7,
+      "layer": "ru_maneuver",
+      "duration": 31.499999999999996
+    },
+    {
+      "label": "ru_maneuver_x0.85",
+      "value": 0.85,
+      "layer": "ru_maneuver",
+      "duration": 38.25
+    },
+    {
+      "label": "ru_maneuver_x1",
+      "value": 1,
+      "layer": "ru_maneuver",
+      "duration": 45.0
+    },
+    {
+      "label": "ru_maneuver_x1.25",
+      "value": 1.25,
+      "layer": "ru_maneuver",
+      "duration": 56.25
+    },
+    {
+      "label": "ru_maneuver_x1.5",
+      "value": 1.5,
+      "layer": "ru_maneuver",
+      "duration": 67.5
+    },
+    {
+      "label": "ru_maneuver_x2",
+      "value": 2,
+      "layer": "ru_maneuver",
+      "duration": 90.0
+    },
+    {
+      "label": "ru_maneuver_x3",
+      "value": 3,
+      "layer": "ru_maneuver",
+      "duration": 135.0
+    },
+    {
+      "label": "environmental_conditions_x0.25",
+      "value": 0.25,
+      "layer": "environmental_conditions",
+      "duration": 450.0
+    },
+    {
+      "label": "environmental_conditions_x0.4",
+      "value": 0.4,
+      "layer": "environmental_conditions",
+      "duration": 720.0
+    },
+    {
+      "label": "environmental_conditions_x0.55",
+      "value": 0.55,
+      "layer": "environmental_conditions",
+      "duration": 990.0000000000001
+    },
+    {
+      "label": "environmental_conditions_x0.7",
+      "value": 0.7,
+      "layer": "environmental_conditions",
+      "duration": 1260.0
+    },
+    {
+      "label": "environmental_conditions_x0.85",
+      "value": 0.85,
+      "layer": "environmental_conditions",
+      "duration": 1530.0
+    },
+    {
+      "label": "environmental_conditions_x1",
+      "value": 1,
+      "layer": "environmental_conditions",
+      "duration": 1800.0
+    },
+    {
+      "label": "environmental_conditions_x1.25",
+      "value": 1.25,
+      "layer": "environmental_conditions",
+      "duration": 2250.0
+    },
+    {
+      "label": "environmental_conditions_x1.5",
+      "value": 1.5,
+      "layer": "environmental_conditions",
+      "duration": 2700.0
+    },
+    {
+      "label": "environmental_conditions_x2",
+      "value": 2,
+      "layer": "environmental_conditions",
+      "duration": 3600.0
+    },
+    {
+      "label": "environmental_conditions_x3",
+      "value": 3,
+      "layer": "environmental_conditions",
+      "duration": 5400.0
+    },
+    {
+      "label": "triggering_conditions_x0.25",
+      "value": 0.25,
+      "layer": "triggering_conditions",
+      "duration": 30.0
+    },
+    {
+      "label": "triggering_conditions_x0.4",
+      "value": 0.4,
+      "layer": "triggering_conditions",
+      "duration": 48.0
+    },
+    {
+      "label": "triggering_conditions_x0.55",
+      "value": 0.55,
+      "layer": "triggering_conditions",
+      "duration": 66.0
+    },
+    {
+      "label": "triggering_conditions_x0.7",
+      "value": 0.7,
+      "layer": "triggering_conditions",
+      "duration": 84.0
+    },
+    {
+      "label": "triggering_conditions_x0.85",
+      "value": 0.85,
+      "layer": "triggering_conditions",
+      "duration": 102.0
+    },
+    {
+      "label": "triggering_conditions_x1",
+      "value": 1,
+      "layer": "triggering_conditions",
+      "duration": 120.0
+    },
+    {
+      "label": "triggering_conditions_x1.25",
+      "value": 1.25,
+      "layer": "triggering_conditions",
+      "duration": 150.0
+    },
+    {
+      "label": "triggering_conditions_x1.5",
+      "value": 1.5,
+      "layer": "triggering_conditions",
+      "duration": 180.0
+    },
+    {
+      "label": "triggering_conditions_x2",
+      "value": 2,
+      "layer": "triggering_conditions",
+      "duration": 240.0
+    },
+    {
+      "label": "triggering_conditions_x3",
+      "value": 3,
+      "layer": "triggering_conditions",
+      "duration": 360.0
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

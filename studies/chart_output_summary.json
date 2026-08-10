@@ -1,0 +1,283 @@
+{
+  "complete": true,
+  "baseline_chart_count": 13,
+  "baseline_charts": [
+    "cumulative_episodes.png",
+    "episode_durations.png",
+    "inter_arrival_hist.png",
+    "window_counts.png",
+    "per_layer_stats.png",
+    "street_composition.png",
+    "unknown_occupancy_convergence.png",
+    "episode_duration_survival.png",
+    "inter_arrival_diagnostics.png",
+    "combination_size_contribution.png",
+    "rule_contributions.png",
+    "class_mass_verification.png",
+    "episode_timeline.png"
+  ],
+  "component_study_chart_count": 129,
+  "studies": [
+    {
+      "study": "selection_class_percentages_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "paired_replicate_responses.png",
+        "selection_class_percentages_study_effects.png",
+        "selection_percentage_sweeps.png"
+      ]
+    },
+    {
+      "study": "unknown_scenarios_enabled_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png",
+        "unknown_scenarios_enabled_study_effects.png"
+      ]
+    },
+    {
+      "study": "combination_counts_study",
+      "chart_count": 7,
+      "charts": [
+        "c_size_composition.png",
+        "combination_counts_study_effects.png",
+        "configured_vs_observed_combination_sizes.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "combination_size_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "combination_size_study_effects.png",
+        "configured_vs_observed_combination_sizes.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "layer_mean_duration_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "layer_mean_duration_study_effects.png",
+        "layer_response_heatmap.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "layer_variance_duration_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "layer_response_heatmap.png",
+        "layer_variance_duration_study_effects.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "duration_profile_mean_multiplier_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "duration_profile_mean_multiplier_study_effects.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "paired_replicate_responses.png",
+        "rarity_response_heatmap.png"
+      ]
+    },
+    {
+      "study": "duration_profile_coefficient_of_variation_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "duration_profile_coefficient_of_variation_study_effects.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "paired_replicate_responses.png",
+        "rarity_response_heatmap.png"
+      ]
+    },
+    {
+      "study": "duration_profile_element_spread_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "duration_profile_element_spread_study_effects.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "allow_self_transition_study",
+      "chart_count": 6,
+      "charts": [
+        "allow_self_transition_study_effects.png",
+        "c_size_composition.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "concentration_simulation_study",
+      "chart_count": 7,
+      "charts": [
+        "c_size_composition.png",
+        "concentration_effects.png",
+        "concentration_scale_study_effects.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "rescale_transition_class_masses_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png",
+        "rescale_transition_class_masses_study_effects.png"
+      ]
+    },
+    {
+      "study": "element_class_percentages_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "element_class_percentages_study_effects.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "layer_element_count_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "layer_element_count_study_effects.png",
+        "layer_response_heatmap.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "conditional_transition_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "conditional_transition_study_effects.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "target_total_hours_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png",
+        "target_total_hours_study_effects.png"
+      ]
+    },
+    {
+      "study": "average_speed_study",
+      "chart_count": 6,
+      "charts": [
+        "average_speed_study_effects.png",
+        "c_size_composition.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "window_mileage_study",
+      "chart_count": 7,
+      "charts": [
+        "c_size_composition.png",
+        "mechanism_relationships.png",
+        "mileage_window_study_effects.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png",
+        "window_mileage_effects.png"
+      ]
+    },
+    {
+      "study": "minimum_duration_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "mechanism_relationships.png",
+        "minimum_duration_study_effects.png",
+        "normalized_response_heatmap.png",
+        "numeric_response_curves.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "duration_distribution_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "duration_distribution_effects.png",
+        "duration_distribution_study_effects.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "paired_replicate_responses.png"
+      ]
+    },
+    {
+      "study": "seed_variability_study",
+      "chart_count": 6,
+      "charts": [
+        "c_size_composition.png",
+        "mechanism_relationships.png",
+        "normalized_response_heatmap.png",
+        "paired_replicate_responses.png",
+        "seed_caterpillar.png",
+        "seed_variability_study_effects.png"
+      ]
+    }
+  ],
+  "sensitivity_charts": [
+    "sensitivity_tornado.png",
+    "sensitivity_metric_heatmap.png",
+    "effect_noise_scatter.png"
+  ],
+  "failures": []
+}

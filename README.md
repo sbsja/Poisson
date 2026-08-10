@@ -28,10 +28,14 @@ selection_class_percentages:
 each class. Because counts must be integers, the simulator uses the
 largest-remainder method.
 
-`selection_class_percentages` controls the exact total transition-probability
-mass of each class. The simulator randomly distributes that mass among the
-elements inside the class, but the class totals remain exactly as configured.
-There are no intermediate class weights and no solved unknown probability.
+`selection_class_percentages` controls the initial class masses and the target
+class masses for transition-vector generation. With the default
+`rescale_transition_class_masses: true`, the simulator randomly distributes
+each mass among the elements inside its class and preserves the configured
+class totals exactly. With the setting `false`, it keeps the raw seeded
+Dirichlet vector, so realized transition class masses vary around the configured
+targets. There are no intermediate class weights and no solved unknown
+probability.
 
 ## Generated layers
 
@@ -92,7 +96,7 @@ A completed run writes:
 - configured selection-class percentages;
 - exact integer counts and achieved element proportions per layer;
 - the total element composition across all six layers;
-- exact permanent transition mass by class for every layer.
+- realized permanent transition mass by class for every layer.
 
 `--no-plots` suppresses both plot folders.
 

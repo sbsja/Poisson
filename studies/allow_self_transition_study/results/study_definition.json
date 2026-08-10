@@ -1,0 +1,20 @@
+{
+  "study": "allow_self_transition_study",
+  "description": "Boolean structural study of forced element turnover at layer expiry.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "self_transitions_off",
+      "value": false
+    },
+    {
+      "label": "self_transitions_on",
+      "value": true
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

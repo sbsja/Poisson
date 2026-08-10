@@ -1,0 +1,162 @@
+{
+  "study": "duration_profile_coefficient_of_variation_study",
+  "description": "Tests duration-tail and clustering sensitivity at fixed element means.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "common_0.1",
+      "value": 0.1,
+      "rarity": "common"
+    },
+    {
+      "label": "common_0.2",
+      "value": 0.2,
+      "rarity": "common"
+    },
+    {
+      "label": "common_0.35",
+      "value": 0.35,
+      "rarity": "common"
+    },
+    {
+      "label": "common_0.5",
+      "value": 0.5,
+      "rarity": "common"
+    },
+    {
+      "label": "common_0.65",
+      "value": 0.65,
+      "rarity": "common"
+    },
+    {
+      "label": "common_0.8",
+      "value": 0.8,
+      "rarity": "common"
+    },
+    {
+      "label": "common_1",
+      "value": 1,
+      "rarity": "common"
+    },
+    {
+      "label": "common_1.25",
+      "value": 1.25,
+      "rarity": "common"
+    },
+    {
+      "label": "common_1.5",
+      "value": 1.5,
+      "rarity": "common"
+    },
+    {
+      "label": "common_2",
+      "value": 2,
+      "rarity": "common"
+    },
+    {
+      "label": "rare_0.1",
+      "value": 0.1,
+      "rarity": "rare"
+    },
+    {
+      "label": "rare_0.2",
+      "value": 0.2,
+      "rarity": "rare"
+    },
+    {
+      "label": "rare_0.35",
+      "value": 0.35,
+      "rarity": "rare"
+    },
+    {
+      "label": "rare_0.5",
+      "value": 0.5,
+      "rarity": "rare"
+    },
+    {
+      "label": "rare_0.65",
+      "value": 0.65,
+      "rarity": "rare"
+    },
+    {
+      "label": "rare_0.8",
+      "value": 0.8,
+      "rarity": "rare"
+    },
+    {
+      "label": "rare_1",
+      "value": 1,
+      "rarity": "rare"
+    },
+    {
+      "label": "rare_1.25",
+      "value": 1.25,
+      "rarity": "rare"
+    },
+    {
+      "label": "rare_1.5",
+      "value": 1.5,
+      "rarity": "rare"
+    },
+    {
+      "label": "rare_2",
+      "value": 2,
+      "rarity": "rare"
+    },
+    {
+      "label": "unknown_0.1",
+      "value": 0.1,
+      "rarity": "unknown"
+    },
+    {
+      "label": "unknown_0.2",
+      "value": 0.2,
+      "rarity": "unknown"
+    },
+    {
+      "label": "unknown_0.35",
+      "value": 0.35,
+      "rarity": "unknown"
+    },
+    {
+      "label": "unknown_0.5",
+      "value": 0.5,
+      "rarity": "unknown"
+    },
+    {
+      "label": "unknown_0.65",
+      "value": 0.65,
+      "rarity": "unknown"
+    },
+    {
+      "label": "unknown_0.8",
+      "value": 0.8,
+      "rarity": "unknown"
+    },
+    {
+      "label": "unknown_1",
+      "value": 1,
+      "rarity": "unknown"
+    },
+    {
+      "label": "unknown_1.25",
+      "value": 1.25,
+      "rarity": "unknown"
+    },
+    {
+      "label": "unknown_1.5",
+      "value": 1.5,
+      "rarity": "unknown"
+    },
+    {
+      "label": "unknown_2",
+      "value": 2,
+      "rarity": "unknown"
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

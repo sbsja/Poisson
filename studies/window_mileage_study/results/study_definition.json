@@ -1,0 +1,52 @@
+{
+  "study": "mileage_window_study",
+  "description": "Measures how reporting-window scale changes count dispersion, not state history.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "100_miles",
+      "value": 100
+    },
+    {
+      "label": "250_miles",
+      "value": 250
+    },
+    {
+      "label": "500_miles",
+      "value": 500
+    },
+    {
+      "label": "1000_miles",
+      "value": 1000
+    },
+    {
+      "label": "2500_miles",
+      "value": 2500
+    },
+    {
+      "label": "5000_miles",
+      "value": 5000
+    },
+    {
+      "label": "10000_miles",
+      "value": 10000
+    },
+    {
+      "label": "25000_miles",
+      "value": 25000
+    },
+    {
+      "label": "50000_miles",
+      "value": 50000
+    },
+    {
+      "label": "100000_miles",
+      "value": 100000
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 2000.0,
+  "quick": false
+}

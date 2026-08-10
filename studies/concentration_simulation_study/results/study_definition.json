@@ -1,0 +1,52 @@
+{
+  "study": "concentration_scale_study",
+  "description": "Measures within-class probability concentration and seed sensitivity under the v6 direct-class-mass model.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "c_100",
+      "value": 100
+    },
+    {
+      "label": "c_300",
+      "value": 300
+    },
+    {
+      "label": "c_1000",
+      "value": 1000
+    },
+    {
+      "label": "c_3000",
+      "value": 3000
+    },
+    {
+      "label": "c_10000",
+      "value": 10000
+    },
+    {
+      "label": "c_20000",
+      "value": 20000
+    },
+    {
+      "label": "c_50000",
+      "value": 50000
+    },
+    {
+      "label": "c_100000",
+      "value": 100000
+    },
+    {
+      "label": "c_300000",
+      "value": 300000
+    },
+    {
+      "label": "c_1000000",
+      "value": 1000000
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

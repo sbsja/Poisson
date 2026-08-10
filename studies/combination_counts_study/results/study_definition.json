@@ -1,0 +1,112 @@
+{
+  "study": "combination_counts_study",
+  "description": "Measures how total selected-rule coverage affects episode frequency.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "scale_0",
+      "value": 0,
+      "counts": {
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0
+      }
+    },
+    {
+      "label": "scale_0.1",
+      "value": 0.1,
+      "counts": {
+        "3": 4,
+        "4": 3,
+        "5": 2,
+        "6": 1
+      }
+    },
+    {
+      "label": "scale_0.25",
+      "value": 0.25,
+      "counts": {
+        "3": 10,
+        "4": 8,
+        "5": 5,
+        "6": 2
+      }
+    },
+    {
+      "label": "scale_0.5",
+      "value": 0.5,
+      "counts": {
+        "3": 20,
+        "4": 15,
+        "5": 10,
+        "6": 5
+      }
+    },
+    {
+      "label": "scale_0.75",
+      "value": 0.75,
+      "counts": {
+        "3": 30,
+        "4": 22,
+        "5": 15,
+        "6": 8
+      }
+    },
+    {
+      "label": "scale_1",
+      "value": 1,
+      "counts": {
+        "3": 40,
+        "4": 30,
+        "5": 20,
+        "6": 10
+      }
+    },
+    {
+      "label": "scale_1.5",
+      "value": 1.5,
+      "counts": {
+        "3": 60,
+        "4": 45,
+        "5": 30,
+        "6": 15
+      }
+    },
+    {
+      "label": "scale_2",
+      "value": 2,
+      "counts": {
+        "3": 80,
+        "4": 60,
+        "5": 40,
+        "6": 20
+      }
+    },
+    {
+      "label": "scale_3",
+      "value": 3,
+      "counts": {
+        "3": 120,
+        "4": 90,
+        "5": 60,
+        "6": 30
+      }
+    },
+    {
+      "label": "scale_5",
+      "value": 5,
+      "counts": {
+        "3": 200,
+        "4": 150,
+        "5": 100,
+        "6": 50
+      }
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

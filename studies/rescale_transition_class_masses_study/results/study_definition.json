@@ -1,0 +1,20 @@
+{
+  "study": "rescale_transition_class_masses_study",
+  "description": "Boolean study of exact versus seed-varying realized class masses.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "raw_dirichlet",
+      "value": false
+    },
+    {
+      "label": "exact_class_masses",
+      "value": true
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

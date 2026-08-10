@@ -1,46 +1,48 @@
-# Duration-distribution study for `ego_008`
+# Duration Distribution Study
 
-## Outcome
+Compares ten positive sojourn families. Nine alternatives match every element's configured mean and variance to the production Gamma law.
 
-Changing the duration distribution mainly changes the **tail of episode duration**, not how often the element is selected. All four candidates have the same theoretical 30-second mean and 400 s² variance, so their average occupancy remains close; their rare long-duration behavior is different.
+## Design
 
-Across candidates, mean target-episode counts differed by only 0.8%, while mean target occupancy differed by 0.8%. The largest average 99th-percentile episode duration came from **Lognormal** at 103.2 seconds, versus 95.5 seconds for the current Gamma model.
+- Levels: 10
+- Paired independent seed sets per level: 3
+- All seven simulator seeds are shifted together between replicates.
+- All levels within a replicate use the same seed set.
+- Default screening duration: 1000 simulated hours.
+- Total wall time: 73.2 seconds.
 
-**Recommendation:** retain Gamma as the neutral production default unless measured maneuver-duration data supports another family. Use Lognormal or Inverse Gaussian as tail-stress alternatives when the safety question is sensitivity to unusually long maneuvers; use Weibull when completion likelihood is expected to change with elapsed time.
+## Aggregate results
 
-## Aggregate simulation results
+| level | episodes/hour | unknown-time fraction | duration p90 (s) | dispersion | C3/C4/C5/C6 |
+|---|---:|---:|---:|---:|---:|
+| gamma | 0.02 | 0.0001333 | 47.6747 | 0.5402 | 19.3333/0.6667/0/0 |
+| weibull | 0.026 | 0.0001392 | 41.5 | 1 | 25/1/0/0 |
+| lognormal | 0.0213 | 0.0001083 | 27.7424 | 0.5383 | 21/0.3333/0/0 |
+| inverse_gaussian | 0.0223 | 0.0001352 | 41.1681 | 1.8723 | 21.3333/1/0/0 |
+| shifted_exponential | 0.027 | 0.000148 | 33.182 | 1.9678 | 26.6667/0.3333/0/0 |
+| inverse_gamma | 0.0217 | 0.0001222 | 42.1544 | 1.0842 | 20.6667/1/0/0 |
+| symmetric_two_point | 0.0277 | 0.0001645 | 43.0357 | 1.5635 | 27/0.6667/0/0 |
+| three_point | 0.0247 | 0.0001259 | 37.5912 | 1.3906 | 24.6667/0/0/0 |
+| pareto | 0.024 | 0.000144 | 46.7253 | 1.2705 | 22.6667/0.6667/0.6667/0 |
+| scaled_beta | 0.0297 | 0.0001441 | 40.8849 | 2.1862 | 28.3333/1.3333/0/0 |
 
-Each cell is the mean across three full runs; `±` is sample standard deviation.
+## Interpretation note
 
-| distribution | target episodes | episode mean | episode p90 | episode p99 | target occupancy | all unknown episodes | union unknown time |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| Gamma (current) | 20,901 ± 62 | 30.18 ± 0.17 s | 57.1 ± 0.3 s | 95.5 ± 0.6 s | 0.438% ± 0.004% | 75,932 ± 985 | 2.053% ± 0.009% |
-| Weibull | 21,023 ± 73 | 30.20 ± 0.18 s | 57.8 ± 0.3 s | 91.5 ± 0.3 s | 0.441% ± 0.001% | 76,084 ± 390 | 2.049% ± 0.030% |
-| Lognormal | 20,934 ± 103 | 30.18 ± 0.18 s | 54.7 ± 0.4 s | 103.2 ± 1.0 s | 0.439% ± 0.005% | 75,706 ± 156 | 2.036% ± 0.004% |
-| Inverse Gaussian | 21,060 ± 21 | 30.19 ± 0.17 s | 55.8 ± 0.3 s | 103.1 ± 0.5 s | 0.442% ± 0.003% | 75,909 ± 422 | 2.035% ± 0.019% |
-
-## Why these distributions
-
-- **Gamma (current):** current positive waiting-time model; moderate right tail.
-- **Weibull:** time-to-completion model with an elapsed-time-dependent hazard.
-- **Lognormal:** multiplicative delays; allows occasional long maneuvers.
-- **Inverse Gaussian:** first-passage/completion-time model with a strong right tail.
-
-## Method
-
-- Target: `ego_008`, the sole unknown ego-maneuver element in the current seeded configuration.
-- 12 end-to-end simulations: four distributions × three duration seeds.
-- Every run used the full configured 2,000,000-mile target.
-- Only `ego_008` used the candidate distribution. Every other element retained the production Gamma model.
-- Candidate durations were generated from common uniform quantiles using a dedicated target-element seed. This prevents target draws from consuming the shared duration RNG used by other elements.
-- All candidates use theoretical mean 30 seconds and variance 400 s², followed by the simulator's existing one-second lower clamp.
-- The production simulator and root configuration were not modified; the adapter exists only in this study runner.
-- Total study wall time: 9.5 minutes.
+These are screening simulations, not causal claims from a single run. Compare the level-to-level change with the replicate standard deviations in `summary.csv`; confirm influential settings with longer runs and more seeds.
 
 ## Files
 
+- `baseline_config.json`: immutable source configuration snapshot.
+- `study_definition.json`: levels and execution settings.
 - `runs.csv`: one row per simulation.
-- `summary.csv`: distribution-level means, standard deviations, minima, and maxima.
-- `summary.json`: study manifest, fitted parameters, per-run results, and aggregate results.
-- `runs/.../stats.json`: compact output for each individual run.
-- `duration_distribution_effects.png`: distribution shapes and outcome comparison.
+- `summary.csv` and `summary.json`: aggregate and machine-readable results.
+- `runs/<level>/replicate_<n>/config.json`: exact configuration for each run.
+- `runs/<level>/replicate_<n>/stats.json`: compact per-run metrics.
+- `duration_distribution_study_effects.png`: principal outcomes by level.
+
+## Additional study-specific charts
+
+- `paired_replicate_responses.png`
+- `c_size_composition.png`
+- `mechanism_relationships.png`
+- `normalized_response_heatmap.png`

@@ -1,0 +1,102 @@
+{
+  "study": "element_class_percentages_study",
+  "description": "Tests dilution and catalogue-composition effects at fixed class selection mass.",
+  "simulator_profile": "generated_elements_v6",
+  "source_config": "config.yaml",
+  "levels": [
+    {
+      "label": "rare_elements_6pct",
+      "value": 6,
+      "percentages": {
+        "common": 84.0,
+        "rare": 6.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_elements_8pct",
+      "value": 8,
+      "percentages": {
+        "common": 82.0,
+        "rare": 8.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_elements_10pct",
+      "value": 10,
+      "percentages": {
+        "common": 80.0,
+        "rare": 10.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_elements_15pct",
+      "value": 15,
+      "percentages": {
+        "common": 75.0,
+        "rare": 15.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_elements_20pct",
+      "value": 20,
+      "percentages": {
+        "common": 70.0,
+        "rare": 20.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_elements_25pct",
+      "value": 25,
+      "percentages": {
+        "common": 65.0,
+        "rare": 25.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_elements_30pct",
+      "value": 30,
+      "percentages": {
+        "common": 60.0,
+        "rare": 30.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_elements_35pct",
+      "value": 35,
+      "percentages": {
+        "common": 55.0,
+        "rare": 35.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_elements_40pct",
+      "value": 40,
+      "percentages": {
+        "common": 50.0,
+        "rare": 40.0,
+        "unknown": 10.0
+      }
+    },
+    {
+      "label": "rare_elements_50pct",
+      "value": 50,
+      "percentages": {
+        "common": 40.0,
+        "rare": 50.0,
+        "unknown": 10.0
+      }
+    }
+  ],
+  "replicates": 3,
+  "seed_step": 1000003,
+  "screening_hours": 1000.0,
+  "quick": false
+}

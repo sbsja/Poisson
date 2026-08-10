@@ -1,0 +1,104 @@
+{
+  "profile_name": "generated_elements_v6",
+  "profile_kind": "generated_elements",
+  "seeds": {
+    "element_count": 12345,
+    "rarity_assignment": 23456,
+    "transition_matrix": 34567,
+    "duration": 45678,
+    "initial_state": 56789,
+    "transition_sampling": 67890,
+    "combination_selection": 78901
+  },
+  "target_total_hours": 1000.0,
+  "target_total_miles": null,
+  "average_speed_mph": 50.0,
+  "min_duration_seconds": 1.0,
+  "mileage_window_miles": 10000,
+  "unknown_scenarios": {
+    "enabled": true,
+    "combination_counts": {
+      "3": 40,
+      "4": 30,
+      "5": 20,
+      "6": 10
+    },
+    "require_triggering_condition": true,
+    "exact_rare_set": true
+  },
+  "element_class_percentages": {
+    "common": 70.0,
+    "rare": 20.0,
+    "unknown": 10.0
+  },
+  "selection_class_percentages": {
+    "common": 70.0,
+    "rare": 20.0,
+    "unknown": 10.0
+  },
+  "duration_profiles": {
+    "common": {
+      "mean_multiplier": 1.5,
+      "coefficient_of_variation": 0.45,
+      "element_spread": 0.1
+    },
+    "rare": {
+      "mean_multiplier": 0.75,
+      "coefficient_of_variation": 0.6,
+      "element_spread": 0.1
+    },
+    "unknown": {
+      "mean_multiplier": 0.25,
+      "coefficient_of_variation": 0.8,
+      "element_spread": 0.1
+    }
+  },
+  "transition_model": {
+    "mode": "independent",
+    "conditional": {
+      "apply_to_initial_state": true,
+      "rules": []
+    }
+  },
+  "concentration_scale": 20000.0,
+  "rescale_transition_class_masses": true,
+  "allow_self_transition": true,
+  "layers": {
+    "street": {
+      "mean_duration": 300.0,
+      "variance_duration": 20000.0,
+      "element_count_min": 12,
+      "element_count_max": 12
+    },
+    "temporal_modifications": {
+      "mean_duration": 600.0,
+      "variance_duration": 90000.0,
+      "element_count_min": 40,
+      "element_count_max": 45
+    },
+    "ego_maneuver": {
+      "mean_duration": 30.0,
+      "variance_duration": 400.0,
+      "element_count_min": 20,
+      "element_count_max": 24
+    },
+    "ru_maneuver": {
+      "mean_duration": 45.0,
+      "variance_duration": 900.0,
+      "element_count_min": 20,
+      "element_count_max": 24
+    },
+    "environmental_conditions": {
+      "mean_duration": 1800.0,
+      "variance_duration": 500000.0,
+      "element_count_min": 22,
+      "element_count_max": 22
+    },
+    "triggering_conditions": {
+      "mean_duration": 360.0,
+      "variance_duration": 8000.0,
+      "element_count_min": 80,
+      "element_count_max": 90
+    }
+  }
+}
