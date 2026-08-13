@@ -1,0 +1,1343 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/72fq84",
+    "id": "72fq84",
+    "slide": 9,
+    "layoutId": "2f85b398-97e0-42af-952f-7faaec5e0b0c",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "6f4004be-b641-4324-a8dd-603cfdd2200a",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "2f85b398-97e0-42af-952f-7faaec5e0b0c",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "6f4004be-b641-4324-a8dd-603cfdd2200a",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "6f4004be-b641-4324-a8dd-603cfdd2200a",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ep4vuh0n",
+      "id": "1",
+      "name": "Google-Shape-532-p58-2",
+      "bbox": [
+        1184.18,
+        659.24,
+        54.48,
+        25.33
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.0"
+      },
+      "geometry": "rect",
+      "text": "9",
+      "textPreview": "9",
+      "resolvedFontSize": 13.33,
+      "resolvedTextStyle": {
+        "anchor": 3,
+        "fontSize": 13.33,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "right",
+        "verticalAlignment": "bottom",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "9"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "9",
+          "resolvedTextStyle": {
+            "anchor": 3,
+            "fontSize": 13.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "right",
+            "verticalAlignment": "bottom",
+            "wrap": "square",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "9",
+              "anchor": 3,
+              "fontSize": 13.33,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "right",
+              "verticalAlignment": "bottom",
+              "wrap": "square",
+              "autoFit": "none",
+              "insets": {
+                "top": 0,
+                "right": 0,
+                "bottom": 0,
+                "left": 0
+              }
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/1sfepcje",
+      "id": "2",
+      "name": "Google-Shape-533-p58-3",
+      "bbox": [
+        41.33,
+        36.17,
+        1197.33,
+        67.64
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.1"
+      },
+      "geometry": "rect",
+      "text": "“Unknown” means two different things",
+      "textPreview": "“Unknown” means two different things",
+      "resolvedFontSize": 38.67,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 38.67,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "square",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "“Unknown” means two different things"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "“Unknown” means two different things",
+          "lineSpacingPercent": 90000,
+          "spaceAfter": 0,
+          "resolvedTextStyle": {
+            "anchor": 1,
+            "fontSize": 38.67,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "verticalAlignment": "top",
+            "wrap": "square",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "“Unknown” means two different things",
+              "fontSize": 48,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0r6dw7it",
+      "id": "3",
+      "name": "Rounded-Rectangle-1-4",
+      "bbox": [
+        41.68,
+        350.56,
+        580.99,
+        138.67
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.2"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#F2F2F2"
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/rmdcj21w",
+      "id": "4",
+      "name": "Content-Placeholder-10-5",
+      "bbox": [
+        72.89,
+        376.69,
+        523.56,
+        92.16
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.3"
+      },
+      "geometry": "rect",
+      "text": "Unknown-rarity element",
+      "textPreview": "Unknown-rarity element",
+      "resolvedFontSize": 32,
+      "resolvedTextStyle": {
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Unknown-rarity element"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Unknown-rarity element",
+          "lineSpacingPercent": 110000,
+          "spaceAfter": 600,
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Unknown-rarity element",
+              "fontSize": 27,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ql4vqx0b",
+      "id": "5",
+      "name": "Content-Placeholder-15-6",
+      "bbox": [
+        72.89,
+        506.94,
+        549.78,
+        102.67
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.4"
+      },
+      "geometry": "rect",
+      "text": "• One generated element class\n• Has its own probability and Gamma law\n• Does not open an episode",
+      "textPreview": "• One generated element class | • Has its own probability and Gamma law | • Does not open an episode",
+      "resolvedFontSize": 21.33,
+      "resolvedTextStyle": {
+        "fontSize": 21.33,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "• One generated element class"
+          },
+          {
+            "index": 2,
+            "text": "• Has its own probability and Gamma law"
+          },
+          {
+            "index": 3,
+            "text": "• Does not open an episode"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "• One generated element class",
+          "lineSpacingPercent": 110000,
+          "spaceAfter": 600,
+          "resolvedTextStyle": {
+            "fontSize": 21.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• One generated element class",
+              "fontSize": 19,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "• Has its own probability and Gamma law",
+          "lineSpacingPercent": 110000,
+          "spaceAfter": 600,
+          "resolvedTextStyle": {
+            "fontSize": 21.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• Has its own probability and Gamma law",
+              "fontSize": 19,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "• Does not open an episode",
+          "lineSpacingPercent": 110000,
+          "spaceAfter": 600,
+          "resolvedTextStyle": {
+            "fontSize": 21.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• Does not open an episode",
+              "fontSize": 19,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/dovelcj2",
+      "id": "6",
+      "name": "Rounded-Rectangle-7-7",
+      "bbox": [
+        657.3,
+        350.56,
+        580.99,
+        138.67
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.5"
+      },
+      "geometry": "roundRect",
+      "fillColor": "#F2F2F2"
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cnmds7ih",
+      "id": "7",
+      "name": "Content-Placeholder-10-8",
+      "bbox": [
+        688.51,
+        376.69,
+        523.56,
+        92.16
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.6"
+      },
+      "geometry": "rect",
+      "text": "Unknown scenario episode",
+      "textPreview": "Unknown scenario episode",
+      "resolvedFontSize": 32,
+      "resolvedTextStyle": {
+        "fontSize": 32,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Unknown scenario episode"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Unknown scenario episode",
+          "lineSpacingPercent": 110000,
+          "spaceAfter": 600,
+          "resolvedTextStyle": {
+            "fontSize": 32,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Unknown scenario episode",
+              "fontSize": 27,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/vixwvmhg",
+      "id": "8",
+      "name": "Content-Placeholder-15-9",
+      "bbox": [
+        688.51,
+        506.94,
+        549.78,
+        102.67
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.7"
+      },
+      "geometry": "rect",
+      "text": "• One selected C3–C6 rare rule\n• Starts when the full joint state matches\n• Ends when that exact match breaks",
+      "textPreview": "• One selected C3–C6 rare rule | • Starts when the full joint state matches | • Ends when that exact match breaks",
+      "resolvedFontSize": 21.33,
+      "resolvedTextStyle": {
+        "fontSize": 21.33,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "• One selected C3–C6 rare rule"
+          },
+          {
+            "index": 2,
+            "text": "• Starts when the full joint state matches"
+          },
+          {
+            "index": 3,
+            "text": "• Ends when that exact match breaks"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "• One selected C3–C6 rare rule",
+          "lineSpacingPercent": 110000,
+          "spaceAfter": 600,
+          "resolvedTextStyle": {
+            "fontSize": 21.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• One selected C3–C6 rare rule",
+              "fontSize": 19,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "• Starts when the full joint state matches",
+          "lineSpacingPercent": 110000,
+          "spaceAfter": 600,
+          "resolvedTextStyle": {
+            "fontSize": 21.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• Starts when the full joint state matches",
+              "fontSize": 19,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "• Ends when that exact match breaks",
+          "lineSpacingPercent": 110000,
+          "spaceAfter": 600,
+          "resolvedTextStyle": {
+            "fontSize": 21.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• Ends when that exact match breaks",
+              "fontSize": 19,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ahov210v",
+      "id": "9",
+      "name": "Content-Placeholder-15-10",
+      "bbox": [
+        42.09,
+        121.52,
+        1197.33,
+        171.05
+      ],
+      "composeSource": {
+        "run": 1,
+        "path": "0.8"
+      },
+      "geometry": "rect",
+      "text": "THE DISTINCTION PREVENTS MISREADING THE RESULTS\nUnknown-rarity elements participate in ordinary selection and duration statistics. Only exact rare combinations create reportable episodes.\n",
+      "textPreview": "THE DISTINCTION PREVENTS MISREADING THE RESULTS | Unknown-rarity elements participate in ordinary selection and duration statistics. Only...",
+      "resolvedFontSize": 21.33,
+      "resolvedTextStyle": {
+        "fontSize": 21.33,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "autoFit": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 3,
+        "lines": [
+          {
+            "index": 1,
+            "text": "THE DISTINCTION PREVENTS MISREADING THE RESULTS"
+          },
+          {
+            "index": 2,
+            "text": "Unknown-rarity elements participate in ordinary selection and duration statistics. Only exact rare combinations create reportable episodes."
+          },
+          {
+            "index": 3,
+            "text": ""
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "THE DISTINCTION PREVENTS MISREADING THE RESULTS",
+          "lineSpacingPercent": 110000,
+          "spaceAfter": 350,
+          "resolvedTextStyle": {
+            "fontSize": 21.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "THE DISTINCTION PREVENTS MISREADING THE RESULTS",
+              "fontSize": 20,
+              "typeface": "Helvetica Neue",
+              "color": "#3D8DFF",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 2,
+          "text": "Unknown-rarity elements participate in ordinary selection and duration statistics. Only exact rare combinations create reportable episodes.",
+          "lineSpacingPercent": 110000,
+          "spaceAfter": 0,
+          "resolvedTextStyle": {
+            "fontSize": 21.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "left",
+            "autoFit": "none",
+            "insets": {
+              "top": 0,
+              "right": 0,
+              "bottom": 0,
+              "left": 0
+            }
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Unknown-rarity elements participate in ordinary selection and duration statistics. Only exact rare combinations create reportable episodes.",
+              "fontSize": 20,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": [
+    {
+      "index": 1,
+      "frame": {
+        "left": 0,
+        "top": 0,
+        "width": 1280,
+        "height": 720
+      },
+      "baseUnit": 1,
+      "root": {
+        "path": "0",
+        "kind": "layers",
+        "name": "codex-grid-layout-library#slide-11",
+        "requestedSize": {
+          "width": {
+            "mode": "fill",
+            "value": 1
+          },
+          "height": {
+            "mode": "fill",
+            "value": 1
+          }
+        },
+        "intrinsicSize": {
+          "width": 1239.42,
+          "height": 684.57
+        },
+        "frame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "children": [
+          {
+            "path": "0.0",
+            "kind": "text",
+            "name": "Google-Shape-532-p58-2",
+            "position": {
+              "left": 1184.18,
+              "top": 659.24
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 54.48
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 25.33
+              }
+            },
+            "intrinsicSize": {
+              "width": 54.48,
+              "height": 25.33
+            },
+            "frame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            },
+            "snappedFrame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            },
+            "children": [],
+            "text": "9",
+            "transform": "none",
+            "element": {
+              "aid": "sh/ep4vuh0n",
+              "id": "1",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.1",
+            "kind": "text",
+            "name": "Google-Shape-533-p58-3",
+            "position": {
+              "left": 41.33,
+              "top": 36.17
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 1197.33
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 67.64
+              }
+            },
+            "intrinsicSize": {
+              "width": 1197.33,
+              "height": 67.64
+            },
+            "frame": {
+              "left": 41.33,
+              "top": 36.17,
+              "width": 1197.33,
+              "height": 67.64
+            },
+            "snappedFrame": {
+              "left": 41.33,
+              "top": 36.17,
+              "width": 1197.33,
+              "height": 67.64
+            },
+            "children": [],
+            "text": "“Unknown” means two different things",
+            "transform": "none",
+            "element": {
+              "aid": "sh/1sfepcje",
+              "id": "2",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.2",
+            "kind": "shape",
+            "name": "Rounded-Rectangle-1-4",
+            "position": {
+              "left": 41.68,
+              "top": 350.56
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 580.99
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 138.67
+              }
+            },
+            "intrinsicSize": {
+              "width": 580.99,
+              "height": 138.67
+            },
+            "frame": {
+              "left": 41.68,
+              "top": 350.56,
+              "width": 580.99,
+              "height": 138.67
+            },
+            "snappedFrame": {
+              "left": 41.68,
+              "top": 350.56,
+              "width": 580.99,
+              "height": 138.67
+            },
+            "children": [],
+            "geometry": "roundRect",
+            "element": {
+              "aid": "sh/0r6dw7it",
+              "id": "3",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.3",
+            "kind": "text",
+            "name": "Content-Placeholder-10-5",
+            "position": {
+              "left": 72.89,
+              "top": 376.69
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 523.56
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 92.16
+              }
+            },
+            "intrinsicSize": {
+              "width": 523.56,
+              "height": 92.16
+            },
+            "frame": {
+              "left": 72.89,
+              "top": 376.69,
+              "width": 523.56,
+              "height": 92.16
+            },
+            "snappedFrame": {
+              "left": 72.89,
+              "top": 376.69,
+              "width": 523.56,
+              "height": 92.16
+            },
+            "children": [],
+            "text": "Unknown-rarity element",
+            "transform": "none",
+            "element": {
+              "aid": "sh/rmdcj21w",
+              "id": "4",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.4",
+            "kind": "text",
+            "name": "Content-Placeholder-15-6",
+            "position": {
+              "left": 72.89,
+              "top": 506.94
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 549.78
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 102.67
+              }
+            },
+            "intrinsicSize": {
+              "width": 549.78,
+              "height": 102.67
+            },
+            "frame": {
+              "left": 72.89,
+              "top": 506.94,
+              "width": 549.78,
+              "height": 102.67
+            },
+            "snappedFrame": {
+              "left": 72.89,
+              "top": 506.94,
+              "width": 549.78,
+              "height": 102.67
+            },
+            "children": [],
+            "text": "• One generated element class\n• Has its own probability and Gamma law\n• Does not open an episode",
+            "transform": "none",
+            "element": {
+              "aid": "sh/ql4vqx0b",
+              "id": "5",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.5",
+            "kind": "shape",
+            "name": "Rounded-Rectangle-7-7",
+            "position": {
+              "left": 657.3,
+              "top": 350.56
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 580.99
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 138.67
+              }
+            },
+            "intrinsicSize": {
+              "width": 580.99,
+              "height": 138.67
+            },
+            "frame": {
+              "left": 657.3,
+              "top": 350.56,
+              "width": 580.99,
+              "height": 138.67
+            },
+            "snappedFrame": {
+              "left": 657.3,
+              "top": 350.56,
+              "width": 580.99,
+              "height": 138.67
+            },
+            "children": [],
+            "geometry": "roundRect",
+            "element": {
+              "aid": "sh/dovelcj2",
+              "id": "6",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.6",
+            "kind": "text",
+            "name": "Content-Placeholder-10-8",
+            "position": {
+              "left": 688.51,
+              "top": 376.69
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 523.56
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 92.16
+              }
+            },
+            "intrinsicSize": {
+              "width": 523.56,
+              "height": 92.16
+            },
+            "frame": {
+              "left": 688.51,
+              "top": 376.69,
+              "width": 523.56,
+              "height": 92.16
+            },
+            "snappedFrame": {
+              "left": 688.51,
+              "top": 376.69,
+              "width": 523.56,
+              "height": 92.16
+            },
+            "children": [],
+            "text": "Unknown scenario episode",
+            "transform": "none",
+            "element": {
+              "aid": "sh/cnmds7ih",
+              "id": "7",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.7",
+            "kind": "text",
+            "name": "Content-Placeholder-15-9",
+            "position": {
+              "left": 688.51,
+              "top": 506.94
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 549.78
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 102.67
+              }
+            },
+            "intrinsicSize": {
+              "width": 549.78,
+              "height": 102.67
+            },
+            "frame": {
+              "left": 688.51,
+              "top": 506.94,
+              "width": 549.78,
+              "height": 102.67
+            },
+            "snappedFrame": {
+              "left": 688.51,
+              "top": 506.94,
+              "width": 549.78,
+              "height": 102.67
+            },
+            "children": [],
+            "text": "• One selected C3–C6 rare rule\n• Starts when the full joint state matches\n• Ends when that exact match breaks",
+            "transform": "none",
+            "element": {
+              "aid": "sh/vixwvmhg",
+              "id": "8",
+              "kind": "shape"
+            }
+          },
+          {
+            "path": "0.8",
+            "kind": "text",
+            "name": "Content-Placeholder-15-10",
+            "position": {
+              "left": 42.09,
+              "top": 121.52
+            },
+            "requestedSize": {
+              "width": {
+                "mode": "fixed",
+                "value": 1197.33
+              },
+              "height": {
+                "mode": "fixed",
+                "value": 171.05
+              }
+            },
+            "intrinsicSize": {
+              "width": 1197.33,
+              "height": 171.05
+            },
+            "frame": {
+              "left": 42.09,
+              "top": 121.52,
+              "width": 1197.33,
+              "height": 171.05
+            },
+            "snappedFrame": {
+              "left": 42.09,
+              "top": 121.52,
+              "width": 1197.33,
+              "height": 171.05
+            },
+            "children": [],
+            "text": "THE DISTINCTION PREVENTS MISREADING THE RESULTS\nUnknown-rarity elements participate in ordinary selection and duration statistics. Only exact rare combinations create reportable episodes.\n",
+            "transform": "none",
+            "element": {
+              "aid": "sh/ahov210v",
+              "id": "9",
+              "kind": "shape"
+            }
+          }
+        ],
+        "padding": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        },
+        "alignItems": "stretch",
+        "justifyItems": "stretch",
+        "contentFrame": {
+          "left": 0,
+          "top": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "items": [
+          {
+            "path": "0.0",
+            "frame": {
+              "left": 1184.18,
+              "top": 659.24,
+              "width": 54.48,
+              "height": 25.33
+            }
+          },
+          {
+            "path": "0.1",
+            "frame": {
+              "left": 41.33,
+              "top": 36.17,
+              "width": 1197.33,
+              "height": 67.64
+            }
+          },
+          {
+            "path": "0.2",
+            "frame": {
+              "left": 41.68,
+              "top": 350.56,
+              "width": 580.99,
+              "height": 138.67
+            }
+          },
+          {
+            "path": "0.3",
+            "frame": {
+              "left": 72.89,
+              "top": 376.69,
+              "width": 523.56,
+              "height": 92.16
+            }
+          },
+          {
+            "path": "0.4",
+            "frame": {
+              "left": 72.89,
+              "top": 506.94,
+              "width": 549.78,
+              "height": 102.67
+            }
+          },
+          {
+            "path": "0.5",
+            "frame": {
+              "left": 657.3,
+              "top": 350.56,
+              "width": 580.99,
+              "height": 138.67
+            }
+          },
+          {
+            "path": "0.6",
+            "frame": {
+              "left": 688.51,
+              "top": 376.69,
+              "width": 523.56,
+              "height": 92.16
+            }
+          },
+          {
+            "path": "0.7",
+            "frame": {
+              "left": 688.51,
+              "top": 506.94,
+              "width": 549.78,
+              "height": 102.67
+            }
+          },
+          {
+            "path": "0.8",
+            "frame": {
+              "left": 42.09,
+              "top": 121.52,
+              "width": 1197.33,
+              "height": 171.05
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

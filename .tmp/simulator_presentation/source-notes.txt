@@ -1,0 +1,21 @@
+Communication job: By the end, technical and project stakeholders should understand the simulator's state model, stochastic construction, event loop, unknown-episode semantics, reproducibility controls, and outputs.
+
+Visual route: Codex Grid layout library, because no custom visual direction or reference deck was supplied.
+
+Project sources:
+- C:\Users\SJameel\Poission\README.md
+- C:\Users\SJameel\Poission\DOCUMENTATION.md
+- C:\Users\SJameel\Poission\config.yaml
+- C:\Users\SJameel\Poission\simulator.py
+- C:\Users\SJameel\Poission\run_simulation.py
+- C:\Users\SJameel\Poission\version 6\stats.json
+- C:\Users\SJameel\Poission\version 6\plots\cumulative_episodes.png
+
+External sources and assets: none. All claims and visuals come from the local project repository.
+
+Narrative:
+1. Establish the model as a six-layer continuous-time joint state.
+2. Explain generated elements, class composition, probability mass, and duration laws.
+3. Walk through the event-driven loop.
+4. Define exact C3-C6 unknown scenarios and distinguish them from unknown-rarity elements.
+5. Close with reproducibility, outputs, and the model's key interpretation.

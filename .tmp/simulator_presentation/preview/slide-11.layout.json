@@ -1,0 +1,435 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/phkz2a",
+    "id": "phkz2a",
+    "slide": 11,
+    "layoutId": "2f85b398-97e0-42af-952f-7faaec5e0b0c",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "6f4004be-b641-4324-a8dd-603cfdd2200a",
+    "masterLayoutName": "Master",
+    "backgroundColor": "#FFFFFF",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "Helvetica Neue"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "2f85b398-97e0-42af-952f-7faaec5e0b0c",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "6f4004be-b641-4324-a8dd-603cfdd2200a",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "6f4004be-b641-4324-a8dd-603cfdd2200a",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/e1grm14z",
+      "id": "1",
+      "name": "slide-11-title",
+      "bbox": [
+        41.33,
+        36.12,
+        1197.33,
+        72
+      ],
+      "geometry": "rect",
+      "text": "Outputs turn episodes into measurable evidence",
+      "textPreview": "Outputs turn episodes into measurable evidence",
+      "resolvedFontSize": 48,
+      "resolvedTextStyle": {
+        "fontSize": 48,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Outputs turn episodes into measurable evidence"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Outputs turn episodes into measurable evidence",
+          "resolvedTextStyle": {
+            "fontSize": 48,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "bold": true
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Outputs turn episodes into measurable evidence",
+              "fontSize": 48,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/147axgna",
+      "id": "2",
+      "name": "slide-11-body",
+      "bbox": [
+        41.33,
+        170,
+        415,
+        400
+      ],
+      "geometry": "rect",
+      "text": "The runner produces:\n\n• episodes.csv — start, end, duration, inter-arrival\n• windows.csv — starts per complete mileage window\n• stats.json — rates, occupancy, composition, diagnostics\n• summary.md and plots — review-ready evidence\n\nCurrent seeded run: 495 episodes across 1,000,000 derived miles.",
+      "textPreview": "The runner produces: |  | • episodes.csv — start, end, duration, inter-arrival | • windows.csv — starts per complete mileage window | • s...",
+      "resolvedFontSize": 22,
+      "resolvedTextStyle": {
+        "fontSize": 22,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 13,
+        "lines": [
+          {
+            "index": 1,
+            "text": "The runner produces:"
+          },
+          {
+            "index": 2,
+            "text": ""
+          },
+          {
+            "index": 3,
+            "text": "• episodes.csv — start, end, duration,"
+          },
+          {
+            "index": 4,
+            "text": "inter-arrival"
+          },
+          {
+            "index": 5,
+            "text": "• windows.csv — starts per complete"
+          },
+          {
+            "index": 6,
+            "text": "mileage window"
+          },
+          {
+            "index": 7,
+            "text": "• stats.json — rates, occupancy,"
+          },
+          {
+            "index": 8,
+            "text": "composition, diagnostics"
+          },
+          {
+            "index": 9,
+            "text": "• summary.md and plots — review-ready"
+          },
+          {
+            "index": 10,
+            "text": "evidence"
+          },
+          {
+            "index": 11,
+            "text": ""
+          },
+          {
+            "index": 12,
+            "text": "Current seeded run: 495 episodes across"
+          },
+          {
+            "index": 13,
+            "text": "1,000,000 derived miles."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "The runner produces:",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Helvetica Neue",
+            "color": "#000000"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "The runner produces:",
+              "fontSize": 22,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 3,
+          "text": "• episodes.csv — start, end, duration, inter-arrival",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Helvetica Neue",
+            "color": "#000000"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• episodes.csv — start, end, duration, inter-arrival",
+              "fontSize": 22,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 4,
+          "text": "• windows.csv — starts per complete mileage window",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Helvetica Neue",
+            "color": "#000000"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• windows.csv — starts per complete mileage window",
+              "fontSize": 22,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 5,
+          "text": "• stats.json — rates, occupancy, composition, diagnostics",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Helvetica Neue",
+            "color": "#000000"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• stats.json — rates, occupancy, composition, diagnostics",
+              "fontSize": 22,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 6,
+          "text": "• summary.md and plots — review-ready evidence",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Helvetica Neue",
+            "color": "#000000"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "• summary.md and plots — review-ready evidence",
+              "fontSize": 22,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        },
+        {
+          "index": 8,
+          "text": "Current seeded run: 495 episodes across 1,000,000 derived miles.",
+          "resolvedTextStyle": {
+            "fontSize": 22,
+            "typeface": "Helvetica Neue",
+            "color": "#000000"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Current seeded run: 495 episodes across 1,000,000 derived miles.",
+              "fontSize": 22,
+              "typeface": "Helvetica Neue",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/03y9obm5",
+      "id": "3",
+      "name": "plot-frame",
+      "bbox": [
+        500,
+        145,
+        739,
+        478
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFFFFF",
+      "lineColor": "#B8BCC4",
+      "lineWidth": 1
+    },
+    {
+      "order": 4,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/69kz2d0f",
+      "id": "4",
+      "bbox": [
+        512,
+        157,
+        715,
+        454
+      ],
+      "alt": "Cumulative unknown episodes over one million simulated miles",
+      "contentType": "image/png",
+      "imageFit": "contain",
+      "asset": {
+        "assetId": "485d10c8-cc63-4c06-93e0-419c83d7178d",
+        "contentType": "image/png",
+        "byteLength": 40318
+      }
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mpgrql4v",
+      "id": "5",
+      "name": "slide-11-footer",
+      "bbox": [
+        1184.18,
+        659.24,
+        54.48,
+        25.33
+      ],
+      "geometry": "rect",
+      "text": "11",
+      "textPreview": "11",
+      "resolvedFontSize": 13.33,
+      "resolvedTextStyle": {
+        "fontSize": 13.33,
+        "typeface": "Helvetica Neue",
+        "color": "#000000",
+        "alignment": "right",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "11"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "11",
+          "resolvedTextStyle": {
+            "fontSize": 13.33,
+            "typeface": "Helvetica Neue",
+            "color": "#000000",
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "11",
+              "fontSize": 13.33,
+              "typeface": "Helvetica Neue",
+              "color": "#000000",
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}
