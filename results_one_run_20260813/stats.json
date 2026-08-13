@@ -1,0 +1,5878 @@
+{
+  "profile_name": "generated_elements_v6",
+  "profile_kind": "generated_elements",
+  "rescale_transition_class_masses": true,
+  "total_simulated_mileage": 999999.999999826,
+  "total_simulated_time_seconds": 72000000.0,
+  "total_events": 4079575,
+  "wall_seconds": 10.35899999999674,
+  "total_unknown_episodes": 495,
+  "episodes_truncated": 0,
+  "episodes_per_million_miles": 495.0000000000862,
+  "total_unknown_time_seconds": 10361.594918244547,
+  "unknown_time_fraction": 0.00014391104053117427,
+  "episode_duration_seconds": {
+    "mean": 20.932514986352622,
+    "median": 16.408725902438164,
+    "p90": 42.62334184497598,
+    "min": 0.012019901536405087,
+    "max": 137.24928426370025
+  },
+  "episode_duration_miles": {
+    "mean": 0.2907293748091799,
+    "median": 0.22789897094480693,
+    "p90": 0.5919908589217816,
+    "min": 0.00016694306395947933,
+    "max": 1.9062400592956692
+  },
+  "inter_arrival_miles": {
+    "mean": 2017.9786036251533,
+    "median": 1368.3979208596284,
+    "p90": 4954.406046585718,
+    "min": 0.015450473525561392,
+    "max": 12677.897895979462
+  },
+  "inter_arrival_seconds": {
+    "mean": 145294.45946103602,
+    "median": 98524.65030185133,
+    "p90": 356717.23535360716,
+    "min": 1.112434096634388,
+    "max": 912808.6485108715
+  },
+  "mileage_windows": {
+    "window_miles": 10000.0,
+    "n_windows": 99,
+    "empirical_mean_count_per_window": 4.929292929292929,
+    "empirical_variance_count_per_window": 6.67862296433725,
+    "dispersion_index": 1.3548845767815323
+  },
+  "episodes_by_type": {
+    "rare_combination": 495
+  },
+  "combination_stats": {
+    "enabled": true,
+    "mechanism": "exact_rare_element_combinations",
+    "require_triggering_condition": true,
+    "exact_rare_set": true,
+    "combination_counts": {
+      "3": 40,
+      "4": 30,
+      "5": 20,
+      "6": 10
+    },
+    "episodes": 495,
+    "episodes_by_size": {
+      "3": 481,
+      "4": 14,
+      "5": 0,
+      "6": 0
+    },
+    "rules": [
+      {
+        "index": 0,
+        "description": "C3: street=street_000 & temporal_modifications=temporal_001 & triggering_conditions=trigger_032",
+        "size": 3,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_001"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_032"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.9791209584317857e-05,
+        "episodes": 7
+      },
+      {
+        "index": 1,
+        "description": "C3: street=street_000 & temporal_modifications=temporal_009 & triggering_conditions=trigger_066",
+        "size": 3,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_066"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.4917410331034547e-05,
+        "episodes": 8
+      },
+      {
+        "index": 2,
+        "description": "C3: street=street_000 & temporal_modifications=temporal_024 & triggering_conditions=trigger_017",
+        "size": 3,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_024"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.4668900039716352e-05,
+        "episodes": 11
+      },
+      {
+        "index": 3,
+        "description": "C3: street=street_000 & temporal_modifications=temporal_038 & triggering_conditions=trigger_007",
+        "size": 3,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_038"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_007"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.460894590858619e-05,
+        "episodes": 7
+      },
+      {
+        "index": 4,
+        "description": "C3: street=street_000 & ego_maneuver=ego_011 & triggering_conditions=trigger_018",
+        "size": 3,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_018"
+          }
+        ],
+        "source": "selected",
+        "mass": 5.9436808561073915e-05,
+        "episodes": 38
+      },
+      {
+        "index": 5,
+        "description": "C3: street=street_004 & ego_maneuver=ego_009 & triggering_conditions=trigger_011",
+        "size": 3,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_011"
+          }
+        ],
+        "source": "selected",
+        "mass": 5.837512577693701e-05,
+        "episodes": 38
+      },
+      {
+        "index": 6,
+        "description": "C3: street=street_004 & environmental_conditions=environment_012 & triggering_conditions=trigger_000",
+        "size": 3,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_000"
+          }
+        ],
+        "source": "selected",
+        "mass": 5.937144099728829e-05,
+        "episodes": 22
+      },
+      {
+        "index": 7,
+        "description": "C3: temporal_modifications=temporal_005 & ego_maneuver=ego_011 & triggering_conditions=trigger_023",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_005"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_023"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.2584051596820044e-05,
+        "episodes": 7
+      },
+      {
+        "index": 8,
+        "description": "C3: temporal_modifications=temporal_009 & ego_maneuver=ego_000 & triggering_conditions=trigger_028",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_009"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_028"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.429974482342702e-05,
+        "episodes": 15
+      },
+      {
+        "index": 9,
+        "description": "C3: temporal_modifications=temporal_017 & ego_maneuver=ego_000 & triggering_conditions=trigger_007",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_017"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_007"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.3067275503717291e-05,
+        "episodes": 6
+      },
+      {
+        "index": 10,
+        "description": "C3: temporal_modifications=temporal_017 & ego_maneuver=ego_011 & triggering_conditions=trigger_028",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_017"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_028"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.4741457399228107e-05,
+        "episodes": 12
+      },
+      {
+        "index": 11,
+        "description": "C3: temporal_modifications=temporal_023 & ego_maneuver=ego_009 & triggering_conditions=trigger_000",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_000"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.3839181141916966e-05,
+        "episodes": 8
+      },
+      {
+        "index": 12,
+        "description": "C3: temporal_modifications=temporal_023 & ego_maneuver=ego_009 & triggering_conditions=trigger_004",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_004"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.5047848656443764e-05,
+        "episodes": 13
+      },
+      {
+        "index": 13,
+        "description": "C3: temporal_modifications=temporal_023 & ego_maneuver=ego_013 & triggering_conditions=trigger_075",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_075"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.3744633931495153e-05,
+        "episodes": 9
+      },
+      {
+        "index": 14,
+        "description": "C3: temporal_modifications=temporal_024 & ego_maneuver=ego_013 & triggering_conditions=trigger_059",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_024"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_059"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.1090185045365008e-05,
+        "episodes": 7
+      },
+      {
+        "index": 15,
+        "description": "C3: temporal_modifications=temporal_028 & ego_maneuver=ego_013 & triggering_conditions=trigger_075",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_028"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_075"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.1818874475232496e-05,
+        "episodes": 5
+      },
+      {
+        "index": 16,
+        "description": "C3: temporal_modifications=temporal_001 & ru_maneuver=ru_005 & triggering_conditions=trigger_011",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_001"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_011"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.3259628677130961e-05,
+        "episodes": 4
+      },
+      {
+        "index": 17,
+        "description": "C3: temporal_modifications=temporal_005 & ru_maneuver=ru_009 & triggering_conditions=trigger_017",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_005"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.3204516628574657e-05,
+        "episodes": 6
+      },
+      {
+        "index": 18,
+        "description": "C3: temporal_modifications=temporal_017 & ru_maneuver=ru_009 & triggering_conditions=trigger_064",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_017"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_064"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.4227108693558714e-05,
+        "episodes": 7
+      },
+      {
+        "index": 19,
+        "description": "C3: temporal_modifications=temporal_023 & ru_maneuver=ru_010 & triggering_conditions=trigger_064",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_064"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.4421923650458731e-05,
+        "episodes": 7
+      },
+      {
+        "index": 20,
+        "description": "C3: temporal_modifications=temporal_001 & environmental_conditions=environment_013 & triggering_conditions=trigger_000",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_001"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_000"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.3769194949229624e-05,
+        "episodes": 2
+      },
+      {
+        "index": 21,
+        "description": "C3: temporal_modifications=temporal_005 & environmental_conditions=environment_012 & triggering_conditions=trigger_023",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_023"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.2617105246840582e-05,
+        "episodes": 0
+      },
+      {
+        "index": 22,
+        "description": "C3: temporal_modifications=temporal_008 & environmental_conditions=environment_009 & triggering_conditions=trigger_028",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_008"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_028"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.5245049331350393e-05,
+        "episodes": 3
+      },
+      {
+        "index": 23,
+        "description": "C3: temporal_modifications=temporal_009 & environmental_conditions=environment_000 & triggering_conditions=trigger_014",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_014"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.3116388223170755e-05,
+        "episodes": 4
+      },
+      {
+        "index": 24,
+        "description": "C3: temporal_modifications=temporal_017 & environmental_conditions=environment_012 & triggering_conditions=trigger_014",
+        "size": 3,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_017"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_014"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.4011687992052948e-05,
+        "episodes": 4
+      },
+      {
+        "index": 25,
+        "description": "C3: ego_maneuver=ego_011 & ru_maneuver=ru_010 & triggering_conditions=trigger_014",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_014"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.148275294577001e-05,
+        "episodes": 27
+      },
+      {
+        "index": 26,
+        "description": "C3: ego_maneuver=ego_009 & environmental_conditions=environment_000 & triggering_conditions=trigger_064",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_064"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.964028843743683e-05,
+        "episodes": 15
+      },
+      {
+        "index": 27,
+        "description": "C3: ego_maneuver=ego_009 & environmental_conditions=environment_009 & triggering_conditions=trigger_064",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_064"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.095660861652194e-05,
+        "episodes": 25
+      },
+      {
+        "index": 28,
+        "description": "C3: ego_maneuver=ego_011 & environmental_conditions=environment_009 & triggering_conditions=trigger_017",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.9273231014201284e-05,
+        "episodes": 10
+      },
+      {
+        "index": 29,
+        "description": "C3: ego_maneuver=ego_013 & environmental_conditions=environment_000 & triggering_conditions=trigger_018",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_018"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.857122291676918e-05,
+        "episodes": 15
+      },
+      {
+        "index": 30,
+        "description": "C3: ego_maneuver=ego_013 & environmental_conditions=environment_012 & triggering_conditions=trigger_017",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.8244716389952184e-05,
+        "episodes": 16
+      },
+      {
+        "index": 31,
+        "description": "C3: ego_maneuver=ego_013 & environmental_conditions=environment_012 & triggering_conditions=trigger_066",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_066"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.8711236352861836e-05,
+        "episodes": 20
+      },
+      {
+        "index": 32,
+        "description": "C3: ru_maneuver=ru_005 & environmental_conditions=environment_000 & triggering_conditions=trigger_004",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_004"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.0080833564004923e-05,
+        "episodes": 8
+      },
+      {
+        "index": 33,
+        "description": "C3: ru_maneuver=ru_005 & environmental_conditions=environment_009 & triggering_conditions=trigger_017",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.835424978548216e-05,
+        "episodes": 10
+      },
+      {
+        "index": 34,
+        "description": "C3: ru_maneuver=ru_009 & environmental_conditions=environment_000 & triggering_conditions=trigger_066",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_066"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.9755252176254825e-05,
+        "episodes": 16
+      },
+      {
+        "index": 35,
+        "description": "C3: ru_maneuver=ru_009 & environmental_conditions=environment_013 & triggering_conditions=trigger_017",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.993281371913254e-05,
+        "episodes": 10
+      },
+      {
+        "index": 36,
+        "description": "C3: ru_maneuver=ru_010 & environmental_conditions=environment_012 & triggering_conditions=trigger_000",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_000"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.964699568595122e-05,
+        "episodes": 19
+      },
+      {
+        "index": 37,
+        "description": "C3: ru_maneuver=ru_010 & environmental_conditions=environment_013 & triggering_conditions=trigger_007",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_007"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.9125962387601458e-05,
+        "episodes": 13
+      },
+      {
+        "index": 38,
+        "description": "C3: ru_maneuver=ru_018 & environmental_conditions=environment_009 & triggering_conditions=trigger_023",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_023"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.7966860175871083e-05,
+        "episodes": 11
+      },
+      {
+        "index": 39,
+        "description": "C3: ru_maneuver=ru_018 & environmental_conditions=environment_009 & triggering_conditions=trigger_058",
+        "size": 3,
+        "items": [
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_058"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.9145309453964972e-05,
+        "episodes": 16
+      },
+      {
+        "index": 40,
+        "description": "C4: street=street_000 & temporal_modifications=temporal_008 & ru_maneuver=ru_010 & triggering_conditions=trigger_017",
+        "size": 4,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_008"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.3057405236321049e-06,
+        "episodes": 0
+      },
+      {
+        "index": 41,
+        "description": "C4: street=street_000 & temporal_modifications=temporal_023 & ru_maneuver=ru_010 & triggering_conditions=trigger_018",
+        "size": 4,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_018"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.4102757206431194e-06,
+        "episodes": 1
+      },
+      {
+        "index": 42,
+        "description": "C4: street=street_000 & temporal_modifications=temporal_038 & ru_maneuver=ru_018 & triggering_conditions=trigger_000",
+        "size": 4,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_038"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_000"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.1959959470681284e-06,
+        "episodes": 0
+      },
+      {
+        "index": 43,
+        "description": "C4: street=street_004 & temporal_modifications=temporal_009 & ru_maneuver=ru_009 & triggering_conditions=trigger_025",
+        "size": 4,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_009"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_025"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.183492806913273e-06,
+        "episodes": 0
+      },
+      {
+        "index": 44,
+        "description": "C4: street=street_004 & temporal_modifications=temporal_023 & ru_maneuver=ru_010 & triggering_conditions=trigger_014",
+        "size": 4,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_014"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.4959536853373071e-06,
+        "episodes": 1
+      },
+      {
+        "index": 45,
+        "description": "C4: street=street_000 & temporal_modifications=temporal_005 & environmental_conditions=environment_012 & triggering_conditions=trigger_018",
+        "size": 4,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_018"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.3110504074290864e-06,
+        "episodes": 0
+      },
+      {
+        "index": 46,
+        "description": "C4: street=street_004 & temporal_modifications=temporal_001 & environmental_conditions=environment_000 & triggering_conditions=trigger_000",
+        "size": 4,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_001"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_000"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.3615108229196803e-06,
+        "episodes": 0
+      },
+      {
+        "index": 47,
+        "description": "C4: street=street_004 & ego_maneuver=ego_011 & ru_maneuver=ru_009 & triggering_conditions=trigger_028",
+        "size": 4,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_028"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.493013401558947e-06,
+        "episodes": 3
+      },
+      {
+        "index": 48,
+        "description": "C4: street=street_000 & ru_maneuver=ru_005 & environmental_conditions=environment_000 & triggering_conditions=trigger_028",
+        "size": 4,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_028"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.0724248100688473e-06,
+        "episodes": 2
+      },
+      {
+        "index": 49,
+        "description": "C4: street=street_000 & ru_maneuver=ru_010 & environmental_conditions=environment_012 & triggering_conditions=trigger_000",
+        "size": 4,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_000"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.9316739078961928e-06,
+        "episodes": 0
+      },
+      {
+        "index": 50,
+        "description": "C4: temporal_modifications=temporal_024 & ego_maneuver=ego_013 & ru_maneuver=ru_010 & triggering_conditions=trigger_018",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_024"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_018"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.457291156579406e-07,
+        "episodes": 1
+      },
+      {
+        "index": 51,
+        "description": "C4: temporal_modifications=temporal_028 & ego_maneuver=ego_011 & ru_maneuver=ru_009 & triggering_conditions=trigger_000",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_028"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_000"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.250836383807342e-07,
+        "episodes": 0
+      },
+      {
+        "index": 52,
+        "description": "C4: temporal_modifications=temporal_008 & ego_maneuver=ego_000 & environmental_conditions=environment_013 & triggering_conditions=trigger_017",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_008"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_000"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.574055022255406e-07,
+        "episodes": 0
+      },
+      {
+        "index": 53,
+        "description": "C4: temporal_modifications=temporal_009 & ego_maneuver=ego_009 & environmental_conditions=environment_000 & triggering_conditions=trigger_064",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_009"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_064"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.429531052151881e-07,
+        "episodes": 0
+      },
+      {
+        "index": 54,
+        "description": "C4: temporal_modifications=temporal_017 & ego_maneuver=ego_009 & environmental_conditions=environment_009 & triggering_conditions=trigger_014",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_017"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_014"
+          }
+        ],
+        "source": "selected",
+        "mass": 7.117540613300174e-07,
+        "episodes": 1
+      },
+      {
+        "index": 55,
+        "description": "C4: temporal_modifications=temporal_024 & ego_maneuver=ego_000 & environmental_conditions=environment_012 & triggering_conditions=trigger_007",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_024"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_000"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_007"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.417740613259027e-07,
+        "episodes": 1
+      },
+      {
+        "index": 56,
+        "description": "C4: temporal_modifications=temporal_024 & ego_maneuver=ego_000 & environmental_conditions=environment_012 & triggering_conditions=trigger_025",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_024"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_000"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_025"
+          }
+        ],
+        "source": "selected",
+        "mass": 5.700093531685582e-07,
+        "episodes": 0
+      },
+      {
+        "index": 57,
+        "description": "C4: temporal_modifications=temporal_038 & ego_maneuver=ego_000 & environmental_conditions=environment_009 & triggering_conditions=trigger_075",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_038"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_000"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_075"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.553857360876983e-07,
+        "episodes": 0
+      },
+      {
+        "index": 58,
+        "description": "C4: temporal_modifications=temporal_038 & ego_maneuver=ego_013 & environmental_conditions=environment_013 & triggering_conditions=trigger_059",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_038"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_059"
+          }
+        ],
+        "source": "selected",
+        "mass": 5.450944580436708e-07,
+        "episodes": 0
+      },
+      {
+        "index": 59,
+        "description": "C4: temporal_modifications=temporal_017 & ru_maneuver=ru_005 & environmental_conditions=environment_009 & triggering_conditions=trigger_025",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_017"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_025"
+          }
+        ],
+        "source": "selected",
+        "mass": 5.713085151101838e-07,
+        "episodes": 0
+      },
+      {
+        "index": 60,
+        "description": "C4: temporal_modifications=temporal_017 & ru_maneuver=ru_009 & environmental_conditions=environment_013 & triggering_conditions=trigger_017",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_017"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.708729749717372e-07,
+        "episodes": 0
+      },
+      {
+        "index": 61,
+        "description": "C4: temporal_modifications=temporal_023 & ru_maneuver=ru_005 & environmental_conditions=environment_012 & triggering_conditions=trigger_075",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_075"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.887393875958061e-07,
+        "episodes": 0
+      },
+      {
+        "index": 62,
+        "description": "C4: temporal_modifications=temporal_023 & ru_maneuver=ru_010 & environmental_conditions=environment_000 & triggering_conditions=trigger_032",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_032"
+          }
+        ],
+        "source": "selected",
+        "mass": 7.394711174785438e-07,
+        "episodes": 0
+      },
+      {
+        "index": 63,
+        "description": "C4: temporal_modifications=temporal_024 & ru_maneuver=ru_018 & environmental_conditions=environment_012 & triggering_conditions=trigger_058",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_024"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_058"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.298490277671218e-07,
+        "episodes": 0
+      },
+      {
+        "index": 64,
+        "description": "C4: temporal_modifications=temporal_028 & ru_maneuver=ru_018 & environmental_conditions=environment_013 & triggering_conditions=trigger_007",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_028"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_007"
+          }
+        ],
+        "source": "selected",
+        "mass": 5.659180285131437e-07,
+        "episodes": 0
+      },
+      {
+        "index": 65,
+        "description": "C4: temporal_modifications=temporal_038 & ru_maneuver=ru_005 & environmental_conditions=environment_012 & triggering_conditions=trigger_028",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_038"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_028"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.911436173996518e-07,
+        "episodes": 0
+      },
+      {
+        "index": 66,
+        "description": "C4: temporal_modifications=temporal_038 & ru_maneuver=ru_010 & environmental_conditions=environment_000 & triggering_conditions=trigger_075",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_038"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_075"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.28585441178065e-07,
+        "episodes": 0
+      },
+      {
+        "index": 67,
+        "description": "C4: temporal_modifications=temporal_038 & ru_maneuver=ru_018 & environmental_conditions=environment_012 & triggering_conditions=trigger_058",
+        "size": 4,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_038"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_058"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.207542904081943e-07,
+        "episodes": 1
+      },
+      {
+        "index": 68,
+        "description": "C4: ego_maneuver=ego_009 & ru_maneuver=ru_018 & environmental_conditions=environment_000 & triggering_conditions=trigger_032",
+        "size": 4,
+        "items": [
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_032"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.504344650334783e-06,
+        "episodes": 0
+      },
+      {
+        "index": 69,
+        "description": "C4: ego_maneuver=ego_011 & ru_maneuver=ru_010 & environmental_conditions=environment_013 & triggering_conditions=trigger_028",
+        "size": 4,
+        "items": [
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_028"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.656195529045278e-06,
+        "episodes": 3
+      },
+      {
+        "index": 70,
+        "description": "C5: street=street_000 & temporal_modifications=temporal_009 & ego_maneuver=ego_009 & ru_maneuver=ru_010 & triggering_conditions=trigger_007",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_009"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_007"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.299575420123458e-08,
+        "episodes": 0
+      },
+      {
+        "index": 71,
+        "description": "C5: street=street_004 & temporal_modifications=temporal_001 & ego_maneuver=ego_011 & ru_maneuver=ru_018 & triggering_conditions=trigger_059",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_001"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_059"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.032205694246944e-08,
+        "episodes": 0
+      },
+      {
+        "index": 72,
+        "description": "C5: street=street_004 & temporal_modifications=temporal_001 & ego_maneuver=ego_013 & ru_maneuver=ru_010 & triggering_conditions=trigger_028",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_001"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_028"
+          }
+        ],
+        "source": "selected",
+        "mass": 7.75986294311343e-08,
+        "episodes": 0
+      },
+      {
+        "index": 73,
+        "description": "C5: street=street_000 & temporal_modifications=temporal_005 & ego_maneuver=ego_009 & environmental_conditions=environment_013 & triggering_conditions=trigger_011",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_005"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_011"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.263629310347854e-08,
+        "episodes": 0
+      },
+      {
+        "index": 74,
+        "description": "C5: street=street_000 & temporal_modifications=temporal_023 & ego_maneuver=ego_011 & environmental_conditions=environment_009 & triggering_conditions=trigger_066",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_066"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.954194341021988e-08,
+        "episodes": 0
+      },
+      {
+        "index": 75,
+        "description": "C5: street=street_000 & temporal_modifications=temporal_024 & ego_maneuver=ego_011 & environmental_conditions=environment_013 & triggering_conditions=trigger_007",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_024"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_007"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.262556458748425e-08,
+        "episodes": 0
+      },
+      {
+        "index": 76,
+        "description": "C5: street=street_004 & temporal_modifications=temporal_028 & ego_maneuver=ego_013 & environmental_conditions=environment_013 & triggering_conditions=trigger_017",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_028"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 5.740319685075175e-08,
+        "episodes": 0
+      },
+      {
+        "index": 77,
+        "description": "C5: street=street_000 & temporal_modifications=temporal_001 & ru_maneuver=ru_005 & environmental_conditions=environment_009 & triggering_conditions=trigger_005",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_001"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_005"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.778025601644458e-08,
+        "episodes": 0
+      },
+      {
+        "index": 78,
+        "description": "C5: street=street_000 & temporal_modifications=temporal_028 & ru_maneuver=ru_005 & environmental_conditions=environment_009 & triggering_conditions=trigger_032",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_028"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_032"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.335713791974246e-08,
+        "episodes": 0
+      },
+      {
+        "index": 79,
+        "description": "C5: street=street_000 & temporal_modifications=temporal_038 & ru_maneuver=ru_010 & environmental_conditions=environment_013 & triggering_conditions=trigger_004",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_038"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_004"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.783278513753188e-08,
+        "episodes": 0
+      },
+      {
+        "index": 80,
+        "description": "C5: street=street_004 & temporal_modifications=temporal_008 & ru_maneuver=ru_010 & environmental_conditions=environment_012 & triggering_conditions=trigger_017",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_008"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_017"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.732315821523219e-08,
+        "episodes": 0
+      },
+      {
+        "index": 81,
+        "description": "C5: street=street_004 & temporal_modifications=temporal_009 & ru_maneuver=ru_009 & environmental_conditions=environment_000 & triggering_conditions=trigger_014",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_009"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_014"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.965733376220567e-08,
+        "episodes": 0
+      },
+      {
+        "index": 82,
+        "description": "C5: street=street_004 & temporal_modifications=temporal_038 & ru_maneuver=ru_010 & environmental_conditions=environment_013 & triggering_conditions=trigger_011",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_038"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_011"
+          }
+        ],
+        "source": "selected",
+        "mass": 6.289043630324118e-08,
+        "episodes": 0
+      },
+      {
+        "index": 83,
+        "description": "C5: street=street_000 & ego_maneuver=ego_011 & ru_maneuver=ru_018 & environmental_conditions=environment_000 & triggering_conditions=trigger_025",
+        "size": 5,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_025"
+          }
+        ],
+        "source": "selected",
+        "mass": 1.2028527980145683e-07,
+        "episodes": 0
+      },
+      {
+        "index": 84,
+        "description": "C5: temporal_modifications=temporal_001 & ego_maneuver=ego_011 & ru_maneuver=ru_009 & environmental_conditions=environment_012 & triggering_conditions=trigger_011",
+        "size": 5,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_001"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_011"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.6254068444987505e-08,
+        "episodes": 0
+      },
+      {
+        "index": 85,
+        "description": "C5: temporal_modifications=temporal_008 & ego_maneuver=ego_013 & ru_maneuver=ru_018 & environmental_conditions=environment_009 & triggering_conditions=trigger_014",
+        "size": 5,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_008"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_014"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.4198499583801746e-08,
+        "episodes": 0
+      },
+      {
+        "index": 86,
+        "description": "C5: temporal_modifications=temporal_017 & ego_maneuver=ego_000 & ru_maneuver=ru_018 & environmental_conditions=environment_000 & triggering_conditions=trigger_058",
+        "size": 5,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_017"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_000"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_058"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.152582234654151e-08,
+        "episodes": 0
+      },
+      {
+        "index": 87,
+        "description": "C5: temporal_modifications=temporal_017 & ego_maneuver=ego_011 & ru_maneuver=ru_018 & environmental_conditions=environment_012 & triggering_conditions=trigger_014",
+        "size": 5,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_017"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_014"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.401736578934528e-08,
+        "episodes": 0
+      },
+      {
+        "index": 88,
+        "description": "C5: temporal_modifications=temporal_023 & ego_maneuver=ego_009 & ru_maneuver=ru_010 & environmental_conditions=environment_013 & triggering_conditions=trigger_004",
+        "size": 5,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_004"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.7891199637186026e-08,
+        "episodes": 0
+      },
+      {
+        "index": 89,
+        "description": "C5: temporal_modifications=temporal_038 & ego_maneuver=ego_009 & ru_maneuver=ru_018 & environmental_conditions=environment_012 & triggering_conditions=trigger_023",
+        "size": 5,
+        "items": [
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_038"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_023"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.995322775763949e-08,
+        "episodes": 0
+      },
+      {
+        "index": 90,
+        "description": "C6: street=street_000 & temporal_modifications=temporal_001 & ego_maneuver=ego_000 & ru_maneuver=ru_005 & environmental_conditions=environment_000 & triggering_conditions=trigger_004",
+        "size": 6,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_001"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_000"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_004"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.554877254035438e-09,
+        "episodes": 0
+      },
+      {
+        "index": 91,
+        "description": "C6: street=street_000 & temporal_modifications=temporal_005 & ego_maneuver=ego_000 & ru_maneuver=ru_018 & environmental_conditions=environment_000 & triggering_conditions=trigger_028",
+        "size": 6,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_005"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_000"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_028"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.3764490665423404e-09,
+        "episodes": 0
+      },
+      {
+        "index": 92,
+        "description": "C6: street=street_000 & temporal_modifications=temporal_008 & ego_maneuver=ego_009 & ru_maneuver=ru_018 & environmental_conditions=environment_009 & triggering_conditions=trigger_023",
+        "size": 6,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_008"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_009"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_023"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.182576380265644e-09,
+        "episodes": 0
+      },
+      {
+        "index": 93,
+        "description": "C6: street=street_000 & temporal_modifications=temporal_023 & ego_maneuver=ego_011 & ru_maneuver=ru_005 & environmental_conditions=environment_012 & triggering_conditions=trigger_032",
+        "size": 6,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_032"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.668209844842056e-09,
+        "episodes": 0
+      },
+      {
+        "index": 94,
+        "description": "C6: street=street_000 & temporal_modifications=temporal_023 & ego_maneuver=ego_013 & ru_maneuver=ru_018 & environmental_conditions=environment_012 & triggering_conditions=trigger_023",
+        "size": 6,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_023"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_018"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_023"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.171494467864493e-09,
+        "episodes": 0
+      },
+      {
+        "index": 95,
+        "description": "C6: street=street_000 & temporal_modifications=temporal_028 & ego_maneuver=ego_009 & ru_maneuver=ru_005 & environmental_conditions=environment_000 & triggering_conditions=trigger_023",
+        "size": 6,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_000"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_028"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_000"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_023"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.7305348948594716e-09,
+        "episodes": 0
+      },
+      {
+        "index": 96,
+        "description": "C6: street=street_004 & temporal_modifications=temporal_005 & ego_maneuver=ego_009 & ru_maneuver=ru_005 & environmental_conditions=environment_013 & triggering_conditions=trigger_058",
+        "size": 6,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_005"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_058"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.2210884442088134e-09,
+        "episodes": 0
+      },
+      {
+        "index": 97,
+        "description": "C6: street=street_004 & temporal_modifications=temporal_005 & ego_maneuver=ego_011 & ru_maneuver=ru_005 & environmental_conditions=environment_013 & triggering_conditions=trigger_059",
+        "size": 6,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_005"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_011"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_005"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_059"
+          }
+        ],
+        "source": "selected",
+        "mass": 2.8167505152712893e-09,
+        "episodes": 0
+      },
+      {
+        "index": 98,
+        "description": "C6: street=street_004 & temporal_modifications=temporal_005 & ego_maneuver=ego_013 & ru_maneuver=ru_010 & environmental_conditions=environment_012 & triggering_conditions=trigger_005",
+        "size": 6,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_005"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_013"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_010"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_012"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_005"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.2345473059909417e-09,
+        "episodes": 0
+      },
+      {
+        "index": 99,
+        "description": "C6: street=street_004 & temporal_modifications=temporal_009 & ego_maneuver=ego_009 & ru_maneuver=ru_009 & environmental_conditions=environment_013 & triggering_conditions=trigger_007",
+        "size": 6,
+        "items": [
+          {
+            "layer": "street",
+            "element": "street_004"
+          },
+          {
+            "layer": "temporal_modifications",
+            "element": "temporal_009"
+          },
+          {
+            "layer": "ego_maneuver",
+            "element": "ego_009"
+          },
+          {
+            "layer": "ru_maneuver",
+            "element": "ru_009"
+          },
+          {
+            "layer": "environmental_conditions",
+            "element": "environment_013"
+          },
+          {
+            "layer": "triggering_conditions",
+            "element": "trigger_007"
+          }
+        ],
+        "source": "selected",
+        "mass": 3.341676210271906e-09,
+        "episodes": 0
+      }
+    ]
+  },
+  "transition_model": {
+    "mode": "independent",
+    "conditional_initialization": false,
+    "dependency_order": [
+      "street",
+      "temporal_modifications",
+      "ego_maneuver",
+      "ru_maneuver",
+      "environmental_conditions",
+      "triggering_conditions"
+    ],
+    "rules": [],
+    "layers": []
+  },
+  "element_rarity_composition": {
+    "configured_element_class_percentages": {
+      "common": 70.0,
+      "rare": 20.0,
+      "unknown": 10.0
+    },
+    "configured_selection_class_percentages": {
+      "common": 70.0,
+      "rare": 20.0,
+      "unknown": 10.0
+    },
+    "allocation_method": "largest_remainder",
+    "layers": [
+      {
+        "layer": "street",
+        "construction_mode": "generated",
+        "total_elements": 12,
+        "counts": {
+          "common": 9,
+          "rare": 2,
+          "unknown": 1
+        },
+        "proportions": {
+          "common": 0.75,
+          "rare": 0.16666666666666666,
+          "unknown": 0.08333333333333333
+        }
+      },
+      {
+        "layer": "temporal_modifications",
+        "construction_mode": "generated",
+        "total_elements": 45,
+        "counts": {
+          "common": 32,
+          "rare": 9,
+          "unknown": 4
+        },
+        "proportions": {
+          "common": 0.7111111111111111,
+          "rare": 0.2,
+          "unknown": 0.08888888888888889
+        }
+      },
+      {
+        "layer": "ego_maneuver",
+        "construction_mode": "generated",
+        "total_elements": 20,
+        "counts": {
+          "common": 14,
+          "rare": 4,
+          "unknown": 2
+        },
+        "proportions": {
+          "common": 0.7,
+          "rare": 0.2,
+          "unknown": 0.1
+        }
+      },
+      {
+        "layer": "ru_maneuver",
+        "construction_mode": "generated",
+        "total_elements": 22,
+        "counts": {
+          "common": 16,
+          "rare": 4,
+          "unknown": 2
+        },
+        "proportions": {
+          "common": 0.7272727272727273,
+          "rare": 0.18181818181818182,
+          "unknown": 0.09090909090909091
+        }
+      },
+      {
+        "layer": "environmental_conditions",
+        "construction_mode": "generated",
+        "total_elements": 22,
+        "counts": {
+          "common": 16,
+          "rare": 4,
+          "unknown": 2
+        },
+        "proportions": {
+          "common": 0.7272727272727273,
+          "rare": 0.18181818181818182,
+          "unknown": 0.09090909090909091
+        }
+      },
+      {
+        "layer": "triggering_conditions",
+        "construction_mode": "generated",
+        "total_elements": 83,
+        "counts": {
+          "common": 58,
+          "rare": 17,
+          "unknown": 8
+        },
+        "proportions": {
+          "common": 0.6987951807228916,
+          "rare": 0.20481927710843373,
+          "unknown": 0.0963855421686747
+        }
+      }
+    ],
+    "all_layers_total": {
+      "total_elements": 204,
+      "counts": {
+        "common": 145,
+        "rare": 40,
+        "unknown": 19
+      },
+      "proportions": {
+        "common": 0.7107843137254902,
+        "rare": 0.19607843137254902,
+        "unknown": 0.09313725490196079
+      }
+    }
+  },
+  "seeds": {
+    "element_count": 12345,
+    "rarity_assignment": 23456,
+    "transition_matrix": 34567,
+    "duration": 45678,
+    "initial_state": 56789,
+    "transition_sampling": 67890,
+    "combination_selection": 78901
+  },
+  "layer_stats": [
+    {
+      "layer": "street",
+      "n_elements": 12,
+      "construction_mode": "generated",
+      "has_unknown": true,
+      "counts": {
+        "common": 9,
+        "rare": 2,
+        "unknown": 1
+      },
+      "element_proportions": {
+        "common": 0.75,
+        "rare": 0.16666666666666666,
+        "unknown": 0.08333333333333333
+      },
+      "configured_selection_class_percentages": {
+        "common": 70.0,
+        "rare": 20.0,
+        "unknown": 10.0
+      },
+      "transition_class_proportions": {
+        "common": 0.7,
+        "rare": 0.2,
+        "unknown": 0.1
+      },
+      "designed_unknown_mass": 0.1,
+      "realized_unknown_mass": 0.1,
+      "baseline_unknown_mass": 0.1,
+      "empirical_unknown_occupancy": 0.02082542865868651,
+      "transitions": 196496,
+      "unknown_selected": 20025,
+      "empirical_unknown_rate": 0.10191047145997884,
+      "conditional_selection_rate": 0.10191047145997884,
+      "episodes": 0,
+      "selected_by_rarity": {
+        "common": 137354,
+        "rare": 39118,
+        "unknown": 20025
+      },
+      "elements": [
+        {
+          "id": "street_000",
+          "label": "street_000",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 202.5,
+          "duration_variance_seconds2": 14762.25,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 72.9,
+          "visit_count": 19230,
+          "realized_selection_rate": 0.0978640895280844
+        },
+        {
+          "id": "street_001",
+          "label": "street_001",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 405.0,
+          "duration_variance_seconds2": 33215.0625,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 82.0125,
+          "visit_count": 16048,
+          "realized_selection_rate": 0.08167045807315125
+        },
+        {
+          "id": "street_002",
+          "label": "street_002",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 416.25,
+          "duration_variance_seconds2": 35085.97265625,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 84.290625,
+          "visit_count": 15489,
+          "realized_selection_rate": 0.07882563092566298
+        },
+        {
+          "id": "street_003",
+          "label": "street_003",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 427.5,
+          "duration_variance_seconds2": 37008.140625,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 86.56875,
+          "visit_count": 15575,
+          "realized_selection_rate": 0.07926329664066117
+        },
+        {
+          "id": "street_004",
+          "label": "street_004",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 247.50000000000003,
+          "duration_variance_seconds2": 22052.25,
+          "duration_gamma_shape": 2.7777777777777786,
+          "duration_gamma_scale": 89.1,
+          "visit_count": 19888,
+          "realized_selection_rate": 0.10121274116144267
+        },
+        {
+          "id": "street_005",
+          "label": "street_005",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 438.75,
+          "duration_variance_seconds2": 38981.56640625,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 88.846875,
+          "visit_count": 15080,
+          "realized_selection_rate": 0.07674417421131112
+        },
+        {
+          "id": "street_006",
+          "label": "street_006",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 450.0,
+          "duration_variance_seconds2": 41006.25,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 91.125,
+          "visit_count": 15589,
+          "realized_selection_rate": 0.0793345445477539
+        },
+        {
+          "id": "street_007",
+          "label": "street_007",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 461.24999999999994,
+          "duration_variance_seconds2": 43082.191406249985,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 93.40312499999997,
+          "visit_count": 14575,
+          "realized_selection_rate": 0.07417416041975196
+        },
+        {
+          "id": "street_008",
+          "label": "street_008",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 472.5,
+          "duration_variance_seconds2": 45209.390625,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 95.68125,
+          "visit_count": 14856,
+          "realized_selection_rate": 0.07560420769782744
+        },
+        {
+          "id": "street_009",
+          "label": "street_009",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 75.0,
+          "duration_variance_seconds2": 3600.0,
+          "duration_gamma_shape": 1.5625,
+          "duration_gamma_scale": 48.0,
+          "visit_count": 20025,
+          "realized_selection_rate": 0.10190995282370723
+        },
+        {
+          "id": "street_010",
+          "label": "street_010",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 483.75,
+          "duration_variance_seconds2": 47387.84765625,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 97.959375,
+          "visit_count": 15129,
+          "realized_selection_rate": 0.07699354188613566
+        },
+        {
+          "id": "street_011",
+          "label": "street_011",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 495.00000000000006,
+          "duration_variance_seconds2": 49617.562500000015,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 100.23750000000001,
+          "visit_count": 15013,
+          "realized_selection_rate": 0.0764032020845102
+        }
+      ],
+      "mean_duration_config": 381.25,
+      "duration_profiles": {
+        "common": {
+          "mean_multiplier": 1.5,
+          "coefficient_of_variation": 0.45,
+          "element_spread": 0.1
+        },
+        "rare": {
+          "mean_multiplier": 0.75,
+          "coefficient_of_variation": 0.6,
+          "element_spread": 0.1
+        },
+        "unknown": {
+          "mean_multiplier": 0.25,
+          "coefficient_of_variation": 0.8,
+          "element_spread": 0.1
+        }
+      },
+      "mean_duration_empirical": 366.4179283135895
+    },
+    {
+      "layer": "temporal_modifications",
+      "n_elements": 45,
+      "construction_mode": "generated",
+      "has_unknown": true,
+      "counts": {
+        "common": 32,
+        "rare": 9,
+        "unknown": 4
+      },
+      "element_proportions": {
+        "common": 0.7111111111111111,
+        "rare": 0.2,
+        "unknown": 0.08888888888888889
+      },
+      "configured_selection_class_percentages": {
+        "common": 70.0,
+        "rare": 20.0,
+        "unknown": 10.0
+      },
+      "transition_class_proportions": {
+        "common": 0.7,
+        "rare": 0.2,
+        "unknown": 0.1
+      },
+      "designed_unknown_mass": 0.1,
+      "realized_unknown_mass": 0.1,
+      "baseline_unknown_mass": 0.1,
+      "empirical_unknown_occupancy": 0.020102881394013568,
+      "transitions": 97891,
+      "unknown_selected": 9781,
+      "empirical_unknown_rate": 0.09991725490596684,
+      "conditional_selection_rate": 0.09991725490596684,
+      "episodes": 0,
+      "selected_by_rarity": {
+        "common": 68520,
+        "rare": 19591,
+        "unknown": 9781
+      },
+      "elements": [
+        {
+          "id": "temporal_000",
+          "label": "temporal_000",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 135.0,
+          "duration_variance_seconds2": 11664.0,
+          "duration_gamma_shape": 1.5625,
+          "duration_gamma_scale": 86.4,
+          "visit_count": 2444,
+          "realized_selection_rate": 0.02496628938013321
+        },
+        {
+          "id": "temporal_001",
+          "label": "temporal_001",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 405.0,
+          "duration_variance_seconds2": 59049.0,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 145.8,
+          "visit_count": 2317,
+          "realized_selection_rate": 0.023668941282229395
+        },
+        {
+          "id": "temporal_002",
+          "label": "temporal_002",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 810.0,
+          "duration_variance_seconds2": 132860.25,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 164.025,
+          "visit_count": 2016,
+          "realized_selection_rate": 0.020594124136803824
+        },
+        {
+          "id": "temporal_003",
+          "label": "temporal_003",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 815.8064516129033,
+          "duration_variance_seconds2": 134771.88371488033,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 165.2008064516129,
+          "visit_count": 2482,
+          "realized_selection_rate": 0.025354472275568994
+        },
+        {
+          "id": "temporal_004",
+          "label": "temporal_004",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 821.6129032258063,
+          "duration_variance_seconds2": 136697.1719562955,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 166.3766129032258,
+          "visit_count": 2250,
+          "realized_selection_rate": 0.022984513545539983
+        },
+        {
+          "id": "temporal_005",
+          "label": "temporal_005",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 416.25,
+          "duration_variance_seconds2": 62375.0625,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 149.85,
+          "visit_count": 2125,
+          "realized_selection_rate": 0.021707596126343317
+        },
+        {
+          "id": "temporal_006",
+          "label": "temporal_006",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 827.4193548387096,
+          "duration_variance_seconds2": 138636.11472424556,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 167.5524193548387,
+          "visit_count": 2098,
+          "realized_selection_rate": 0.021431781963796838
+        },
+        {
+          "id": "temporal_007",
+          "label": "temporal_007",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 833.2258064516129,
+          "duration_variance_seconds2": 140588.71201873053,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 168.72822580645166,
+          "visit_count": 2095,
+          "realized_selection_rate": 0.021401135945736116
+        },
+        {
+          "id": "temporal_008",
+          "label": "temporal_008",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 427.5,
+          "duration_variance_seconds2": 65792.25,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 153.9,
+          "visit_count": 2248,
+          "realized_selection_rate": 0.022964082866832835
+        },
+        {
+          "id": "temporal_009",
+          "label": "temporal_009",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 438.75,
+          "duration_variance_seconds2": 69300.5625,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 157.95,
+          "visit_count": 2156,
+          "realized_selection_rate": 0.02202427164630409
+        },
+        {
+          "id": "temporal_010",
+          "label": "temporal_010",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 839.0322580645161,
+          "duration_variance_seconds2": 142554.96383975027,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 169.90403225806455,
+          "visit_count": 2203,
+          "realized_selection_rate": 0.022504392595922035
+        },
+        {
+          "id": "temporal_011",
+          "label": "temporal_011",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 844.8387096774194,
+          "duration_variance_seconds2": 144534.87018730488,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 171.0798387096774,
+          "visit_count": 2149,
+          "realized_selection_rate": 0.021952764270829078
+        },
+        {
+          "id": "temporal_012",
+          "label": "temporal_012",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 850.6451612903226,
+          "duration_variance_seconds2": 146528.4310613944,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 172.25564516129035,
+          "visit_count": 2093,
+          "realized_selection_rate": 0.02138070526702897
+        },
+        {
+          "id": "temporal_013",
+          "label": "temporal_013",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 145.0,
+          "duration_variance_seconds2": 13456.0,
+          "duration_gamma_shape": 1.5625,
+          "duration_gamma_scale": 92.8,
+          "visit_count": 2366,
+          "realized_selection_rate": 0.02416949291055449
+        },
+        {
+          "id": "temporal_014",
+          "label": "temporal_014",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 856.4516129032259,
+          "duration_variance_seconds2": 148535.64646201875,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 173.43145161290323,
+          "visit_count": 2228,
+          "realized_selection_rate": 0.02275977607976137
+        },
+        {
+          "id": "temporal_015",
+          "label": "temporal_015",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 862.258064516129,
+          "duration_variance_seconds2": 150556.51638917794,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 174.60725806451612,
+          "visit_count": 2097,
+          "realized_selection_rate": 0.021421566624443264
+        },
+        {
+          "id": "temporal_016",
+          "label": "temporal_016",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 868.0645161290322,
+          "duration_variance_seconds2": 152591.040842872,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 175.78306451612903,
+          "visit_count": 2038,
+          "realized_selection_rate": 0.020818861602582436
+        },
+        {
+          "id": "temporal_017",
+          "label": "temporal_017",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 450.0,
+          "duration_variance_seconds2": 72900.0,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 162.0,
+          "visit_count": 2122,
+          "realized_selection_rate": 0.0216769501082826
+        },
+        {
+          "id": "temporal_018",
+          "label": "temporal_018",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 873.8709677419355,
+          "duration_variance_seconds2": 154639.21982310095,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 176.95887096774194,
+          "visit_count": 2143,
+          "realized_selection_rate": 0.021891472234707637
+        },
+        {
+          "id": "temporal_019",
+          "label": "temporal_019",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 879.6774193548387,
+          "duration_variance_seconds2": 156701.0533298647,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 178.1346774193548,
+          "visit_count": 2108,
+          "realized_selection_rate": 0.02153393535733257
+        },
+        {
+          "id": "temporal_020",
+          "label": "temporal_020",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 885.483870967742,
+          "duration_variance_seconds2": 158776.5413631634,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 179.31048387096774,
+          "visit_count": 2084,
+          "realized_selection_rate": 0.02128876721284681
+        },
+        {
+          "id": "temporal_021",
+          "label": "temporal_021",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 891.2903225806452,
+          "duration_variance_seconds2": 160865.68392299692,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 180.4862903225807,
+          "visit_count": 1973,
+          "realized_selection_rate": 0.020154864544600172
+        },
+        {
+          "id": "temporal_022",
+          "label": "temporal_022",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 897.0967741935484,
+          "duration_variance_seconds2": 162968.48100936523,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 181.66209677419354,
+          "visit_count": 2185,
+          "realized_selection_rate": 0.022320516487557715
+        },
+        {
+          "id": "temporal_023",
+          "label": "temporal_023",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 461.24999999999994,
+          "duration_variance_seconds2": 76590.56249999997,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 166.04999999999995,
+          "visit_count": 2284,
+          "realized_selection_rate": 0.023331835083561476
+        },
+        {
+          "id": "temporal_024",
+          "label": "temporal_024",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 472.5,
+          "duration_variance_seconds2": 80372.25,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 170.1,
+          "visit_count": 2224,
+          "realized_selection_rate": 0.022718914722347078
+        },
+        {
+          "id": "temporal_025",
+          "label": "temporal_025",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 902.9032258064516,
+          "duration_variance_seconds2": 165084.93262226848,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 182.83790322580646,
+          "visit_count": 1982,
+          "realized_selection_rate": 0.02024680259878233
+        },
+        {
+          "id": "temporal_026",
+          "label": "temporal_026",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 908.7096774193549,
+          "duration_variance_seconds2": 167215.03876170656,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 184.01370967741934,
+          "visit_count": 2029,
+          "realized_selection_rate": 0.020726923548400278
+        },
+        {
+          "id": "temporal_027",
+          "label": "temporal_027",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 914.516129032258,
+          "duration_variance_seconds2": 169358.79942767954,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 185.1895161290323,
+          "visit_count": 1928,
+          "realized_selection_rate": 0.019695174273689373
+        },
+        {
+          "id": "temporal_028",
+          "label": "temporal_028",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 483.75,
+          "duration_variance_seconds2": 84245.0625,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 174.15,
+          "visit_count": 1983,
+          "realized_selection_rate": 0.020257017938135904
+        },
+        {
+          "id": "temporal_029",
+          "label": "temporal_029",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 920.3225806451612,
+          "duration_variance_seconds2": 171516.2146201873,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 186.36532258064517,
+          "visit_count": 2213,
+          "realized_selection_rate": 0.02260654598945777
+        },
+        {
+          "id": "temporal_030",
+          "label": "temporal_030",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 154.99999999999997,
+          "duration_variance_seconds2": 15375.999999999996,
+          "duration_gamma_shape": 1.5625,
+          "duration_gamma_scale": 99.19999999999999,
+          "visit_count": 2353,
+          "realized_selection_rate": 0.024036693498958036
+        },
+        {
+          "id": "temporal_031",
+          "label": "temporal_031",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 926.1290322580645,
+          "duration_variance_seconds2": 173687.28433922995,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 187.54112903225806,
+          "visit_count": 2197,
+          "realized_selection_rate": 0.022443100559800595
+        },
+        {
+          "id": "temporal_032",
+          "label": "temporal_032",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 931.9354838709677,
+          "duration_variance_seconds2": 175872.00858480748,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 188.71693548387097,
+          "visit_count": 2206,
+          "realized_selection_rate": 0.022535038613982757
+        },
+        {
+          "id": "temporal_033",
+          "label": "temporal_033",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 165.0,
+          "duration_variance_seconds2": 17424.0,
+          "duration_gamma_shape": 1.5625,
+          "duration_gamma_scale": 105.6,
+          "visit_count": 2618,
+          "realized_selection_rate": 0.026743758427654966
+        },
+        {
+          "id": "temporal_034",
+          "label": "temporal_034",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 937.741935483871,
+          "duration_variance_seconds2": 178070.38735691988,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 189.89274193548388,
+          "visit_count": 2057,
+          "realized_selection_rate": 0.02101295305030033
+        },
+        {
+          "id": "temporal_035",
+          "label": "temporal_035",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 943.5483870967741,
+          "duration_variance_seconds2": 180282.42065556708,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 191.06854838709674,
+          "visit_count": 2060,
+          "realized_selection_rate": 0.021043599068361053
+        },
+        {
+          "id": "temporal_036",
+          "label": "temporal_036",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 949.3548387096776,
+          "duration_variance_seconds2": 182508.1084807493,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 192.24435483870974,
+          "visit_count": 2396,
+          "realized_selection_rate": 0.024475953091161688
+        },
+        {
+          "id": "temporal_037",
+          "label": "temporal_037",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 955.1612903225806,
+          "duration_variance_seconds2": 184747.4508324662,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 193.4201612903226,
+          "visit_count": 2194,
+          "realized_selection_rate": 0.022412454541739877
+        },
+        {
+          "id": "temporal_038",
+          "label": "temporal_038",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 495.00000000000006,
+          "duration_variance_seconds2": 88209.0,
+          "duration_gamma_shape": 2.7777777777777786,
+          "duration_gamma_scale": 178.2,
+          "visit_count": 2132,
+          "realized_selection_rate": 0.02177910350181833
+        },
+        {
+          "id": "temporal_039",
+          "label": "temporal_039",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 960.967741935484,
+          "duration_variance_seconds2": 187000.44771071806,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 194.5959677419355,
+          "visit_count": 2164,
+          "realized_selection_rate": 0.022105994361132676
+        },
+        {
+          "id": "temporal_040",
+          "label": "temporal_040",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 966.7741935483871,
+          "duration_variance_seconds2": 189267.09911550468,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 195.7717741935484,
+          "visit_count": 2158,
+          "realized_selection_rate": 0.022044702325011236
+        },
+        {
+          "id": "temporal_041",
+          "label": "temporal_041",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 972.5806451612902,
+          "duration_variance_seconds2": 191547.4050468262,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 196.94758064516128,
+          "visit_count": 1943,
+          "realized_selection_rate": 0.01984840436399297
+        },
+        {
+          "id": "temporal_042",
+          "label": "temporal_042",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 978.3870967741937,
+          "duration_variance_seconds2": 193841.36550468265,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 198.1233870967742,
+          "visit_count": 2347,
+          "realized_selection_rate": 0.023975401462836596
+        },
+        {
+          "id": "temporal_043",
+          "label": "temporal_043",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 984.1935483870967,
+          "duration_variance_seconds2": 196148.98048907387,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 199.2991935483871,
+          "visit_count": 2228,
+          "realized_selection_rate": 0.02275977607976137
+        },
+        {
+          "id": "temporal_044",
+          "label": "temporal_044",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 990.0000000000001,
+          "duration_variance_seconds2": 198470.25000000006,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 200.47500000000002,
+          "visit_count": 2176,
+          "realized_selection_rate": 0.022228578433375557
+        }
+      ],
+      "mean_duration_config": 743.3333333333334,
+      "duration_profiles": {
+        "common": {
+          "mean_multiplier": 1.5,
+          "coefficient_of_variation": 0.45,
+          "element_spread": 0.1
+        },
+        "rare": {
+          "mean_multiplier": 0.75,
+          "coefficient_of_variation": 0.6,
+          "element_spread": 0.1
+        },
+        "unknown": {
+          "mean_multiplier": 0.25,
+          "coefficient_of_variation": 0.8,
+          "element_spread": 0.1
+        }
+      },
+      "mean_duration_empirical": 735.515258091128
+    },
+    {
+      "layer": "ego_maneuver",
+      "n_elements": 20,
+      "construction_mode": "generated",
+      "has_unknown": true,
+      "counts": {
+        "common": 14,
+        "rare": 4,
+        "unknown": 2
+      },
+      "element_proportions": {
+        "common": 0.7,
+        "rare": 0.2,
+        "unknown": 0.1
+      },
+      "configured_selection_class_percentages": {
+        "common": 70.0,
+        "rare": 20.0,
+        "unknown": 10.0
+      },
+      "transition_class_proportions": {
+        "common": 0.7000000000000001,
+        "rare": 0.2,
+        "unknown": 0.1
+      },
+      "designed_unknown_mass": 0.1,
+      "realized_unknown_mass": 0.1,
+      "baseline_unknown_mass": 0.1,
+      "empirical_unknown_occupancy": 0.02053849111876191,
+      "transitions": 1959754,
+      "unknown_selected": 196665,
+      "empirical_unknown_rate": 0.10035188089933736,
+      "conditional_selection_rate": 0.10035188089933736,
+      "episodes": 0,
+      "selected_by_rarity": {
+        "common": 1371062,
+        "rare": 392028,
+        "unknown": 196665
+      },
+      "elements": [
+        {
+          "id": "ego_000",
+          "label": "ego_000",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 20.25,
+          "duration_variance_seconds2": 147.6225,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 7.29,
+          "visit_count": 99022,
+          "realized_selection_rate": 0.05052774453949601
+        },
+        {
+          "id": "ego_001",
+          "label": "ego_001",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 40.5,
+          "duration_variance_seconds2": 332.15062500000005,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 8.201250000000002,
+          "visit_count": 98526,
+          "realized_selection_rate": 0.05027465167839858
+        },
+        {
+          "id": "ego_002",
+          "label": "ego_002",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 41.19230769230769,
+          "duration_variance_seconds2": 343.6032581360947,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 8.341442307692308,
+          "visit_count": 98818,
+          "realized_selection_rate": 0.050423649895012385
+        },
+        {
+          "id": "ego_003",
+          "label": "ego_003",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 41.88461538461539,
+          "duration_variance_seconds2": 355.2500036982249,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 8.481634615384616,
+          "visit_count": 97164,
+          "realized_selection_rate": 0.04957966684611086
+        },
+        {
+          "id": "ego_004",
+          "label": "ego_004",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 42.57692307692307,
+          "duration_variance_seconds2": 367.09086168639044,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 8.621826923076922,
+          "visit_count": 92676,
+          "realized_selection_rate": 0.04728958466747119
+        },
+        {
+          "id": "ego_005",
+          "label": "ego_005",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 43.269230769230774,
+          "duration_variance_seconds2": 379.1258321005919,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 8.762019230769234,
+          "visit_count": 101317,
+          "realized_selection_rate": 0.051698809289936754
+        },
+        {
+          "id": "ego_006",
+          "label": "ego_006",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 43.96153846153846,
+          "duration_variance_seconds2": 391.3549149408284,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 8.902211538461538,
+          "visit_count": 97453,
+          "realized_selection_rate": 0.04972713425912933
+        },
+        {
+          "id": "ego_007",
+          "label": "ego_007",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 6.75,
+          "duration_variance_seconds2": 29.160000000000004,
+          "duration_gamma_shape": 1.5624999999999998,
+          "duration_gamma_scale": 4.32,
+          "visit_count": 98545,
+          "realized_selection_rate": 0.050284346767835775
+        },
+        {
+          "id": "ego_008",
+          "label": "ego_008",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 8.25,
+          "duration_variance_seconds2": 43.56000000000001,
+          "duration_gamma_shape": 1.5624999999999996,
+          "duration_gamma_scale": 5.280000000000001,
+          "visit_count": 98120,
+          "realized_selection_rate": 0.05006748292516156
+        },
+        {
+          "id": "ego_009",
+          "label": "ego_009",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 21.75,
+          "duration_variance_seconds2": 170.30249999999998,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 7.829999999999999,
+          "visit_count": 98704,
+          "realized_selection_rate": 0.050365479358389184
+        },
+        {
+          "id": "ego_010",
+          "label": "ego_010",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 44.65384615384615,
+          "duration_variance_seconds2": 403.7781102071006,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 9.042403846153846,
+          "visit_count": 96821,
+          "realized_selection_rate": 0.04940464496837615
+        },
+        {
+          "id": "ego_011",
+          "label": "ego_011",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 23.249999999999996,
+          "duration_variance_seconds2": 194.60249999999994,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 8.37,
+          "visit_count": 98455,
+          "realized_selection_rate": 0.05023842265997536
+        },
+        {
+          "id": "ego_012",
+          "label": "ego_012",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 45.34615384615385,
+          "duration_variance_seconds2": 416.3954178994083,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 9.182596153846154,
+          "visit_count": 98167,
+          "realized_selection_rate": 0.050091465514822006
+        },
+        {
+          "id": "ego_013",
+          "label": "ego_013",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 24.750000000000004,
+          "duration_variance_seconds2": 220.52250000000004,
+          "duration_gamma_shape": 2.7777777777777786,
+          "duration_gamma_scale": 8.91,
+          "visit_count": 95847,
+          "realized_selection_rate": 0.048907644067753366
+        },
+        {
+          "id": "ego_014",
+          "label": "ego_014",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 46.03846153846153,
+          "duration_variance_seconds2": 429.20683801775147,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 9.322788461538462,
+          "visit_count": 99504,
+          "realized_selection_rate": 0.05077369365048182
+        },
+        {
+          "id": "ego_015",
+          "label": "ego_015",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 46.73076923076923,
+          "duration_variance_seconds2": 442.21237056213033,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 9.462980769230771,
+          "visit_count": 97109,
+          "realized_selection_rate": 0.0495516021135295
+        },
+        {
+          "id": "ego_016",
+          "label": "ego_016",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 47.42307692307693,
+          "duration_variance_seconds2": 455.4120155325445,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 9.60317307692308,
+          "visit_count": 98894,
+          "realized_selection_rate": 0.05046243025276119
+        },
+        {
+          "id": "ego_017",
+          "label": "ego_017",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 48.11538461538461,
+          "duration_variance_seconds2": 468.80577292899403,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 9.743365384615384,
+          "visit_count": 101182,
+          "realized_selection_rate": 0.05162992312814612
+        },
+        {
+          "id": "ego_018",
+          "label": "ego_018",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 48.80769230769231,
+          "duration_variance_seconds2": 482.39364275147926,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 9.883557692307692,
+          "visit_count": 96272,
+          "realized_selection_rate": 0.04912450791042758
+        },
+        {
+          "id": "ego_019",
+          "label": "ego_019",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 49.50000000000001,
+          "duration_variance_seconds2": 496.1756250000001,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 10.02375,
+          "visit_count": 97159,
+          "realized_selection_rate": 0.049577115506785285
+        }
+      ],
+      "mean_duration_config": 36.75,
+      "duration_profiles": {
+        "common": {
+          "mean_multiplier": 1.5,
+          "coefficient_of_variation": 0.45,
+          "element_spread": 0.1
+        },
+        "rare": {
+          "mean_multiplier": 0.75,
+          "coefficient_of_variation": 0.6,
+          "element_spread": 0.1
+        },
+        "unknown": {
+          "mean_multiplier": 0.25,
+          "coefficient_of_variation": 0.8,
+          "element_spread": 0.1
+        }
+      },
+      "mean_duration_empirical": 36.73929717397481
+    },
+    {
+      "layer": "ru_maneuver",
+      "n_elements": 22,
+      "construction_mode": "generated",
+      "has_unknown": true,
+      "counts": {
+        "common": 16,
+        "rare": 4,
+        "unknown": 2
+      },
+      "element_proportions": {
+        "common": 0.7272727272727273,
+        "rare": 0.18181818181818182,
+        "unknown": 0.09090909090909091
+      },
+      "configured_selection_class_percentages": {
+        "common": 70.0,
+        "rare": 20.0,
+        "unknown": 10.0
+      },
+      "transition_class_proportions": {
+        "common": 0.6999999999999997,
+        "rare": 0.2,
+        "unknown": 0.1
+      },
+      "designed_unknown_mass": 0.1,
+      "realized_unknown_mass": 0.1,
+      "baseline_unknown_mass": 0.1,
+      "empirical_unknown_occupancy": 0.020411672022558548,
+      "transitions": 1303675,
+      "unknown_selected": 130173,
+      "empirical_unknown_rate": 0.09985080637428807,
+      "conditional_selection_rate": 0.09985080637428807,
+      "episodes": 0,
+      "selected_by_rarity": {
+        "common": 912576,
+        "rare": 260927,
+        "unknown": 130173
+      },
+      "elements": [
+        {
+          "id": "ru_000",
+          "label": "ru_000",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 60.75,
+          "duration_variance_seconds2": 747.3389062500002,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 12.301875000000003,
+          "visit_count": 55353,
+          "realized_selection_rate": 0.04245916930280223
+        },
+        {
+          "id": "ru_001",
+          "label": "ru_001",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 61.65,
+          "duration_variance_seconds2": 769.64630625,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 12.484124999999999,
+          "visit_count": 58343,
+          "realized_selection_rate": 0.04475268394907937
+        },
+        {
+          "id": "ru_002",
+          "label": "ru_002",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 10.125,
+          "duration_variance_seconds2": 65.61,
+          "duration_gamma_shape": 1.5625,
+          "duration_gamma_scale": 6.4799999999999995,
+          "visit_count": 63476,
+          "realized_selection_rate": 0.0486900119354809
+        },
+        {
+          "id": "ru_003",
+          "label": "ru_003",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 12.375000000000002,
+          "duration_variance_seconds2": 98.01000000000005,
+          "duration_gamma_shape": 1.5624999999999998,
+          "duration_gamma_scale": 7.920000000000003,
+          "visit_count": 66697,
+          "realized_selection_rate": 0.051160717847072434
+        },
+        {
+          "id": "ru_004",
+          "label": "ru_004",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 62.55,
+          "duration_variance_seconds2": 792.2817562500001,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 12.666375000000002,
+          "visit_count": 57549,
+          "realized_selection_rate": 0.044143636915920825
+        },
+        {
+          "id": "ru_005",
+          "label": "ru_005",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 30.375,
+          "duration_variance_seconds2": 332.15062499999993,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 10.934999999999997,
+          "visit_count": 63595,
+          "realized_selection_rate": 0.04878129228427922
+        },
+        {
+          "id": "ru_006",
+          "label": "ru_006",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 63.449999999999996,
+          "duration_variance_seconds2": 815.2452562499999,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 12.848624999999998,
+          "visit_count": 54747,
+          "realized_selection_rate": 0.04199432987950994
+        },
+        {
+          "id": "ru_007",
+          "label": "ru_007",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 64.35000000000001,
+          "duration_variance_seconds2": 838.5368062500002,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 13.030875,
+          "visit_count": 54486,
+          "realized_selection_rate": 0.04179412676155732
+        },
+        {
+          "id": "ru_008",
+          "label": "ru_008",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 65.25,
+          "duration_variance_seconds2": 862.15640625,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 13.213125,
+          "visit_count": 55344,
+          "realized_selection_rate": 0.04245226574701076
+        },
+        {
+          "id": "ru_009",
+          "label": "ru_009",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 32.625,
+          "duration_variance_seconds2": 383.18062499999996,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 11.745,
+          "visit_count": 68828,
+          "realized_selection_rate": 0.05279532644614152
+        },
+        {
+          "id": "ru_010",
+          "label": "ru_010",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 34.87499999999999,
+          "duration_variance_seconds2": 437.85562499999975,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 12.554999999999996,
+          "visit_count": 65443,
+          "realized_selection_rate": 0.050198822406794325
+        },
+        {
+          "id": "ru_011",
+          "label": "ru_011",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 66.15,
+          "duration_variance_seconds2": 886.1040562500001,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 13.395375,
+          "visit_count": 55177,
+          "realized_selection_rate": 0.04232416643399127
+        },
+        {
+          "id": "ru_012",
+          "label": "ru_012",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 67.05,
+          "duration_variance_seconds2": 910.37975625,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 13.577625000000001,
+          "visit_count": 55752,
+          "realized_selection_rate": 0.04276522694289072
+        },
+        {
+          "id": "ru_013",
+          "label": "ru_013",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 67.94999999999999,
+          "duration_variance_seconds2": 934.9835062499998,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 13.759875,
+          "visit_count": 56471,
+          "realized_selection_rate": 0.043316744344453685
+        },
+        {
+          "id": "ru_014",
+          "label": "ru_014",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 68.85,
+          "duration_variance_seconds2": 959.9153062499998,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 13.942124999999999,
+          "visit_count": 61070,
+          "realized_selection_rate": 0.04684446135389468
+        },
+        {
+          "id": "ru_015",
+          "label": "ru_015",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 69.74999999999999,
+          "duration_variance_seconds2": 985.1751562499998,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 14.124374999999999,
+          "visit_count": 55898,
+          "realized_selection_rate": 0.04287721795906345
+        },
+        {
+          "id": "ru_016",
+          "label": "ru_016",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 70.64999999999999,
+          "duration_variance_seconds2": 1010.7630562499997,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 14.306624999999999,
+          "visit_count": 56795,
+          "realized_selection_rate": 0.04356527235294659
+        },
+        {
+          "id": "ru_017",
+          "label": "ru_017",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 71.55,
+          "duration_variance_seconds2": 1036.67900625,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 14.488875,
+          "visit_count": 59415,
+          "realized_selection_rate": 0.04557497415001887
+        },
+        {
+          "id": "ru_018",
+          "label": "ru_018",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 37.125,
+          "duration_variance_seconds2": 496.1756249999999,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 13.364999999999998,
+          "visit_count": 63061,
+          "realized_selection_rate": 0.04837168130731869
+        },
+        {
+          "id": "ru_019",
+          "label": "ru_019",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 72.44999999999999,
+          "duration_variance_seconds2": 1062.9230062499998,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 14.671125,
+          "visit_count": 60024,
+          "realized_selection_rate": 0.04604211475857498
+        },
+        {
+          "id": "ru_020",
+          "label": "ru_020",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 73.35,
+          "duration_variance_seconds2": 1089.49505625,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 14.853375000000002,
+          "visit_count": 56082,
+          "realized_selection_rate": 0.043018357321911276
+        },
+        {
+          "id": "ru_021",
+          "label": "ru_021",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 74.25,
+          "duration_variance_seconds2": 1116.3951562500001,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 15.035625000000001,
+          "visit_count": 60070,
+          "realized_selection_rate": 0.04607739959928694
+        }
+      ],
+      "mean_duration_config": 56.25,
+      "duration_profiles": {
+        "common": {
+          "mean_multiplier": 1.5,
+          "coefficient_of_variation": 0.45,
+          "element_spread": 0.1
+        },
+        "rare": {
+          "mean_multiplier": 0.75,
+          "coefficient_of_variation": 0.6,
+          "element_spread": 0.1
+        },
+        "unknown": {
+          "mean_multiplier": 0.25,
+          "coefficient_of_variation": 0.8,
+          "element_spread": 0.1
+        }
+      },
+      "mean_duration_empirical": 55.228455297395755
+    },
+    {
+      "layer": "environmental_conditions",
+      "n_elements": 22,
+      "construction_mode": "generated",
+      "has_unknown": true,
+      "counts": {
+        "common": 16,
+        "rare": 4,
+        "unknown": 2
+      },
+      "element_proportions": {
+        "common": 0.7272727272727273,
+        "rare": 0.18181818181818182,
+        "unknown": 0.09090909090909091
+      },
+      "configured_selection_class_percentages": {
+        "common": 70.0,
+        "rare": 20.0,
+        "unknown": 10.0
+      },
+      "transition_class_proportions": {
+        "common": 0.7,
+        "rare": 0.2,
+        "unknown": 0.1
+      },
+      "designed_unknown_mass": 0.1,
+      "realized_unknown_mass": 0.1,
+      "baseline_unknown_mass": 0.1,
+      "empirical_unknown_occupancy": 0.01992243078519407,
+      "transitions": 32537,
+      "unknown_selected": 3158,
+      "empirical_unknown_rate": 0.09705873313458524,
+      "conditional_selection_rate": 0.09705873313458524,
+      "episodes": 0,
+      "selected_by_rarity": {
+        "common": 22896,
+        "rare": 6484,
+        "unknown": 3158
+      },
+      "elements": [
+        {
+          "id": "environment_000",
+          "label": "environment_000",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 1215.0,
+          "duration_variance_seconds2": 531441.0,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 437.4,
+          "visit_count": 1589,
+          "realized_selection_rate": 0.04883520806441699
+        },
+        {
+          "id": "environment_001",
+          "label": "environment_001",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2430.0,
+          "duration_variance_seconds2": 1195742.25,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 492.075,
+          "visit_count": 1435,
+          "realized_selection_rate": 0.04410228041059684
+        },
+        {
+          "id": "environment_002",
+          "label": "environment_002",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2466.0,
+          "duration_variance_seconds2": 1231434.09,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 499.365,
+          "visit_count": 1353,
+          "realized_selection_rate": 0.04158215010141988
+        },
+        {
+          "id": "environment_003",
+          "label": "environment_003",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2502.0,
+          "duration_variance_seconds2": 1267650.8100000003,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 506.65500000000014,
+          "visit_count": 1476,
+          "realized_selection_rate": 0.04536234556518532
+        },
+        {
+          "id": "environment_004",
+          "label": "environment_004",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2538.0,
+          "duration_variance_seconds2": 1304392.4100000004,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 513.9450000000002,
+          "visit_count": 1445,
+          "realized_selection_rate": 0.044409613375130615
+        },
+        {
+          "id": "environment_005",
+          "label": "environment_005",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2574.0,
+          "duration_variance_seconds2": 1341658.89,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 521.235,
+          "visit_count": 1476,
+          "realized_selection_rate": 0.04536234556518532
+        },
+        {
+          "id": "environment_006",
+          "label": "environment_006",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2610.0,
+          "duration_variance_seconds2": 1379450.25,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 528.525,
+          "visit_count": 1410,
+          "realized_selection_rate": 0.0433339479992624
+        },
+        {
+          "id": "environment_007",
+          "label": "environment_007",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2646.0,
+          "duration_variance_seconds2": 1417766.4900000002,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 535.815,
+          "visit_count": 1395,
+          "realized_selection_rate": 0.04287294855246174
+        },
+        {
+          "id": "environment_008",
+          "label": "environment_008",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 405.0,
+          "duration_variance_seconds2": 104976.0,
+          "duration_gamma_shape": 1.5625,
+          "duration_gamma_scale": 259.2,
+          "visit_count": 1552,
+          "realized_selection_rate": 0.04769807609564202
+        },
+        {
+          "id": "environment_009",
+          "label": "environment_009",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 1305.0,
+          "duration_variance_seconds2": 613089.0,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 469.8,
+          "visit_count": 1658,
+          "realized_selection_rate": 0.05095580551970004
+        },
+        {
+          "id": "environment_010",
+          "label": "environment_010",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 495.00000000000006,
+          "duration_variance_seconds2": 156816.00000000006,
+          "duration_gamma_shape": 1.5624999999999998,
+          "duration_gamma_scale": 316.80000000000007,
+          "visit_count": 1606,
+          "realized_selection_rate": 0.04935767410412441
+        },
+        {
+          "id": "environment_011",
+          "label": "environment_011",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2682.0,
+          "duration_variance_seconds2": 1456607.6100000003,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 543.1050000000001,
+          "visit_count": 1477,
+          "realized_selection_rate": 0.0453930788616387
+        },
+        {
+          "id": "environment_012",
+          "label": "environment_012",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 1394.9999999999998,
+          "duration_variance_seconds2": 700568.9999999998,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 502.19999999999993,
+          "visit_count": 1605,
+          "realized_selection_rate": 0.049326940807671034
+        },
+        {
+          "id": "environment_013",
+          "label": "environment_013",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 1485.0000000000002,
+          "duration_variance_seconds2": 793881.0000000002,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 534.6,
+          "visit_count": 1632,
+          "realized_selection_rate": 0.050156739811912224
+        },
+        {
+          "id": "environment_014",
+          "label": "environment_014",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2718.0,
+          "duration_variance_seconds2": 1495973.6100000003,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 550.3950000000001,
+          "visit_count": 1453,
+          "realized_selection_rate": 0.04465547974675764
+        },
+        {
+          "id": "environment_015",
+          "label": "environment_015",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2754.0,
+          "duration_variance_seconds2": 1535864.49,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 557.685,
+          "visit_count": 1461,
+          "realized_selection_rate": 0.04490134611838466
+        },
+        {
+          "id": "environment_016",
+          "label": "environment_016",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2789.9999999999995,
+          "duration_variance_seconds2": 1576280.2499999995,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 564.9749999999999,
+          "visit_count": 1369,
+          "realized_selection_rate": 0.04207388284467392
+        },
+        {
+          "id": "environment_017",
+          "label": "environment_017",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2826.0,
+          "duration_variance_seconds2": 1617220.8900000001,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 572.2650000000001,
+          "visit_count": 1514,
+          "realized_selection_rate": 0.04653021083041367
+        },
+        {
+          "id": "environment_018",
+          "label": "environment_018",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2862.0,
+          "duration_variance_seconds2": 1658686.4100000001,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 579.5550000000001,
+          "visit_count": 1380,
+          "realized_selection_rate": 0.042411949105661075
+        },
+        {
+          "id": "environment_019",
+          "label": "environment_019",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2898.0,
+          "duration_variance_seconds2": 1700676.8100000003,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 586.8450000000001,
+          "visit_count": 1498,
+          "realized_selection_rate": 0.04603847808715963
+        },
+        {
+          "id": "environment_020",
+          "label": "environment_020",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2934.0,
+          "duration_variance_seconds2": 1743192.0899999999,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 594.135,
+          "visit_count": 1333,
+          "realized_selection_rate": 0.040967484172352325
+        },
+        {
+          "id": "environment_021",
+          "label": "environment_021",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 2970.0000000000005,
+          "duration_variance_seconds2": 1786232.2500000007,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 601.4250000000002,
+          "visit_count": 1421,
+          "realized_selection_rate": 0.04367201426024955
+        }
+      ],
+      "mean_duration_config": 2250.0,
+      "duration_profiles": {
+        "common": {
+          "mean_multiplier": 1.5,
+          "coefficient_of_variation": 0.45,
+          "element_spread": 0.1
+        },
+        "rare": {
+          "mean_multiplier": 0.75,
+          "coefficient_of_variation": 0.6,
+          "element_spread": 0.1
+        },
+        "unknown": {
+          "mean_multiplier": 0.25,
+          "coefficient_of_variation": 0.8,
+          "element_spread": 0.1
+        }
+      },
+      "mean_duration_empirical": 2212.833672808499
+    },
+    {
+      "layer": "triggering_conditions",
+      "n_elements": 83,
+      "construction_mode": "generated",
+      "has_unknown": true,
+      "counts": {
+        "common": 58,
+        "rare": 17,
+        "unknown": 8
+      },
+      "element_proportions": {
+        "common": 0.6987951807228916,
+        "rare": 0.20481927710843373,
+        "unknown": 0.0963855421686747
+      },
+      "configured_selection_class_percentages": {
+        "common": 70.0,
+        "rare": 20.0,
+        "unknown": 10.0
+      },
+      "transition_class_proportions": {
+        "common": 0.6999999999999998,
+        "rare": 0.2,
+        "unknown": 0.10000000000000002
+      },
+      "designed_unknown_mass": 0.09999999999999999,
+      "realized_unknown_mass": 0.10000000000000002,
+      "baseline_unknown_mass": 0.10000000000000002,
+      "empirical_unknown_occupancy": 0.020377618367991908,
+      "transitions": 489222,
+      "unknown_selected": 49051,
+      "empirical_unknown_rate": 0.10026327515933461,
+      "conditional_selection_rate": 0.10026327515933461,
+      "episodes": 0,
+      "selected_by_rarity": {
+        "common": 342965,
+        "rare": 97206,
+        "unknown": 49052
+      },
+      "elements": [
+        {
+          "id": "trigger_000",
+          "label": "trigger_000",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 81.0,
+          "duration_variance_seconds2": 2361.96,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 29.16,
+          "visit_count": 5592,
+          "realized_selection_rate": 0.011430370199275177
+        },
+        {
+          "id": "trigger_001",
+          "label": "trigger_001",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 27.0,
+          "duration_variance_seconds2": 466.56000000000006,
+          "duration_gamma_shape": 1.5624999999999998,
+          "duration_gamma_scale": 17.28,
+          "visit_count": 5944,
+          "realized_selection_rate": 0.012149878480774616
+        },
+        {
+          "id": "trigger_002",
+          "label": "trigger_002",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 162.0,
+          "duration_variance_seconds2": 5314.410000000001,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 32.80500000000001,
+          "visit_count": 6037,
+          "realized_selection_rate": 0.012339975839238956
+        },
+        {
+          "id": "trigger_003",
+          "label": "trigger_003",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 162.63157894736844,
+          "duration_variance_seconds2": 5355.928670360112,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 32.93289473684211,
+          "visit_count": 5591,
+          "realized_selection_rate": 0.01142832614165728
+        },
+        {
+          "id": "trigger_004",
+          "label": "trigger_004",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 82.125,
+          "duration_variance_seconds2": 2428.0256249999998,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 29.564999999999998,
+          "visit_count": 6214,
+          "realized_selection_rate": 0.012701774037606571
+        },
+        {
+          "id": "trigger_005",
+          "label": "trigger_005",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 83.25,
+          "duration_variance_seconds2": 2495.0024999999996,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 29.969999999999995,
+          "visit_count": 5650,
+          "realized_selection_rate": 0.011548925541113152
+        },
+        {
+          "id": "trigger_006",
+          "label": "trigger_006",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 163.26315789473682,
+          "duration_variance_seconds2": 5397.608891966757,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 33.0607894736842,
+          "visit_count": 5841,
+          "realized_selection_rate": 0.011939340546131315
+        },
+        {
+          "id": "trigger_007",
+          "label": "trigger_007",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 84.375,
+          "duration_variance_seconds2": 2562.890625,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 30.375,
+          "visit_count": 5578,
+          "realized_selection_rate": 0.011401753392624631
+        },
+        {
+          "id": "trigger_008",
+          "label": "trigger_008",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 163.89473684210526,
+          "duration_variance_seconds2": 5439.450664819945,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 33.18868421052632,
+          "visit_count": 6107,
+          "realized_selection_rate": 0.012483059872491686
+        },
+        {
+          "id": "trigger_009",
+          "label": "trigger_009",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 27.857142857142858,
+          "duration_variance_seconds2": 496.65306122448993,
+          "duration_gamma_shape": 1.5624999999999996,
+          "duration_gamma_scale": 17.828571428571433,
+          "visit_count": 6095,
+          "realized_selection_rate": 0.012458531181076931
+        },
+        {
+          "id": "trigger_010",
+          "label": "trigger_010",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 164.52631578947367,
+          "duration_variance_seconds2": 5481.453988919666,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 33.31657894736841,
+          "visit_count": 5795,
+          "realized_selection_rate": 0.011845313895708092
+        },
+        {
+          "id": "trigger_011",
+          "label": "trigger_011",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 85.5,
+          "duration_variance_seconds2": 2631.6899999999996,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 30.779999999999994,
+          "visit_count": 5595,
+          "realized_selection_rate": 0.011436502372128865
+        },
+        {
+          "id": "trigger_012",
+          "label": "trigger_012",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 165.1578947368421,
+          "duration_variance_seconds2": 5523.618864265928,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 33.44447368421053,
+          "visit_count": 6210,
+          "realized_selection_rate": 0.012693597807134988
+        },
+        {
+          "id": "trigger_013",
+          "label": "trigger_013",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 165.78947368421052,
+          "duration_variance_seconds2": 5565.945290858726,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 33.57236842105264,
+          "visit_count": 6035,
+          "realized_selection_rate": 0.012335887724003165
+        },
+        {
+          "id": "trigger_014",
+          "label": "trigger_014",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 86.625,
+          "duration_variance_seconds2": 2701.400625,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 31.185000000000002,
+          "visit_count": 6053,
+          "realized_selection_rate": 0.012372680761125295
+        },
+        {
+          "id": "trigger_015",
+          "label": "trigger_015",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 166.42105263157896,
+          "duration_variance_seconds2": 5608.4332686980615,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 33.70026315789474,
+          "visit_count": 6352,
+          "realized_selection_rate": 0.012983853988876238
+        },
+        {
+          "id": "trigger_016",
+          "label": "trigger_016",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 167.05263157894737,
+          "duration_variance_seconds2": 5651.0827977839335,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 33.82815789473684,
+          "visit_count": 5832,
+          "realized_selection_rate": 0.01192094402757025
+        },
+        {
+          "id": "trigger_017",
+          "label": "trigger_017",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 87.75,
+          "duration_variance_seconds2": 2772.0225,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 31.59,
+          "visit_count": 5500,
+          "realized_selection_rate": 0.011242316898428733
+        },
+        {
+          "id": "trigger_018",
+          "label": "trigger_018",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 88.875,
+          "duration_variance_seconds2": 2843.5556249999995,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 31.994999999999994,
+          "visit_count": 5764,
+          "realized_selection_rate": 0.011781948109553311
+        },
+        {
+          "id": "trigger_019",
+          "label": "trigger_019",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 167.68421052631578,
+          "duration_variance_seconds2": 5693.893878116343,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 33.95605263157895,
+          "visit_count": 5660,
+          "realized_selection_rate": 0.011569366117292115
+        },
+        {
+          "id": "trigger_020",
+          "label": "trigger_020",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 168.31578947368422,
+          "duration_variance_seconds2": 5736.866509695291,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 34.08394736842105,
+          "visit_count": 5884,
+          "realized_selection_rate": 0.012027235023700848
+        },
+        {
+          "id": "trigger_021",
+          "label": "trigger_021",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 168.94736842105263,
+          "duration_variance_seconds2": 5780.000692520775,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 34.21184210526316,
+          "visit_count": 5477,
+          "realized_selection_rate": 0.011195303573217122
+        },
+        {
+          "id": "trigger_022",
+          "label": "trigger_022",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 169.57894736842107,
+          "duration_variance_seconds2": 5823.2964265928,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 34.339736842105275,
+          "visit_count": 5714,
+          "realized_selection_rate": 0.011679745228658505
+        },
+        {
+          "id": "trigger_023",
+          "label": "trigger_023",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 90.0,
+          "duration_variance_seconds2": 2916.0,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 32.4,
+          "visit_count": 5543,
+          "realized_selection_rate": 0.011330211375998267
+        },
+        {
+          "id": "trigger_024",
+          "label": "trigger_024",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 170.21052631578948,
+          "duration_variance_seconds2": 5866.753711911358,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 34.46763157894737,
+          "visit_count": 6249,
+          "realized_selection_rate": 0.012773316054232937
+        },
+        {
+          "id": "trigger_025",
+          "label": "trigger_025",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 91.125,
+          "duration_variance_seconds2": 2989.3556249999997,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 32.805,
+          "visit_count": 5124,
+          "realized_selection_rate": 0.010473751234099786
+        },
+        {
+          "id": "trigger_026",
+          "label": "trigger_026",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 170.8421052631579,
+          "duration_variance_seconds2": 5910.3725484764545,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 34.59552631578948,
+          "visit_count": 6098,
+          "realized_selection_rate": 0.01246466335393062
+        },
+        {
+          "id": "trigger_027",
+          "label": "trigger_027",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 28.714285714285715,
+          "duration_variance_seconds2": 527.6865306122451,
+          "duration_gamma_shape": 1.5624999999999998,
+          "duration_gamma_scale": 18.37714285714286,
+          "visit_count": 6031,
+          "realized_selection_rate": 0.01232771149353158
+        },
+        {
+          "id": "trigger_028",
+          "label": "trigger_028",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 92.24999999999999,
+          "duration_variance_seconds2": 3063.6224999999986,
+          "duration_gamma_shape": 2.7777777777777786,
+          "duration_gamma_scale": 33.20999999999999,
+          "visit_count": 6335,
+          "realized_selection_rate": 0.012949105009372004
+        },
+        {
+          "id": "trigger_029",
+          "label": "trigger_029",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 171.4736842105263,
+          "duration_variance_seconds2": 5954.152936288088,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 34.72342105263158,
+          "visit_count": 5416,
+          "realized_selection_rate": 0.011070616058525457
+        },
+        {
+          "id": "trigger_030",
+          "label": "trigger_030",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 29.571428571428573,
+          "duration_variance_seconds2": 559.6604081632654,
+          "duration_gamma_shape": 1.5625,
+          "duration_gamma_scale": 18.92571428571429,
+          "visit_count": 6650,
+          "realized_selection_rate": 0.013592983159009286
+        },
+        {
+          "id": "trigger_031",
+          "label": "trigger_031",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 172.10526315789474,
+          "duration_variance_seconds2": 5998.09487534626,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 34.85131578947368,
+          "visit_count": 5650,
+          "realized_selection_rate": 0.011548925541113152
+        },
+        {
+          "id": "trigger_032",
+          "label": "trigger_032",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 93.37500000000001,
+          "duration_variance_seconds2": 3138.8006250000008,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 33.615,
+          "visit_count": 6120,
+          "realized_selection_rate": 0.012509632621524335
+        },
+        {
+          "id": "trigger_033",
+          "label": "trigger_033",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 172.73684210526315,
+          "duration_variance_seconds2": 6042.198365650969,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 34.97921052631579,
+          "visit_count": 5923,
+          "realized_selection_rate": 0.012106953270798797
+        },
+        {
+          "id": "trigger_034",
+          "label": "trigger_034",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 173.3684210526316,
+          "duration_variance_seconds2": 6086.463407202218,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 35.107105263157905,
+          "visit_count": 5475,
+          "realized_selection_rate": 0.011191215457981329
+        },
+        {
+          "id": "trigger_035",
+          "label": "trigger_035",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 174.0,
+          "duration_variance_seconds2": 6130.889999999999,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 35.235,
+          "visit_count": 5671,
+          "realized_selection_rate": 0.011591850751088971
+        },
+        {
+          "id": "trigger_036",
+          "label": "trigger_036",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 174.6315789473684,
+          "duration_variance_seconds2": 6175.478144044321,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 35.36289473684211,
+          "visit_count": 5206,
+          "realized_selection_rate": 0.01064136395876727
+        },
+        {
+          "id": "trigger_037",
+          "label": "trigger_037",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 175.26315789473685,
+          "duration_variance_seconds2": 6220.227839335182,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 35.49078947368422,
+          "visit_count": 6041,
+          "realized_selection_rate": 0.01234815206971054
+        },
+        {
+          "id": "trigger_038",
+          "label": "trigger_038",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 175.89473684210526,
+          "duration_variance_seconds2": 6265.139085872575,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 35.61868421052631,
+          "visit_count": 5891,
+          "realized_selection_rate": 0.012041543427026121
+        },
+        {
+          "id": "trigger_039",
+          "label": "trigger_039",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 176.52631578947367,
+          "duration_variance_seconds2": 6310.211883656509,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 35.74657894736842,
+          "visit_count": 5599,
+          "realized_selection_rate": 0.01144467860260045
+        },
+        {
+          "id": "trigger_040",
+          "label": "trigger_040",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 177.1578947368421,
+          "duration_variance_seconds2": 6355.4462326869825,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 35.874473684210535,
+          "visit_count": 6052,
+          "realized_selection_rate": 0.012370636703507399
+        },
+        {
+          "id": "trigger_041",
+          "label": "trigger_041",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 177.78947368421052,
+          "duration_variance_seconds2": 6400.842132963988,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 36.00236842105262,
+          "visit_count": 5636,
+          "realized_selection_rate": 0.011520308734462607
+        },
+        {
+          "id": "trigger_042",
+          "label": "trigger_042",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 178.42105263157893,
+          "duration_variance_seconds2": 6446.3995844875335,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 36.13026315789473,
+          "visit_count": 5308,
+          "realized_selection_rate": 0.010849857835792676
+        },
+        {
+          "id": "trigger_043",
+          "label": "trigger_043",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 179.05263157894737,
+          "duration_variance_seconds2": 6492.118587257619,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 36.25815789473685,
+          "visit_count": 5701,
+          "realized_selection_rate": 0.011653172479625856
+        },
+        {
+          "id": "trigger_044",
+          "label": "trigger_044",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 179.68421052631578,
+          "duration_variance_seconds2": 6537.999141274237,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 36.38605263157894,
+          "visit_count": 5960,
+          "realized_selection_rate": 0.012182583402660953
+        },
+        {
+          "id": "trigger_045",
+          "label": "trigger_045",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 180.31578947368422,
+          "duration_variance_seconds2": 6584.0412465373975,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 36.51394736842106,
+          "visit_count": 5838,
+          "realized_selection_rate": 0.011933208373277627
+        },
+        {
+          "id": "trigger_046",
+          "label": "trigger_046",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 180.94736842105263,
+          "duration_variance_seconds2": 6630.2449030470925,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 36.641842105263166,
+          "visit_count": 6499,
+          "realized_selection_rate": 0.01328433045870697
+        },
+        {
+          "id": "trigger_047",
+          "label": "trigger_047",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 181.57894736842107,
+          "duration_variance_seconds2": 6676.610110803325,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 36.76973684210527,
+          "visit_count": 5678,
+          "realized_selection_rate": 0.011606159154414245
+        },
+        {
+          "id": "trigger_048",
+          "label": "trigger_048",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 182.21052631578948,
+          "duration_variance_seconds2": 6723.136869806095,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 36.89763157894737,
+          "visit_count": 6356,
+          "realized_selection_rate": 0.012992030219347823
+        },
+        {
+          "id": "trigger_049",
+          "label": "trigger_049",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 182.8421052631579,
+          "duration_variance_seconds2": 6769.825180055403,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 37.02552631578948,
+          "visit_count": 5929,
+          "realized_selection_rate": 0.012119217616506174
+        },
+        {
+          "id": "trigger_050",
+          "label": "trigger_050",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 30.428571428571427,
+          "duration_variance_seconds2": 592.574693877551,
+          "duration_gamma_shape": 1.5625,
+          "duration_gamma_scale": 19.474285714285713,
+          "visit_count": 5948,
+          "realized_selection_rate": 0.0121580547112462
+        },
+        {
+          "id": "trigger_051",
+          "label": "trigger_051",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 183.47368421052633,
+          "duration_variance_seconds2": 6816.675041551247,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 37.15342105263158,
+          "visit_count": 5680,
+          "realized_selection_rate": 0.011610247269650037
+        },
+        {
+          "id": "trigger_052",
+          "label": "trigger_052",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 184.10526315789474,
+          "duration_variance_seconds2": 6863.686454293629,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 37.28131578947369,
+          "visit_count": 5918,
+          "realized_selection_rate": 0.012096732982709317
+        },
+        {
+          "id": "trigger_053",
+          "label": "trigger_053",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 184.73684210526318,
+          "duration_variance_seconds2": 6910.859418282552,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 37.4092105263158,
+          "visit_count": 5991,
+          "realized_selection_rate": 0.012245949188815735
+        },
+        {
+          "id": "trigger_054",
+          "label": "trigger_054",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 185.3684210526316,
+          "duration_variance_seconds2": 6958.193933518006,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 37.5371052631579,
+          "visit_count": 5742,
+          "realized_selection_rate": 0.011736978841959598
+        },
+        {
+          "id": "trigger_055",
+          "label": "trigger_055",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 185.99999999999997,
+          "duration_variance_seconds2": 7005.689999999998,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 37.66499999999999,
+          "visit_count": 5481,
+          "realized_selection_rate": 0.011203479803688706
+        },
+        {
+          "id": "trigger_056",
+          "label": "trigger_056",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 186.6315789473684,
+          "duration_variance_seconds2": 7053.347617728532,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 37.79289473684211,
+          "visit_count": 5946,
+          "realized_selection_rate": 0.012153966596010408
+        },
+        {
+          "id": "trigger_057",
+          "label": "trigger_057",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 187.26315789473682,
+          "duration_variance_seconds2": 7101.166786703599,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 37.92078947368421,
+          "visit_count": 6022,
+          "realized_selection_rate": 0.012309314974970514
+        },
+        {
+          "id": "trigger_058",
+          "label": "trigger_058",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 94.5,
+          "duration_variance_seconds2": 3214.8899999999994,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 34.019999999999996,
+          "visit_count": 5691,
+          "realized_selection_rate": 0.011632731903446894
+        },
+        {
+          "id": "trigger_059",
+          "label": "trigger_059",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 95.625,
+          "duration_variance_seconds2": 3291.890625,
+          "duration_gamma_shape": 2.7777777777777777,
+          "duration_gamma_scale": 34.425,
+          "visit_count": 5036,
+          "realized_selection_rate": 0.010293874163724927
+        },
+        {
+          "id": "trigger_060",
+          "label": "trigger_060",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 187.89473684210526,
+          "duration_variance_seconds2": 7149.147506925208,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 38.04868421052632,
+          "visit_count": 6558,
+          "realized_selection_rate": 0.013404929858162842
+        },
+        {
+          "id": "trigger_061",
+          "label": "trigger_061",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 188.52631578947367,
+          "duration_variance_seconds2": 7197.289778393352,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 38.17657894736843,
+          "visit_count": 5713,
+          "realized_selection_rate": 0.01167770117104061
+        },
+        {
+          "id": "trigger_062",
+          "label": "trigger_062",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 31.28571428571429,
+          "duration_variance_seconds2": 626.4293877551022,
+          "duration_gamma_shape": 1.5624999999999998,
+          "duration_gamma_scale": 20.022857142857145,
+          "visit_count": 5773,
+          "realized_selection_rate": 0.011800344628114377
+        },
+        {
+          "id": "trigger_063",
+          "label": "trigger_063",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 189.15789473684208,
+          "duration_variance_seconds2": 7245.593601108031,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 38.30447368421052,
+          "visit_count": 6238,
+          "realized_selection_rate": 0.012750831420436079
+        },
+        {
+          "id": "trigger_064",
+          "label": "trigger_064",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 96.75,
+          "duration_variance_seconds2": 3369.8025,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 34.83,
+          "visit_count": 5786,
+          "realized_selection_rate": 0.011826917377147026
+        },
+        {
+          "id": "trigger_065",
+          "label": "trigger_065",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 189.78947368421052,
+          "duration_variance_seconds2": 7294.0589750692525,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 38.43236842105264,
+          "visit_count": 5371,
+          "realized_selection_rate": 0.010978633465720132
+        },
+        {
+          "id": "trigger_066",
+          "label": "trigger_066",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 97.87499999999999,
+          "duration_variance_seconds2": 3448.6256249999983,
+          "duration_gamma_shape": 2.777777777777778,
+          "duration_gamma_scale": 35.234999999999985,
+          "visit_count": 5735,
+          "realized_selection_rate": 0.011722670438634324
+        },
+        {
+          "id": "trigger_067",
+          "label": "trigger_067",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 190.42105263157893,
+          "duration_variance_seconds2": 7342.685900277008,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 38.56026315789474,
+          "visit_count": 6436,
+          "realized_selection_rate": 0.013155554828779514
+        },
+        {
+          "id": "trigger_068",
+          "label": "trigger_068",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 191.05263157894737,
+          "duration_variance_seconds2": 7391.474376731302,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 38.68815789473684,
+          "visit_count": 6093,
+          "realized_selection_rate": 0.01245444306584114
+        },
+        {
+          "id": "trigger_069",
+          "label": "trigger_069",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 191.68421052631578,
+          "duration_variance_seconds2": 7440.424404432133,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 38.81605263157895,
+          "visit_count": 5719,
+          "realized_selection_rate": 0.011689965516747986
+        },
+        {
+          "id": "trigger_070",
+          "label": "trigger_070",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 192.31578947368422,
+          "duration_variance_seconds2": 7489.535983379504,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 38.943947368421064,
+          "visit_count": 6495,
+          "realized_selection_rate": 0.013276154228235386
+        },
+        {
+          "id": "trigger_071",
+          "label": "trigger_071",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 192.94736842105263,
+          "duration_variance_seconds2": 7538.809113573407,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 39.07184210526316,
+          "visit_count": 5769,
+          "realized_selection_rate": 0.011792168397642792
+        },
+        {
+          "id": "trigger_072",
+          "label": "trigger_072",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 32.14285714285714,
+          "duration_variance_seconds2": 661.2244897959182,
+          "duration_gamma_shape": 1.5625,
+          "duration_gamma_scale": 20.57142857142857,
+          "visit_count": 6192,
+          "realized_selection_rate": 0.012656804770012858
+        },
+        {
+          "id": "trigger_073",
+          "label": "trigger_073",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 193.57894736842104,
+          "duration_variance_seconds2": 7588.24379501385,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 39.19973684210527,
+          "visit_count": 6318,
+          "realized_selection_rate": 0.01291435602986777
+        },
+        {
+          "id": "trigger_074",
+          "label": "trigger_074",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 194.21052631578948,
+          "duration_variance_seconds2": 7637.840027700833,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 39.327631578947376,
+          "visit_count": 5853,
+          "realized_selection_rate": 0.011963869237546068
+        },
+        {
+          "id": "trigger_075",
+          "label": "trigger_075",
+          "description": "",
+          "rarity": "rare",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 99.00000000000001,
+          "duration_variance_seconds2": 3528.3600000000006,
+          "duration_gamma_shape": 2.7777777777777786,
+          "duration_gamma_scale": 35.64,
+          "visit_count": 5890,
+          "realized_selection_rate": 0.012039499369408225
+        },
+        {
+          "id": "trigger_076",
+          "label": "trigger_076",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 194.8421052631579,
+          "duration_variance_seconds2": 7687.597811634349,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 39.45552631578947,
+          "visit_count": 6002,
+          "realized_selection_rate": 0.012268433822612591
+        },
+        {
+          "id": "trigger_077",
+          "label": "trigger_077",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 195.47368421052633,
+          "duration_variance_seconds2": 7737.517146814406,
+          "duration_gamma_shape": 4.938271604938271,
+          "duration_gamma_scale": 39.583421052631586,
+          "visit_count": 5803,
+          "realized_selection_rate": 0.01186166635665126
+        },
+        {
+          "id": "trigger_078",
+          "label": "trigger_078",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 196.10526315789474,
+          "duration_variance_seconds2": 7787.598033240999,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 39.711315789473694,
+          "visit_count": 5699,
+          "realized_selection_rate": 0.011649084364390064
+        },
+        {
+          "id": "trigger_079",
+          "label": "trigger_079",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 196.73684210526318,
+          "duration_variance_seconds2": 7837.840470914129,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 39.83921052631579,
+          "visit_count": 6541,
+          "realized_selection_rate": 0.013370180878658608
+        },
+        {
+          "id": "trigger_080",
+          "label": "trigger_080",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 197.3684210526316,
+          "duration_variance_seconds2": 7888.244459833797,
+          "duration_gamma_shape": 4.93827160493827,
+          "duration_gamma_scale": 39.967105263157904,
+          "visit_count": 6271,
+          "realized_selection_rate": 0.01281828532182665
+        },
+        {
+          "id": "trigger_081",
+          "label": "trigger_081",
+          "description": "",
+          "rarity": "unknown",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 33.0,
+          "duration_variance_seconds2": 696.9600000000002,
+          "duration_gamma_shape": 1.5624999999999996,
+          "duration_gamma_scale": 21.120000000000005,
+          "visit_count": 6419,
+          "realized_selection_rate": 0.01312080584927528
+        },
+        {
+          "id": "trigger_082",
+          "label": "trigger_082",
+          "description": "",
+          "rarity": "common",
+          "duration_distribution": "gamma",
+          "duration_mean_seconds": 198.00000000000003,
+          "duration_variance_seconds2": 7938.810000000001,
+          "duration_gamma_shape": 4.938271604938272,
+          "duration_gamma_scale": 40.095,
+          "visit_count": 6595,
+          "realized_selection_rate": 0.013480559990024999
+        }
+      ],
+      "mean_duration_config": 147.10843373493975,
+      "duration_profiles": {
+        "common": {
+          "mean_multiplier": 1.5,
+          "coefficient_of_variation": 0.45,
+          "element_spread": 0.1
+        },
+        "rare": {
+          "mean_multiplier": 0.75,
+          "coefficient_of_variation": 0.6,
+          "element_spread": 0.1
+        },
+        "unknown": {
+          "mean_multiplier": 0.25,
+          "coefficient_of_variation": 0.8,
+          "element_spread": 0.1
+        }
+      },
+      "mean_duration_empirical": 147.17253431619497
+    }
+  ],
+  "street_composition": {
+    "elements": [
+      "street_000",
+      "street_001",
+      "street_002",
+      "street_003",
+      "street_004",
+      "street_005",
+      "street_006",
+      "street_007",
+      "street_008",
+      "street_009",
+      "street_010",
+      "street_011"
+    ],
+    "configured_probabilities": [
+      0.09888603685011568,
+      0.08174300016141949,
+      0.07760294978899171,
+      0.07910380496744124,
+      0.10111396314988433,
+      0.07758642494692747,
+      0.07964881499872983,
+      0.07562027517288898,
+      0.07506787990068219,
+      0.1,
+      0.07674557729957532,
+      0.07688127276334374
+    ],
+    "empirical_visit_share": [
+      0.0978640895280844,
+      0.08167045807315125,
+      0.07882563092566298,
+      0.07926329664066117,
+      0.10121274116144267,
+      0.07674417421131112,
+      0.0793345445477539,
+      0.07417416041975196,
+      0.07560420769782744,
+      0.10190995282370723,
+      0.07699354188613566,
+      0.0764032020845102
+    ]
+  }
+}

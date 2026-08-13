@@ -1,0 +1,205 @@
+{
+  "description": "Representative per-layer Gamma duration distributions. Curves are theoretical before min_duration_seconds clamping.",
+  "min_duration_seconds": 1.0,
+  "selection": "element nearest the median configured mean per rarity",
+  "layers": [
+    {
+      "layer": "street",
+      "file": "street.png",
+      "elements": [
+        {
+          "id": "street_006",
+          "label": "street_006",
+          "rarity": "common",
+          "mean_seconds": 450.0,
+          "variance_seconds2": 41006.25,
+          "gamma_shape": 4.938271604938271,
+          "gamma_scale": 91.125
+        },
+        {
+          "id": "street_000",
+          "label": "street_000",
+          "rarity": "rare",
+          "mean_seconds": 202.5,
+          "variance_seconds2": 14762.25,
+          "gamma_shape": 2.7777777777777777,
+          "gamma_scale": 72.9
+        },
+        {
+          "id": "street_009",
+          "label": "street_009",
+          "rarity": "unknown",
+          "mean_seconds": 75.0,
+          "variance_seconds2": 3600.0,
+          "gamma_shape": 1.5625,
+          "gamma_scale": 48.0
+        }
+      ]
+    },
+    {
+      "layer": "temporal_modifications",
+      "file": "temporal_modifications.png",
+      "elements": [
+        {
+          "id": "temporal_022",
+          "label": "temporal_022",
+          "rarity": "common",
+          "mean_seconds": 897.0967741935484,
+          "variance_seconds2": 162968.48100936523,
+          "gamma_shape": 4.938271604938272,
+          "gamma_scale": 181.66209677419354
+        },
+        {
+          "id": "temporal_017",
+          "label": "temporal_017",
+          "rarity": "rare",
+          "mean_seconds": 450.0,
+          "variance_seconds2": 72900.0,
+          "gamma_shape": 2.7777777777777777,
+          "gamma_scale": 162.0
+        },
+        {
+          "id": "temporal_030",
+          "label": "temporal_030",
+          "rarity": "unknown",
+          "mean_seconds": 154.99999999999997,
+          "variance_seconds2": 15375.999999999996,
+          "gamma_shape": 1.5625,
+          "gamma_scale": 99.19999999999999
+        }
+      ]
+    },
+    {
+      "layer": "ego_maneuver",
+      "file": "ego_maneuver.png",
+      "elements": [
+        {
+          "id": "ego_010",
+          "label": "ego_010",
+          "rarity": "common",
+          "mean_seconds": 44.65384615384615,
+          "variance_seconds2": 403.7781102071006,
+          "gamma_shape": 4.938271604938271,
+          "gamma_scale": 9.042403846153846
+        },
+        {
+          "id": "ego_011",
+          "label": "ego_011",
+          "rarity": "rare",
+          "mean_seconds": 23.249999999999996,
+          "variance_seconds2": 194.60249999999994,
+          "gamma_shape": 2.777777777777778,
+          "gamma_scale": 8.37
+        },
+        {
+          "id": "ego_007",
+          "label": "ego_007",
+          "rarity": "unknown",
+          "mean_seconds": 6.75,
+          "variance_seconds2": 29.160000000000004,
+          "gamma_shape": 1.5624999999999998,
+          "gamma_scale": 4.32
+        }
+      ]
+    },
+    {
+      "layer": "ru_maneuver",
+      "file": "ru_maneuver.png",
+      "elements": [
+        {
+          "id": "ru_013",
+          "label": "ru_013",
+          "rarity": "common",
+          "mean_seconds": 67.94999999999999,
+          "variance_seconds2": 934.9835062499998,
+          "gamma_shape": 4.938271604938271,
+          "gamma_scale": 13.759875
+        },
+        {
+          "id": "ru_010",
+          "label": "ru_010",
+          "rarity": "rare",
+          "mean_seconds": 34.87499999999999,
+          "variance_seconds2": 437.85562499999975,
+          "gamma_shape": 2.777777777777778,
+          "gamma_scale": 12.554999999999996
+        },
+        {
+          "id": "ru_002",
+          "label": "ru_002",
+          "rarity": "unknown",
+          "mean_seconds": 10.125,
+          "variance_seconds2": 65.61,
+          "gamma_shape": 1.5625,
+          "gamma_scale": 6.4799999999999995
+        }
+      ]
+    },
+    {
+      "layer": "environmental_conditions",
+      "file": "environmental_conditions.png",
+      "elements": [
+        {
+          "id": "environment_011",
+          "label": "environment_011",
+          "rarity": "common",
+          "mean_seconds": 2682.0,
+          "variance_seconds2": 1456607.6100000003,
+          "gamma_shape": 4.93827160493827,
+          "gamma_scale": 543.1050000000001
+        },
+        {
+          "id": "environment_012",
+          "label": "environment_012",
+          "rarity": "rare",
+          "mean_seconds": 1394.9999999999998,
+          "variance_seconds2": 700568.9999999998,
+          "gamma_shape": 2.7777777777777777,
+          "gamma_scale": 502.19999999999993
+        },
+        {
+          "id": "environment_008",
+          "label": "environment_008",
+          "rarity": "unknown",
+          "mean_seconds": 405.0,
+          "variance_seconds2": 104976.0,
+          "gamma_shape": 1.5625,
+          "gamma_scale": 259.2
+        }
+      ]
+    },
+    {
+      "layer": "triggering_conditions",
+      "file": "triggering_conditions.png",
+      "elements": [
+        {
+          "id": "trigger_044",
+          "label": "trigger_044",
+          "rarity": "common",
+          "mean_seconds": 179.68421052631578,
+          "variance_seconds2": 6537.999141274237,
+          "gamma_shape": 4.938271604938271,
+          "gamma_scale": 36.38605263157894
+        },
+        {
+          "id": "trigger_023",
+          "label": "trigger_023",
+          "rarity": "rare",
+          "mean_seconds": 90.0,
+          "variance_seconds2": 2916.0,
+          "gamma_shape": 2.7777777777777777,
+          "gamma_scale": 32.4
+        },
+        {
+          "id": "trigger_030",
+          "label": "trigger_030",
+          "rarity": "unknown",
+          "mean_seconds": 29.571428571428573,
+          "variance_seconds2": 559.6604081632654,
+          "gamma_shape": 1.5625,
+          "gamma_scale": 18.92571428571429
+        }
+      ]
+    }
+  ]
+}
